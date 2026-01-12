@@ -5,7 +5,7 @@ def load_css():
         <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
         
         <style>
-            /* --- GLOBAL THEME --- */
+            /* --- 1. GLOBAL RESET & THEME --- */
             :root {
                 --bg-dark: #050505;
                 --bg-card: rgba(255, 255, 255, 0.03);
@@ -20,11 +20,12 @@ def load_css():
                 font-family: 'Inter', sans-serif;
             }
 
-            /* Header/Footer Gizle */
+            /* Hide Streamlit Header/Footer/Menu */
             header[data-testid="stHeader"] {display: none;}
             footer {display: none;}
-
-            /* --- TYPOGRAPHY --- */
+            #MainMenu {display: none;}
+            
+            /* --- 2. TYPOGRAPHY --- */
             h1, h2, h3, h4 {
                 font-family: 'Cinzel', serif !important;
                 color: var(--text-white) !important;
@@ -36,13 +37,13 @@ def load_css():
                 color: var(--text-silver);
             }
 
-            /* --- SIDEBAR --- */
+            /* --- 3. SIDEBAR STYLING --- */
             section[data-testid="stSidebar"] {
                 background-color: #000000;
                 border-right: 1px solid var(--border-light);
             }
             
-            /* Sidebar Radio Buttons */
+            /* Custom Sidebar Nav Buttons (Radio) */
             .stRadio > div { background-color: transparent; }
             .stRadio > div > label {
                 background-color: transparent;
@@ -52,19 +53,21 @@ def load_css():
                 border-radius: 8px;
                 transition: all 0.3s;
                 cursor: pointer;
+                margin-bottom: 5px;
             }
             .stRadio > div > label:hover {
                 color: var(--gold);
                 background-color: var(--bg-card);
                 border: 1px solid var(--border-light);
             }
-            /* Seçili Olan */
+            
+            /* Selected State */
             .stRadio > div [data-testid="stMarkdownContainer"] > p {
                 font-size: 14px;
                 font-weight: 500;
             }
 
-            /* --- METRIC CARDS (Bento Grid) --- */
+            /* --- 4. BENTO GRID METRIC CARDS --- */
             div[data-testid="metric-container"] {
                 background-color: var(--bg-card);
                 backdrop-filter: blur(10px);
@@ -90,14 +93,13 @@ def load_css():
                 background-color: rgba(46, 125, 50, 0.15);
                 padding: 4px 8px;
                 border-radius: 4px;
-                color: #4ade80 !important; /* Canlı yeşil */
+                color: #4ade80 !important; /* Vivid Green */
             }
             div[data-testid="metric-container"] div[data-testid="stMetricDelta"] svg {
                 fill: #4ade80 !important;
             }
 
-            /* --- NOTIFICATION PANEL FIX --- */
-            /* Bu class'lar views.py içinde kullanılacak */
+            /* --- 5. NOTIFICATION PANEL (HTML/CSS) --- */
             .notification-box {
                 background-color: var(--bg-card);
                 border: 1px solid var(--border-light);
@@ -142,30 +144,7 @@ def load_css():
                 line-height: 1.4 !important;
             }
 
-            /* --- CHAT INTERFACE (JARVIS) --- */
-            .chat-message {
-                padding: 15px;
-                border-radius: 10px;
-                margin-bottom: 10px;
-                font-family: 'Inter', sans-serif;
-                font-size: 14px;
-                max-width: 80%;
-            }
-            .chat-user {
-                background-color: rgba(255, 255, 255, 0.05);
-                border: 1px solid var(--border-light);
-                margin-left: auto;
-                color: white;
-                text-align: right;
-            }
-            .chat-bot {
-                background-color: rgba(212, 175, 55, 0.1); /* Gold tint */
-                border: 1px solid rgba(212, 175, 55, 0.2);
-                margin-right: auto;
-                color: #ddd;
-            }
-
-            /* --- SCROLLBAR --- */
+            /* --- 6. SCROLLBAR --- */
             ::-webkit-scrollbar { width: 6px; }
             ::-webkit-scrollbar-track { background: #000; }
             ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
