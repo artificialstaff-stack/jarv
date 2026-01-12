@@ -4,22 +4,33 @@ import time
 from brain import get_ai_response
 from instructions import COMPANY_DATA
 
-# --- 1. EKRAN: STRATEJİK DANIŞMANLIK (JARVIS) ---
+# --- YARDIMCI FONKSİYON: PREMIUM KART ---
+def premium_metric_card(label, value, desc):
+    st.markdown(f"""
+    <div class="premium-card">
+        <span class="metric-value">{value}</span>
+        <span class="metric-label">{label}</span>
+        <p style="font-size: 12px; margin-top: 5px; color: #888;">{desc}</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# --- 1. EKRAN: STRATEJİ & JARVIS ---
 def render_step1_consulting():
-    st.markdown("## 🧠 Global Entegrasyon Asistanı")
+    # HTML Stili Başlık
     st.markdown("""
-    <div style='background-color: #1c1c24; padding: 15px; border-radius: 10px; border-left: 5px solid #00a8ff;'>
-    <strong>Artificial Staff Vizyonu:</strong> Yerel pazardaki rekabetten sıyrılıp, dünyanın en büyük ekonomisine açılmanız için gereken 
-    tüm altyapıyı (Hukuk, Finans, Lojistik, Yazılım) tek çatı altında sunuyoruz.
+    <div>
+        <span class="section-tag">01 // VISION</span>
+        <h1 style="font-size: 48px; margin-top: 0;">Global Entegrasyon</h1>
+        <p style="font-size: 18px; color: #ccc;">Operasyon, Büyüme ve Yapay Zeka ile Uçtan Uca İhracat Altyapısı</p>
     </div>
     """, unsafe_allow_html=True)
     
     st.divider()
 
+    # Chat Geçmişi Başlatma
     if "messages" not in st.session_state:
         st.session_state.messages = [{"role": "system", "content": COMPANY_DATA}]
-        # İlk mesajı daha profesyonel yaptık
-        st.session_state.messages.append({"role": "assistant", "content": "Jarvis v4.2 Online. ABD operasyonunuz, LLC kurulumu veya lojistik süreçleri hakkında stratejik planlamaya hazırım."})
+        st.session_state.messages.append({"role": "assistant", "content": "Jarvis Online. Artificial Staff stratejik planlama modülü aktif. Size nasıl yardımcı olabilirim?"})
 
     # Mesajları Göster
     for msg in st.session_state.messages:
@@ -28,108 +39,115 @@ def render_step1_consulting():
             st.markdown(msg["content"])
 
     # Input Alanı
-    if prompt := st.chat_input("Soru sorun (Örn: Neden Delaware eyaletinde şirket kurmalıyım?)"):
+    if prompt := st.chat_input("Stratejik sorunuzu yöneltin..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
         with st.chat_message("assistant"):
-            with st.spinner("Artificial Staff veritabanı analiz ediliyor..."):
+            with st.spinner("Analiz ediliyor..."):
                 response_text = get_ai_response(st.session_state.messages)
                 st.markdown(response_text)
         
         st.session_state.messages.append({"role": "assistant", "content": response_text})
 
-# --- 2. EKRAN: OPERASYON BAŞLATMA (FORM) ---
+# --- 2. EKRAN: OPERASYON BAŞLAT (FORM) ---
 def render_step2_action():
-    st.markdown("## 🚀 Operasyon Kurulum Merkezi")
-    st.write("Markanızı global bir oyuncuya dönüştürmek için resmi süreci başlatın.")
+    st.markdown("""
+    <div>
+        <span class="section-tag">LEGAL ENTITY</span>
+        <h1>Operasyon Kurulumu</h1>
+        <p>Amerika'da resmi şirket sahibi olarak global ticarete başlayın.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    st.divider()
-    
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([1, 1], gap="large")
     
     with col1:
-        st.subheader("Kurumsal Kimlik")
-        c_name = st.text_input("Tescil Edilecek Şirket İsmi")
-        owner = st.text_input("Hissedar Ad Soyad (Pasaporttaki hali)")
-        email = st.text_input("Kurumsal İletişim E-Posta")
-        sector = st.selectbox("Hedef Sektör", ["E-Ticaret (Amazon/Etsy/Walmart)", "B2B İhracat", "Yazılım & SaaS", "Lojistik & Tedarik", "Diğer"])
+        st.markdown("### Kurumsal Kimlik")
+        c_name = st.text_input("Tescil Edilecek Şirket İsmi", placeholder="Örn: Global Tech LLC")
+        owner = st.text_input("Hissedar Ad Soyad", placeholder="Pasaporttaki gibi")
+        email = st.text_input("Kurumsal E-Posta")
+        sector = st.selectbox("Sektör", ["E-Ticaret", "B2B İhracat", "Yazılım/SaaS", "Lojistik"])
     
     with col2:
-        st.subheader("Entegrasyon Paketi")
-        # Paket isimlerini ve açıklamalarını sunuma uygun hale getirdik
-        plan = st.radio("Hizmet Seviyesi Seçimi", 
-            [
-                "GLOBAL STARTUP ($1500) | LLC + Banka + Temel Lojistik", 
-                "ENTERPRISE SCALING ($2500) | Full Entegrasyon + B2B AI Satış + Marka Kaydı"
-            ], 
-            index=0
+        st.markdown("### Hizmet Paketi")
+        
+        # HTML tarzı paket gösterimi
+        plan = st.radio("Seçiminiz", 
+            ["GLOBAL STARTUP ($1500)", "ENTERPRISE SCALING ($2500)"],
+            captions=["LLC + Banka + Temel Lojistik", "Full Entegrasyon + AI Satış + Marka Kaydı"]
         )
         
-        st.info("""
-        **Seçilen Paket Kapsamı:**
-        * 🏢 **Yasal:** LLC Kurulumu, EIN, Registered Agent (Delaware/Wyoming).
-        * 🏦 **Finans:** Mercury/Brex Banka Hesabı, Stripe & PayPal Altyapısı.
-        * 📦 **Lojistik:** Uçtan Uca Nakliye ve Gümrükleme Desteği.
-        * ⚡ **Teknoloji:** 0.4s Hızlı Web Altyapısı ve SEO (Enterprise Pakette).
-        """)
+        st.markdown("---")
+        # HTML'deki gibi 'List' yapısı
+        st.markdown("""
+        <ul style="color: #aaa; font-size: 14px; list-style-type: none; padding-left: 0;">
+            <li style="margin-bottom: 10px;">✓ <strong>Yasal:</strong> Delaware/Wyoming Eyalet Kurulumu</li>
+            <li style="margin-bottom: 10px;">✓ <strong>Finans:</strong> Mercury Bank & Stripe Entegrasyonu</li>
+            <li style="margin-bottom: 10px;">✓ <strong>Ofis:</strong> Yasal US Adresi ve Registered Agent</li>
+        </ul>
+        """, unsafe_allow_html=True)
 
-    st.divider()
+    st.markdown("---")
     
-    if st.button("RESMİ BAŞVURU SÜRECİNİ BAŞLAT", type="primary"):
+    if st.button("SÜRECİ BAŞLAT"):
         if c_name and owner:
             st.session_state["active_order"] = {
                 "company": c_name,
                 "owner": owner,
                 "plan": plan,
-                "status": "Compliance Check (Uyumluluk Kontrolü)",
+                "status": "Compliance Check",
                 "progress": 5
             }
-            st.success("✅ Başvuru sisteme işlendi. Operasyon ekibimiz uyumluluk kontrollerini başlattı. 'Durum İzle' ekranından takip edebilirsiniz.")
-            time.sleep(1.5)
+            st.success("Başvuru alındı. Operasyon ekibi yönlendiriliyor.")
+            time.sleep(1)
             st.rerun()
         else:
-            st.error("⚠️ Lütfen yasal işlemler için şirket ismi ve hissedar bilgilerini eksiksiz giriniz.")
+            st.warning("Lütfen kurumsal bilgileri tamamlayın.")
 
-# --- 3. EKRAN: SÜREÇ TAKİBİ (DASHBOARD) ---
+# --- 3. EKRAN: DASHBOARD (İZLEME) ---
 def render_step3_tracking():
-    st.markdown("## 📊 Operasyon Kontrol Paneli")
-    
     if "active_order" not in st.session_state:
-        st.warning("⚠️ Henüz aktif bir global operasyon kaydı bulunamadı. Lütfen 'İşe Başla' menüsünden kurulumu başlatın.")
+        st.info("Aktif operasyon bulunamadı. Lütfen 'İşe Başla' ekranından kurulum yapın.")
         st.stop()
-    
-    data = st.session_state["active_order"]
-    
-    # Dashboard Metrikleri
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Şirket", data["company"], "US Entity")
-    c2.metric("Paket", "Enterprise" if "Enterprise" in data["plan"] else "Startup", "Active")
-    c3.metric("Tahmini Teslim", "3-5 İş Günü", "On Time")
-    
-    st.divider()
-    
-    st.subheader("Canlı Süreç Akışı")
-    st.progress(data["progress"])
-    
-    st.caption(f"📍 Mevcut Aşama: **{data['status']}**")
-    
-    col_checklist, col_logs = st.columns([1, 1])
-    
-    with col_checklist:
-        st.markdown("### 📝 Yapılacaklar Listesi")
-        st.checkbox("Başvuru & KYC Doğrulaması", value=True, disabled=True)
-        st.checkbox("Eyalet Dosyalama (State Filing)", value=(data['progress'] > 20), disabled=True)
-        st.checkbox("EIN (Vergi No) Tahsisi", value=False, disabled=True)
-        st.checkbox("Mercury Banka Hesabı Açılışı", value=False, disabled=True)
-        st.checkbox("Global Lojistik Entegrasyonu", value=False, disabled=True)
         
-    with col_logs:
-        st.markdown("### 📡 Sistem Logları")
+    data = st.session_state["active_order"]
+
+    st.markdown("""
+    <div>
+        <span class="section-tag">05 // DASHBOARD</span>
+        <h1>Operasyon Kontrol</h1>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # HTML DOSYASINDAKİ METRİK KARTLARIN AYNISI
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        premium_metric_card("US ENTITY", data["company"], "Delaware LLC")
+    with col2:
+        premium_metric_card("PACKAGE", "Enterprise" if "Enterprise" in data["plan"] else "Startup", "Active Plan")
+    with col3:
+        premium_metric_card("ESTIMATED", "3-5 Days", "Completion Time")
+
+    st.markdown("### Canlı Süreç")
+    st.progress(data["progress"])
+    st.caption(f"STATUS: {data['status'].upper()}")
+    
+    st.markdown("---")
+    
+    c_check, c_logs = st.columns(2)
+    with c_check:
+        st.markdown("#### Yapılacaklar")
+        st.checkbox("Compliance Check", value=True, disabled=True)
+        st.checkbox("State Filing", value=False, disabled=True)
+        st.checkbox("EIN Number", value=False, disabled=True)
+    
+    with c_logs:
+        st.markdown("#### Sistem Logları")
         st.code(f"""
-        [SYSTEM] New Order Created: {data['company']} LLC
-        [INFO] Region: US-East-1
-        [STATUS] Verifying identity documents...
-        [STATUS] Waiting for State approval...
+        > SYSTEM INTIIATED...
+        > CLIENT: {data['owner']}
+        > REGION: US-EAST-1
+        > STATUS: WAITING FOR APPROVAL
         """, language="bash")
