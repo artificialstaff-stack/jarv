@@ -5,7 +5,7 @@ def load_css():
         <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
         
         <style>
-            /* --- 1. GLOBAL RESET & TEMEL AYARLAR --- */
+            /* --- GLOBAL THEME --- */
             :root {
                 --bg-dark: #050505;
                 --bg-card: rgba(255, 255, 255, 0.03);
@@ -20,31 +20,30 @@ def load_css():
                 font-family: 'Inter', sans-serif;
             }
 
-            /* Streamlit Header/Footer Gizleme */
+            /* Header/Footer Gizle */
             header[data-testid="stHeader"] {display: none;}
             footer {display: none;}
-            
-            /* --- 2. TYPOGRAPHY --- */
-            h1, h2, h3 {
+
+            /* --- TYPOGRAPHY --- */
+            h1, h2, h3, h4 {
                 font-family: 'Cinzel', serif !important;
                 color: var(--text-white) !important;
                 font-weight: 600 !important;
             }
             
-            p, span, label {
+            p, span, label, div {
+                font-family: 'Inter', sans-serif;
                 color: var(--text-silver);
             }
 
-            /* --- 3. SIDEBAR (YAN MENÜ) --- */
+            /* --- SIDEBAR --- */
             section[data-testid="stSidebar"] {
                 background-color: #000000;
                 border-right: 1px solid var(--border-light);
             }
             
-            /* Sidebar Navigasyon Butonları */
-            .stRadio > div {
-                background-color: transparent;
-            }
+            /* Sidebar Radio Buttons */
+            .stRadio > div { background-color: transparent; }
             .stRadio > div > label {
                 background-color: transparent;
                 color: var(--text-silver);
@@ -53,8 +52,6 @@ def load_css():
                 border-radius: 8px;
                 transition: all 0.3s;
                 cursor: pointer;
-                font-family: 'Inter', sans-serif;
-                margin-bottom: 5px;
             }
             .stRadio > div > label:hover {
                 color: var(--gold);
@@ -67,48 +64,40 @@ def load_css():
                 font-weight: 500;
             }
 
-            /* --- 4. METRIC CARDS (BENTO GRID) --- */
+            /* --- METRIC CARDS (Bento Grid) --- */
             div[data-testid="metric-container"] {
                 background-color: var(--bg-card);
                 backdrop-filter: blur(10px);
                 border: 1px solid var(--border-light);
-                padding: 24px;
+                padding: 20px;
                 border-radius: 12px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
                 transition: transform 0.3s ease, border-color 0.3s ease;
             }
-            
             div[data-testid="metric-container"]:hover {
                 transform: translateY(-4px);
                 border-color: rgba(212, 175, 55, 0.4);
             }
-
-            /* Metrik Etiketleri */
             div[data-testid="metric-container"] label {
-                font-size: 12px !important;
+                font-size: 11px !important;
                 text-transform: uppercase;
                 letter-spacing: 1.5px;
-                color: var(--text-silver) !important;
             }
-            
-            /* Metrik Değerleri */
             div[data-testid="metric-container"] div[data-testid="stMetricValue"] {
-                font-family: 'Inter', sans-serif;
-                font-size: 32px !important;
+                font-size: 28px !important;
                 color: var(--text-white) !important;
-                font-weight: 600;
             }
-
-            /* Delta (Değişim) Değerleri */
             div[data-testid="metric-container"] div[data-testid="stMetricDelta"] {
-                font-family: 'Inter', sans-serif;
-                background-color: rgba(46, 125, 50, 0.1);
+                background-color: rgba(46, 125, 50, 0.15);
                 padding: 4px 8px;
                 border-radius: 4px;
-                font-size: 12px !important;
+                color: #4ade80 !important; /* Canlı yeşil */
             }
-            
-            /* --- 5. NOTIFICATION PANEL --- */
+            div[data-testid="metric-container"] div[data-testid="stMetricDelta"] svg {
+                fill: #4ade80 !important;
+            }
+
+            /* --- NOTIFICATION PANEL FIX --- */
+            /* Bu class'lar views.py içinde kullanılacak */
             .notification-box {
                 background-color: var(--bg-card);
                 border: 1px solid var(--border-light);
@@ -116,14 +105,6 @@ def load_css():
                 padding: 20px;
                 height: 400px;
                 overflow-y: auto;
-            }
-            .notif-header {
-                font-family: 'Cinzel', serif;
-                color: var(--text-white);
-                font-size: 18px;
-                margin-bottom: 20px;
-                border-bottom: 1px solid var(--border-light);
-                padding-bottom: 10px;
             }
             .notif-item {
                 display: flex;
@@ -140,7 +121,7 @@ def load_css():
                 border-left: 2px solid var(--gold);
             }
             .status-dot {
-                width: 8px;
+                min-width: 8px;
                 height: 8px;
                 border-radius: 50%;
                 margin-top: 6px;
@@ -149,21 +130,45 @@ def load_css():
             }
             .notif-content h4 {
                 font-family: 'Inter', sans-serif !important;
-                font-size: 14px;
-                margin: 0;
-                color: var(--text-white);
+                font-size: 14px !important;
+                margin: 0 !important;
+                color: var(--text-white) !important;
+                font-weight: 600 !important;
             }
             .notif-content p {
-                font-size: 12px;
-                margin: 4px 0 0 0;
-                color: #666;
+                font-size: 12px !important;
+                margin: 4px 0 0 0 !important;
+                color: #888 !important;
+                line-height: 1.4 !important;
             }
-            
-            /* Custom Scrollbar */
-            ::-webkit-scrollbar { width: 8px; }
+
+            /* --- CHAT INTERFACE (JARVIS) --- */
+            .chat-message {
+                padding: 15px;
+                border-radius: 10px;
+                margin-bottom: 10px;
+                font-family: 'Inter', sans-serif;
+                font-size: 14px;
+                max-width: 80%;
+            }
+            .chat-user {
+                background-color: rgba(255, 255, 255, 0.05);
+                border: 1px solid var(--border-light);
+                margin-left: auto;
+                color: white;
+                text-align: right;
+            }
+            .chat-bot {
+                background-color: rgba(212, 175, 55, 0.1); /* Gold tint */
+                border: 1px solid rgba(212, 175, 55, 0.2);
+                margin-right: auto;
+                color: #ddd;
+            }
+
+            /* --- SCROLLBAR --- */
+            ::-webkit-scrollbar { width: 6px; }
             ::-webkit-scrollbar-track { background: #000; }
-            ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+            ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
             ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
-            
         </style>
     """, unsafe_allow_html=True)
