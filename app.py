@@ -1,57 +1,45 @@
 import streamlit as st
-import time
+import google.generativeai as genai
 
-# Sayfa tasarımı
+# Sayfa Ayarları
 st.set_page_config(page_title="Artificial Staff - Jarvis", page_icon="🤖")
 
-# CSS ile Jarvis havası katalım (Opsiyonel: Koyu tema ve güzel fontlar)
-st.markdown("""
-    <style>
-    .stApp { background-color: #0e1117; color: #ffffff; }
-    </style>
-    """, unsafe_allow_html=True)
+# API Anahtarını Streamlit Secrets'dan çekiyoruz
+# (Streamlit panelinde Settings > Secrets kısmına GOOGLE_API_KEY eklemelisin)
+try:
+    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+    model = genai.GenerativeModel('gemini-pro')
+except:
+    st.error("Lütfen Google API Key'i ayarlara ekleyin.")
 
-if "messages" not in st.session_state:
+# Jarvis'in Karakter Tanımı (System Prompt)
+if "chat" not in st.session_state:
+    st.session_state.chat = model.start_chat(history=[])
+    # Jarvis'e kim olduğunu öğretiyoruz
     st.session_state.messages = []
-    # Jarvis'in Karşılaması
-    jarvis_intro = (
-        "Sisteme hoş geldiniz. Ben **Jarvis**, Artificial Staff operasyonel zekasıyım. "
-        "Türkiye'deki operasyonunuzu Amerika pazarına taşımak, lojistik süreçlerinizi yönetmek "
-        "ve envanterinizi otonom olarak takip etmek için buradayım.\n\n"
-        "**Amerika pazarına açılmaya hazır mısınız?**"
-    )
-    st.session_state.messages.append({"role": "assistant", "content": jarvis_intro})
+    intro_text = ("Merhaba! Ben **Jarvis**, Artificial Staff'in operasyonel zekasıyım. "
+                  "Türkiye'deki işinizi Amerika'ya taşımak için buradayım. "
+                  "Lojistik, depo ve satış süreçlerinizi birlikte yöneteceğiz. "
+                  "Hazırsanız başlayalım mı?")
+    st.session_state.messages.append({"role": "assistant", "content": intro_text})
 
-# Mesajları göster
+# Sohbeti Ekrana Yazdır
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Müşteri girişi
-if prompt := st.chat_input("Jarvis ile konuşun..."):
+# Müşteri Yazdığında
+if prompt := st.chat_input("Jarvis'e bir şey sorun..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
+    # Jarvis'in Düşünme Süreci
     with st.chat_message("assistant"):
-        if "evet" in prompt.lower() or "hazırım" in prompt.lower():
-            response = (
-                "Mükemmel bir karar! Başarı yolculuğunuz başlıyor. 🚀\n\n"
-                "Süreci hemen başlatabilmem için bana birkaç detay vermeniz gerekiyor:\n"
-                "1. Hangi tür ürünler satmayı planlıyorsunuz? (Örn: Tekstil, Ev Gereçleri)\n"
-                "2. İlk etapta tahmini kaç adet ürün yollayacaksınız?\n"
-                "3. Ürünler İstanbul'da hangi bölgeden teslim alınacak?"
-            )
-        else:
-            response = "Anlaşıldı. Hazır olduğunuzda 'hazırım' demeniz yeterli, sizi bekliyor olacağım."
+        # Jarvis'e arka planda kim olduğunu hatırlatıyoruz ki karakterden çıkmasın
+        full_prompt = f"Sen Jarvis'sin, Artificial Staff operasyon asistanısın. Müşterinin şu mesajına bir iş ortağı gibi mantıklı ve samimi cevap ver: {prompt}"
         
-        # Yazıyor efekti
-        placeholder = st.empty()
-        full_res = ""
-        for chunk in response.split():
-            full_res += chunk + " "
-            time.sleep(0.05)
-            placeholder.markdown(full_res + "▌")
-        placeholder.markdown(full_res)
-    
-    st.session_state.messages.append({"role": "assistant", "content": full_res})
+        response = st.session_state.chat.send_message(full_prompt)
+        st.markdown(response.text)
+        
+    st.session_state.messages.append({"role": "assistant", "content": response.text})
