@@ -3,184 +3,157 @@ import streamlit as st
 def load_css():
     st.markdown("""
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-
-            /* --- 1. GLOBAL RESET (SİMSİYAH TEMA) --- */
-            :root {
-                --bg-color: #000000;
-                --card-bg: #0a0a0a;
-                --text-white: #ffffff;
-                --text-gray: #888888;
-                --accent-gold: #D4AF37; 
-                --hover-bg: #1a1a1a;
-            }
-
-            .stApp {
-                background-color: var(--bg-color);
+            /* 1. IMPORTS & TYPOGRAPHY */
+            @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&family=Share+Tech+Mono&display=swap');
+            
+            html, body, [class*="css"] {
                 font-family: 'Inter', sans-serif;
-                color: var(--text-white);
+                background-color: #000000;
+                color: #E0E0E0;
+            }
+            
+            h1, h2, h3 {
+                font-family: 'Cinzel', serif !important;
+                color: #FFFFFF;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+            }
+            
+            /* Metric Values */
+            div[data-testid="stMetricValue"] {
+                font-family: 'Share Tech Mono', monospace;
+                color: #D4AF37 !important; /* Gold */
+                text-shadow: 0 0 5px #D4AF37;
             }
 
-            /* Streamlit varsayılanlarını gizle */
-            header, footer, #MainMenu {display: none !important;}
-            .block-container {
-                padding-top: 0rem !important;
-                padding-bottom: 0rem !important;
-                padding-left: 0rem !important;
-                padding-right: 0rem !important;
-                max-width: 100% !important;
+            /* 2. UI OVERRIDES */
+            /* Hide Default Header/Footer */
+            header {visibility: hidden;}
+            footer {visibility: hidden;}
+            #MainMenu {visibility: hidden;}
+            
+            /* Main Container Adjustment for Fixed Navbar */
+            .main .block-container {
+                padding-top: 5rem;
+                padding-left: 2rem;
+                padding-right: 2rem;
+                max-width: 100%;
             }
 
-            /* --- 2. NAVBAR --- */
-            .navbar {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 20px 40px;
-                background: rgba(0,0,0,0.8);
-                backdrop-filter: blur(10px);
+            /* Sidebar - The Command Center */
+            section[data-testid="stSidebar"] {
+                background-color: #050505;
+                border-right: 1px solid #1A1A1A;
+            }
+            section[data-testid="stSidebar"] h1 {
+                font-size: 1.2rem;
+                color: #D4AF37;
+            }
+
+            /* 3. INPUT FIELDS (Perplexity Style) */
+            .stTextInput input {
+                background-color: #0A0A0A;
+                border: 1px solid #333;
+                border-radius: 20px;
+                color: #FFF;
+                padding: 10px 15px;
+            }
+            .stTextInput input:focus {
+                border-color: #D4AF37;
+                box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+            }
+
+            /* 4. CUSTOM COMPONENTS */
+            
+            /* Navbar */
+            .custom-navbar {
                 position: fixed;
                 top: 0;
+                left: 0;
                 width: 100%;
-                z-index: 999;
-                border-bottom: 1px solid rgba(255,255,255,0.05);
+                height: 70px;
+                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(10px);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 40px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
             .nav-logo {
-                font-size: 20px;
-                font-weight: 800;
-                color: white;
-                letter-spacing: -1px;
+                font-family: 'Cinzel';
+                font-size: 1.5rem;
+                color: #FFF;
+                font-weight: bold;
             }
-            .nav-links a {
-                color: var(--text-gray);
-                text-decoration: none;
-                margin: 0 15px;
-                font-size: 14px;
-                transition: 0.3s;
+            .nav-links {
+                font-family: 'Inter';
+                font-size: 0.9rem;
+                color: #AAA;
             }
-            .nav-links a:hover { color: white; }
-            .nav-btn {
-                background: white;
-                color: black;
-                padding: 8px 20px;
-                border-radius: 20px;
-                font-weight: 600;
-                font-size: 13px;
-                text-decoration: none;
+            .nav-cta {
+                color: #D4AF37;
+                border: 1px solid #D4AF37;
+                padding: 5px 15px;
+                border-radius: 4px;
+                font-family: 'Share Tech Mono';
             }
 
-            /* --- 3. HERO SECTION (VİDEODAKİ GİBİ) --- */
-            .hero-container {
-                height: 85vh;
+            /* Bento Grid Card */
+            .hub-card {
+                background: rgba(20, 20, 20, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 12px;
+                padding: 25px;
+                transition: all 0.3s ease;
+                height: 200px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
                 text-align: center;
-                background: radial-gradient(circle at center, #1a1a1a 0%, #000000 70%);
-                padding: 0 20px;
-                margin-top: 60px;
-            }
-            .hero-badge {
-                border: 1px solid #333;
-                padding: 5px 15px;
-                border-radius: 20px;
-                font-size: 12px;
-                color: var(--text-gray);
-                margin-bottom: 20px;
-                background: rgba(255,255,255,0.05);
-            }
-            .hero-title {
-                font-size: 72px;
-                font-weight: 800;
-                line-height: 1.1;
-                margin-bottom: 20px;
-                background: linear-gradient(180deg, #fff 0%, #aaa 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                letter-spacing: -2px;
-            }
-            .hero-sub {
-                font-size: 18px;
-                color: var(--text-gray);
-                max-width: 600px;
-                margin-bottom: 40px;
-            }
-            .hero-cta {
-                background: var(--text-white);
-                color: black;
-                padding: 15px 40px;
-                border-radius: 30px;
-                font-weight: 600;
-                font-size: 16px;
-                text-decoration: none;
-                transition: transform 0.2s;
-            }
-            .hero-cta:hover { transform: scale(1.05); }
-
-            /* --- 4. BENTO GRID (KARTLAR) --- */
-            .bento-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                gap: 20px;
-                padding: 40px;
-                max-width: 1400px;
-                margin: 0 auto;
-            }
-            .bento-card {
-                background-color: var(--card-bg);
-                border: 1px solid rgba(255,255,255,0.08);
-                border-radius: 24px;
-                padding: 30px;
-                height: 300px;
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-end;
-                transition: all 0.4s ease;
-                position: relative;
-                overflow: hidden;
                 cursor: pointer;
             }
-            .bento-card:hover {
-                background-color: var(--hover-bg);
-                border-color: rgba(255,255,255,0.2);
+            .hub-card:hover {
+                border-color: #D4AF37;
+                box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
                 transform: translateY(-5px);
             }
-            .card-img-placeholder {
-                position: absolute;
-                top: 0; left: 0; width: 100%; height: 100%;
-                background: linear-gradient(to bottom, transparent, #000);
-                opacity: 0.5;
-                z-index: 1;
-            }
-            .card-content {
-                position: relative;
-                z-index: 2;
-            }
             .card-title {
-                font-size: 24px;
-                font-weight: 700;
+                font-family: 'Cinzel';
+                font-size: 1.2rem;
                 margin-bottom: 10px;
-                color: white;
+                color: #FFF;
             }
             .card-desc {
-                font-size: 14px;
-                color: var(--text-gray);
+                font-family: 'Inter';
+                font-size: 0.8rem;
+                color: #888;
             }
-            .card-icon {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                font-size: 24px;
-                color: var(--text-white);
-                z-index: 2;
+            
+            /* Buttons */
+            .stButton button {
+                background-color: transparent;
+                border: 1px solid #D4AF37;
+                color: #D4AF37;
+                font-family: 'Cinzel';
+                transition: 0.3s;
+                border-radius: 4px;
             }
-
-            /* Responsive */
-            @media (max-width: 768px) {
-                .hero-title { font-size: 42px; }
-                .nav-links { display: none; }
-                .bento-grid { grid-template-columns: 1fr; }
+            .stButton button:hover {
+                background-color: #D4AF37;
+                color: #000;
+            }
+            
+            /* Animations */
+            @keyframes fadeIn {
+                0% { opacity: 0; transform: translateY(20px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+            .animate-text {
+                animation: fadeIn 1.5s ease-out forwards;
             }
         </style>
     """, unsafe_allow_html=True)
