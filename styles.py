@@ -7,7 +7,7 @@ def load_css():
             
             html, body, [class*="css"] {
                 font-family: 'Inter', sans-serif;
-                background-color: #000000;
+                background-color: #050505;
                 color: #E0E0E0;
             }
             
@@ -15,102 +15,62 @@ def load_css():
                 font-family: 'Cinzel', serif !important;
                 color: #FFFFFF;
                 text-transform: uppercase;
-                letter-spacing: 2px;
-                text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+                letter-spacing: 1px;
             }
             
-            div[data-testid="stMetricValue"] {
-                font-family: 'Share Tech Mono', monospace;
-                color: #D4AF37 !important;
-                text-shadow: 0 0 5px #D4AF37;
+            /* FORM ALANLARI (EXPANDER) */
+            .streamlit-expanderHeader {
+                background-color: #111;
+                border: 1px solid #333;
+                border-radius: 8px;
+                color: #D4AF37; /* Gold Başlıklar */
+                font-family: 'Cinzel';
             }
-
-            header {visibility: hidden;}
-            footer {visibility: hidden;}
-            #MainMenu {visibility: hidden;}
             
-            .main .block-container {
-                padding-top: 5rem;
-                padding-left: 2rem;
-                padding-right: 2rem;
-                max-width: 100%;
-            }
-
-            section[data-testid="stSidebar"] {
-                background-color: #050505;
-                border-right: 1px solid #1A1A1A;
-            }
-            section[data-testid="stSidebar"] h1 {
-                font-size: 1.2rem;
-                color: #D4AF37;
-            }
-
-            .stTextInput input {
+            /* INPUTLAR */
+            .stTextInput input, .stSelectbox div, .stNumberInput input {
                 background-color: #0A0A0A;
                 border: 1px solid #333;
-                border-radius: 20px;
+                border-radius: 5px;
                 color: #FFF;
-                padding: 10px 15px;
             }
             .stTextInput input:focus {
                 border-color: #D4AF37;
-                box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
             }
 
-            .custom-navbar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 70px;
-                background: rgba(0, 0, 0, 0.9);
-                backdrop-filter: blur(10px);
-                z-index: 9999;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 0 40px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            }
-            .nav-logo {
-                font-family: 'Cinzel';
-                font-size: 1.5rem;
-                color: #FFF;
-                font-weight: bold;
-            }
-            .nav-links {
-                font-family: 'Inter';
-                font-size: 0.9rem;
-                color: #AAA;
-            }
-            .nav-cta {
-                color: #D4AF37;
-                border: 1px solid #D4AF37;
-                padding: 5px 15px;
-                border-radius: 4px;
-                font-family: 'Share Tech Mono';
-            }
-
+            /* BUTONLAR */
             .stButton button {
-                background-color: transparent;
-                border: 1px solid #D4AF37;
-                color: #D4AF37;
-                font-family: 'Cinzel';
+                background-color: #D4AF37;
+                color: #000;
+                font-weight: bold;
+                border: none;
                 transition: 0.3s;
-                border-radius: 4px;
                 width: 100%;
             }
             .stButton button:hover {
-                background-color: #D4AF37;
+                background-color: #FFF;
                 color: #000;
             }
-            
-            @keyframes fadeIn {
-                0% { opacity: 0; transform: translateY(20px); }
-                100% { opacity: 1; transform: translateY(0); }
+
+            /* CHAT KUTUSU */
+            .stChatMessage {
+                background-color: #111;
+                border: 1px solid #222;
+                border-radius: 10px;
             }
-            .animate-text {
-                animation: fadeIn 1.5s ease-out forwards;
+
+            /* NAVBAR */
+            .custom-navbar {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 60px;
+                background: rgba(0,0,0,0.95);
+                border-bottom: 1px solid #333;
+                z-index: 9999;
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 0 40px;
             }
+            .nav-logo { font-family: 'Cinzel'; font-size: 1.5rem; color: #FFF; }
+            .nav-cta { color: #D4AF37; font-family: 'Share Tech Mono'; }
+
         </style>
     """, unsafe_allow_html=True)
