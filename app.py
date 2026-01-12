@@ -14,7 +14,7 @@ except ImportError:
         sys.path.append(os.path.dirname(__file__))
         import brain
 
-# 1. SAYFA AYARLARI
+# 1. SAYFA YAPILANDIRMASI (PRO AYARLAR)
 st.set_page_config(
     page_title="ARTIS | Global OS",
     page_icon="🌍",
@@ -22,18 +22,105 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. CSS TASARIMI
+# 2. PREMIUM CSS ENJEKSİYONU
 st.markdown("""
 <style>
-    .stApp { background-color: #343541; color: #ECECF1; font-family: 'Inter', sans-serif; }
-    .login-box { background-color: #202123; padding: 40px; border-radius: 12px; border: 1px solid #444; }
-    section[data-testid="stSidebar"] { background-color: #202123; border-right: 1px solid #444; }
-    .stTextInput input, .stSelectbox div { background-color: #40414F !important; color: white !important; border: 1px solid #565869; }
+    /* FONTLAR VE GENEL ARKAPLAN */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .stApp {
+        background-color: #0E1117; /* Derin Siyah/Mavi */
+        color: #E0E0E0;
+    }
+
+    /* SIDEBAR TASARIMI */
+    section[data-testid="stSidebar"] {
+        background-color: #161B22; /* Koyu Github Grisi */
+        border-right: 1px solid #30363D;
+    }
+
+    /* MENÜ (RADIO) BUTONLARINI GİZLE, KART GİBİ YAP */
+    .stRadio > div {
+        background-color: transparent;
+    }
+    .stRadio div[role="radiogroup"] > label {
+        background-color: #21262D;
+        padding: 12px 20px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        border: 1px solid #30363D;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: flex; /* İçeriği hizala */
+        align-items: center;
+    }
+    .stRadio div[role="radiogroup"] > label:hover {
+        background-color: #2F81F7; /* Hover Rengi: Mavi */
+        color: white !important;
+        border-color: #2F81F7;
+    }
+    /* Seçili olanı mavi yap */
+    .stRadio div[role="radiogroup"] > label[data-checked="true"] {
+        background-color: #1F6FEB;
+        color: white !important;
+        border-color: #1F6FEB;
+        box-shadow: 0 0 10px rgba(31, 111, 235, 0.4);
+    }
+    /* Radio yuvarlaklarını gizle */
+    .stRadio div[role="radiogroup"] > label > div:first-child {
+        display: none;
+    }
+
+    /* INPUT ALANI */
+    .stChatInput {
+        position: fixed;
+        bottom: 30px;
+        width: 70% !important;
+        left: 55%; /* Ortalamak için */
+        transform: translateX(-50%);
+        z-index: 999;
+    }
+    .stTextInput input {
+        background-color: #0D1117 !important;
+        border: 1px solid #30363D;
+        color: white;
+    }
+
+    /* GİRİŞ EKRANI */
+    .login-box {
+        background: linear-gradient(145deg, #161B22, #0D1117);
+        padding: 50px;
+        border-radius: 16px;
+        border: 1px solid #30363D;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    /* ÖNERİ KARTLARI (CHAT BAŞLANGICI) */
+    .suggestion-card {
+        background-color: #21262D;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #30363D;
+        text-align: center;
+        transition: 0.3s;
+        cursor: pointer;
+        height: 100%;
+    }
+    .suggestion-card:hover {
+        border-color: #1F6FEB;
+        background-color: #1F6FEB;
+        color: white;
+    }
+    
     header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
-# 3. HAFIZA (SESSION STATE)
+# 3. HAFIZA BAŞLATMA
 if "setup_complete" not in st.session_state:
     st.session_state.setup_complete = False
 if "user_data" not in st.session_state:
@@ -42,85 +129,128 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # =========================================================
-# AKIŞ KONTROLÜ (GİRİŞ EKRANI vs ANA UYGULAMA)
+# DURUM 1: GİRİŞ EKRANI (LANDING PAGE)
 # =========================================================
-
 if not st.session_state.setup_complete:
-    # --- GİRİŞ EKRANI ---
-    # Sütunları burada tanımlıyoruz (Sadece bu blokta geçerli)
-    login_col1, login_col2, login_col3 = st.columns([1, 2, 1])
     
-    with login_col2:
+    c1, c2, c3 = st.columns([1, 1.5, 1])
+    with c2:
         st.markdown("<br><br>", unsafe_allow_html=True)
-        st.markdown("<h1 style='text-align:center;'>ARTIS <span style='color:#10A37F'>AI</span></h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align:center; color:#888;'>Autonomous Export Operating System v2.5</p>", unsafe_allow_html=True)
+        # Logo ve Başlık
+        st.markdown("<h1 style='text-align:center; font-size: 4rem; letter-spacing: -2px;'>ARTIS <span style='color:#1F6FEB'>.OS</span></h1>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align:center; color:#8B949E; font-size: 1.2rem;'>Next-Gen Lojistik Operasyon Sistemi</p>", unsafe_allow_html=True)
         
         st.markdown('<div class="login-box">', unsafe_allow_html=True)
-        st.markdown("### 🚀 SİSTEM KURULUMU")
         
         with st.form("setup_form"):
-            name_in = st.text_input("Adınız Soyadınız", placeholder="Örn: Ahmet Yılmaz")
-            brand_in = st.text_input("Marka Adı", placeholder="Örn: Anatolia")
-            sector_in = st.selectbox("Sektör", ["Tekstil", "Gıda", "Kozmetik", "Diğer"])
-            product_in = st.text_input("Ana Ürünler", placeholder="Örn: İpek Eşarp")
+            st.markdown("### 🚀 Hesap Oluşturun")
+            col_a, col_b = st.columns(2)
+            with col_a:
+                name_in = st.text_input("Ad Soyad", placeholder="Örn: Burak Yılmaz")
+                sector_in = st.selectbox("Sektör", ["E-Ticaret", "Tekstil", "Gıda", "Yazılım", "Diğer"])
+            with col_b:
+                brand_in = st.text_input("Marka Adı", placeholder="Örn: Modanisa")
+                product_in = st.text_input("Ana Ürün", placeholder="Örn: Kadın Giyim")
             
-            submitted = st.form_submit_button("SİSTEMİ BAŞLAT", type="primary", use_container_width=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+            submitted = st.form_submit_button("PANELİ BAŞLAT →", type="primary", use_container_width=True)
             
             if submitted:
                 if len(name_in) > 1 and len(brand_in) > 1:
-                    # Verileri Kaydet
                     st.session_state.user_data = {
                         "name": name_in,
                         "brand": brand_in,
                         "sector": sector_in,
                         "product": product_in
                     }
-                    # İlk Mesajı Hazırla
-                    first_msg = f"Hoş geldiniz {name_in} Bey. {brand_in} markası için analizlerimi tamamladım. Washington DC operasyon merkezindeyim. İlk olarak ne yapmamı istersiniz?"
-                    st.session_state.messages = [{"role": "assistant", "content": first_msg}]
-                    
+                    # İlk mesajı buraya eklemiyoruz, chat ekranında dinamik göstereceğiz
                     st.session_state.setup_complete = True
                     st.rerun()
                 else:
-                    st.error("Lütfen bilgileri eksiksiz giriniz.")
+                    st.error("Lütfen zorunlu alanları doldurunuz.")
         st.markdown('</div>', unsafe_allow_html=True)
 
+# =========================================================
+# DURUM 2: ANA UYGULAMA (DASHBOARD)
+# =========================================================
 else:
-    # --- ANA UYGULAMA ---
-    # Burada artık login_col2 kullanmıyoruz, hata vermez.
-    
-    # SOL MENÜ
+    # --- SIDEBAR (PROFESYONEL MENÜ) ---
     with st.sidebar:
-        st.markdown(f"## 👤 {st.session_state.user_data.get('brand', 'Marka')}")
-        st.caption("Washington DC: 🟢 Online")
-        st.markdown("---")
+        # Marka Logosu Simülasyonu
+        st.markdown(f"""
+        <div style="background:#21262D; padding:15px; border-radius:10px; text-align:center; border:1px solid #30363D;">
+            <h2 style="margin:0; color:white;">{st.session_state.user_data['brand'][0:2].upper()}</h2>
+            <small style="color:#8B949E;">{st.session_state.user_data['brand']}</small>
+        </div>
+        """, unsafe_allow_html=True)
         
-        page = st.radio("MENÜ", ["💬 ASİSTAN", "📊 FİNANS", "📦 LOJİSTİK"], label_visibility="collapsed")
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Menü
+        page = st.radio(
+            "NAVIGASYON", 
+            ["💬 AI ASİSTAN", "📊 FİNANSAL TABLO", "📦 LOJİSTİK AĞI"],
+            label_visibility="collapsed"
+        )
         
         st.markdown("---")
-        if st.button("🔴 ÇIKIŞ", use_container_width=True):
+        # Alt Bilgi
+        st.caption("Server: **US-EAST-1** (4ms)")
+        st.caption("Versiyon: **2.5.0 Pro**")
+        
+        if st.button("Çıkış Yap", use_container_width=True):
             st.session_state.setup_complete = False
             st.session_state.messages = []
             st.rerun()
 
-    # SAYFALAR
-    if page == "💬 ASİSTAN":
-        st.title(f"ARTIS AI - {st.session_state.user_data.get('name', 'Kullanıcı')}")
+    # --- SAYFA İÇERİKLERİ ---
+    
+    # 1. AI ASİSTAN SAYFASI
+    if page == "💬 AI ASİSTAN":
         
-        chat_container = st.container(height=600)
-        for msg in st.session_state.messages:
-            with chat_container.chat_message(msg["role"]):
-                st.markdown(msg["content"])
-
-        if prompt := st.chat_input("Mesaj yazın..."):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with chat_container.chat_message("user"):
-                st.markdown(prompt)
+        # Eğer mesaj geçmişi boşsa "Öneri Kartlarını" göster
+        if not st.session_state.messages:
+            st.markdown(f"<h1 style='text-align:center; margin-top: 50px;'>Merhaba, {st.session_state.user_data['name']} 👋</h1>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align:center; color:#8B949E;'>Washington DC operasyon merkezi hazır. Nereden başlayalım?</p>", unsafe_allow_html=True)
             
-            with chat_container.chat_message("assistant"):
+            # Öneri Kartları (Grid Yapısı)
+            col1, col2, col3 = st.columns(3)
+            
+            # Kartlara basınca session state'e mesaj ekleyip rerun yapıyoruz
+            if col1.button("💰 Maliyet Analizi", use_container_width=True):
+                st.session_state.messages.append({"role": "user", "content": "Ürünlerimin ABD lojistik ve depolama maliyetini hesaplar mısın?"})
+                st.rerun()
+                
+            if col2.button("🚀 Şirket Kurulumu", use_container_width=True):
+                st.session_state.messages.append({"role": "user", "content": "Amerika'da şirket kurmak ve vergi süreçleri nasıl işliyor?"})
+                st.rerun()
+                
+            if col3.button("📦 Kargo Süreci", use_container_width=True):
+                st.session_state.messages.append({"role": "user", "content": "Türkiye'den ürünleri depoya gönderme süreci nasıl?"})
+                st.rerun()
+                
+        else:
+            # Mesajlar varsa göster
+            chat_container = st.container(height=600)
+            for msg in st.session_state.messages:
+                with chat_container.chat_message(msg["role"]):
+                    st.markdown(msg["content"])
+
+        # Input Alanı
+        if prompt := st.chat_input("Bir şeyler sorun..."):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            st.rerun() # Ekranı hemen güncellemek için
+
+        # Son mesaj kullanıcıdansa cevap üret (Rerun sonrası burası çalışır)
+        if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
+            with st.chat_message("user"):
+                st.markdown(st.session_state.messages[-1]["content"])
+            
+            with st.chat_message("assistant"):
                 placeholder = st.empty()
                 full_response = ""
                 try:
+                    # Brain Streaming
                     stream = brain.get_streaming_response(st.session_state.messages, st.session_state.user_data)
                     for chunk in stream:
                         full_response += chunk
@@ -128,17 +258,36 @@ else:
                     placeholder.markdown(full_response)
                 except Exception:
                     placeholder.error("Bağlantı hatası.")
+            
             st.session_state.messages.append({"role": "assistant", "content": full_response})
 
-    elif page == "📊 FİNANS":
-        st.title("📊 Finansal Simülasyon")
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Tahmini Ciro", "$42,500")
-        c2.metric("Net Kâr", "$18,200")
-        c3.metric("Maliyet", "$3,500")
+
+    # 2. FİNANS SAYFASI
+    elif page == "📊 FİNANSAL TABLO":
+        st.markdown("## 📊 Gelir Projeksiyonu")
+        st.markdown("Sektör ortalamalarına göre tahmini büyüme.")
+        
+        # Metrikler
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Aylık Ciro", "$42,500", "+12%")
+        m2.metric("Net Kâr", "$15,200", "+8%")
+        m3.metric("ROI", "%320", "+5%")
+        m4.metric("CAC (Maliyet)", "$12", "-2%")
+        
         st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
 
-    elif page == "📦 LOJİSTİK":
-        st.title("📦 Lojistik Takip")
-        st.success("Washington DC Deposu: Müsait")
-        st.plotly_chart(brain.get_logistics_map(), use_container_width=True)
+    # 3. LOJİSTİK SAYFASI
+    elif page == "📦 LOJİSTİK AĞI":
+        st.markdown("## 📦 Global Sevkiyat Ağı")
+        
+        row1_1, row1_2 = st.columns([3, 1])
+        with row1_1:
+            st.plotly_chart(brain.get_logistics_map(), use_container_width=True)
+        with row1_2:
+            st.success("Depo Durumu: MÜSAİT")
+            st.info("Son Sevkiyat: Yolda")
+            st.warning("Gümrük: İşleniyor")
+            
+            with st.expander("Depo Detayları"):
+                st.write("Adres: 1200 Pennsylvania Ave, Washington DC")
+                st.write("Yönetici: ARTIS AI")
