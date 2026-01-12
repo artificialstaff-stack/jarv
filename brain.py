@@ -4,42 +4,44 @@ import plotly.graph_objects as go
 import google.generativeai as genai
 import streamlit as st
 
-# --- 1. AYARLAR: BURAYA API KEY YAPIŞTIR ---
-# Google AI Studio'dan aldığın keyi tırnak içine yapıştır.
-GOOGLE_API_KEY = "BURAYA_GOOGLE_API_KEY_YAPISTIR"
-
-# API Kurulumu
+# --- 1. API BAĞLANTISI (SECRETS'TAN OKUMA) ---
 try:
-    genai.configure(api_key=GOOGLE_API_KEY)
+    # Secrets'tan anahtarı çekiyoruz
+    api_key = st.secrets["GOOGLE_API_KEY"]
+    genai.configure(api_key=api_key)
     model = genai.GenerativeModel('gemini-pro')
 except Exception as e:
-    st.error(f"API Key Hatası: Lütfen brain.py dosyasına geçerli bir Google API Key yapıştırın. Hata: {e}")
+    # Eğer Secrets ayarlanmamışsa hata vermemesi için model'i None yapıyoruz
+    model = None
+    # Hata mesajını loglara basabiliriz ama kullanıcıya göstermiyoruz ki arayüz bozulmasın
 
-# --- 2. ARTIS'İN KİŞİLİĞİ (SYSTEM PROMPT) ---
-# Burası yapay zekanın "Rolünü" ezberlediği yerdir.
+# --- 2. ARTIS PERSONA (AI KARAKTERİ) ---
 ARTIS_PERSONA = """
 Senin adın ARTIS. Sen Türk ihracatçıları ABD pazarına taşıyan "Yapay Zeka Operasyon Müdürüsün".
 Merkezin Washington DC'de, Beyaz Saray'a 15 dakika mesafede fiziksel bir depo ve ofis.
-Konuşma tarzın: Profesyonel, vizyoner ama samimi ve çözüm odaklı. Asla bir robot gibi değil, bir iş ortağı gibi konuş.
+Konuşma tarzın: Profesyonel, vizyoner, samimi ve çözüm odaklı. Robot gibi değil, iş ortağı gibi konuş.
 
-GÖREVİN VE SOHBET AKIŞIN (Bu sırayı çaktırmadan takip et):
-1. TANIŞMA: Önce markasını ve ismini öğren.
-2. SEKTÖR: Ne ürettiklerini sor.
-3. ÜRÜN DETAYI: Yıldız ürünleri nedir? (Burada Washington DC depomuzda onlar için raf ayırabileceğinden bahset).
-4. VERİ TOPLAMA: Ürün boyutları ve maliyetleri hakkında bilgi iste (Lojistik hesaplamak için).
-5. SATIŞ (KAPANIŞ): Bilgileri alınca onlara şu 3 paketten uygun olanı veya hepsini sun:
-   - Ortaklık Modeli (Sadece kargo öderler, biz satarız, kârdan pay alırız).
-   - Kurumsal Kurulum ($2000 kurulum + $250/ay yönetim).
-   - Tam Otomasyon VIP ($2000 kurulum + $500/ay her şey dahil).
-   - (Bütçe azsa $500'lık web sitesi başlangıç paketi).
+SOHBET AMACIN:
+Müşteriyi sıkmadan aşağıdaki bilgileri sırayla (tek tek) öğrenmek ve sonunda paket satmak.
+Her seferinde SADECE BİR soru sor.
 
-ÖNEMLİ KURALLAR:
-- Cevapların kısa ve net olsun (maksimum 2-3 cümle).
-- Müşteriyi soru yağmuruna tutma, her seferinde tek soru sor.
-- Washington DC vurgusunu güven vermek için kullan.
+SOHBET AKIŞI:
+1. TANIŞMA: Marka adını sor.
+2. SEKTÖR: Ne ürettiklerini sor (Tekstil, Gıda vb.).
+3. ÜRÜN DETAYI: Yıldız ürünleri nedir? (Washington DC depomuzda bu ürünlere raf ayırabileceğini söyle).
+4. VERİ TOPLAMA: Lojistik maliyeti hesaplamak için tahmini ürün boyutlarını veya üretim maliyetlerini sor.
+5. SATIŞ: Bilgiler tamamlanınca şu 3 paketi sun ve hangisini istediğini sor:
+   - 1) ORTAKLIK MODELİ: Kargo müşteriye ait, biz satarız, kârdan pay alırız.
+   - 2) KURUMSAL KURULUM ($2000 + $250/ay): Şirket ve mağaza kurarız, onlar yönetir.
+   - 3) TAM OTOMASYON VIP ($2000 + $500/ay): Her şeyi biz yönetiriz.
+   - (Ekstra: Bütçe azsa $500'lık web sitesi paketi de var).
+
+ASLA UNUTMA:
+- Cevapların kısa olsun.
+- Washington DC deposunu güven vermek için kullan.
 """
 
-# --- 3. CHART & MAP FONKSİYONLARI (AYNEN KALIYOR) ---
+# --- 3. CHART & MAP FONKSİYONLARI ---
 def get_logistics_map():
     fig = go.Figure()
     fig.add_trace(go.Scattergeo(
@@ -48,7 +50,7 @@ def get_logistics_map():
     ))
     fig.add_trace(go.Scattergeo(
         lon = [28.9784, -77.0369], lat = [41.0082, 38.9072],
-        hoverinfo = 'text', text = ['Istanbul HQ', 'Washington DC Hub (15min to White House)'],
+        hoverinfo = 'text', text = ['Istanbul HQ', 'Washington DC Hub'],
         mode = 'markers', marker = dict(size = 8, color = '#FFFFFF')
     ))
     fig.update_layout(
@@ -64,64 +66,53 @@ def get_sales_chart():
     fig.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', margin=dict(t=0, b=0, l=0, r=0), height=300)
     return fig
 
-# --- 4. ZEKİ SOHBET FONKSİYONU ---
+# --- 4. SOHBET YÖNETİCİSİ ---
 
 class OnboardingBrain:
     def __init__(self):
         pass
 
     def process_message(self, user_input, current_step, checklist_state):
-        """
-        Kullanıcının mesajını Gemini'ye gönderir ve cevabı alır.
-        Ayrıca checklist durumunu tahmin etmeye çalışır.
-        """
-        
-        # 1. Chat Geçmişini Hazırla (Persona + Geçmiş Mesajlar)
+        # 1. API Kontrolü
+        if model is None:
+            # Eğer Secrets'ta anahtar yoksa veya hatalıysa uyarı verir ama çökmez
+            return "Sistem Bağlantı Hatası: API Anahtarı 'Secrets' içinde bulunamadı. Lütfen ayarları kontrol edin.", current_step, checklist_state
+
+        # 2. Geçmişi Hazırla
         history = st.session_state.get('onboarding_history', [])
+        recent_history = history[-6:] 
         
-        # Sadece son 10 mesajı al (Token tasarrufu ve hız için)
-        recent_history = history[-10:] if len(history) > 10 else history
-        
-        # Mesajları Gemini formatına çevir
-        chat_content = f"SİSTEM TALİMATI:\n{ARTIS_PERSONA}\n\nSOHBET GEÇMİŞİ:\n"
+        chat_content = f"SİSTEM TALİMATI:\n{ARTIS_PERSONA}\n\nGEÇMİŞ SOHBET:\n"
         for msg in recent_history:
             role = "MÜŞTERİ" if msg["role"] == "user" else "ARTIS"
             chat_content += f"{role}: {msg['content']}\n"
         
-        chat_content += f"MÜŞTERİ: {user_input}\nARTIS:"
+        chat_content += f"MÜŞTERİ: {user_input}\nARTIS (Kısa cevap ver):"
 
-        # 2. Gemini'den Cevap İste
+        # 3. Gemini'ye Gönder
         try:
             response = model.generate_content(chat_content)
             bot_response = response.text
         except Exception as e:
-            bot_response = "Bağlantıda küçük bir kopukluk oldu. Lütfen tekrar eder misiniz?"
+            bot_response = "Bağlantıda anlık bir sorun oluştu. Lütfen tekrar yazın."
 
-        # 3. Arka Planda Checklist Güncelleme (Basit Anahtar Kelime Kontrolü)
-        # Gemini burayı yönetebilir ama şimdilik basit tutuyoruz ki hata yapmasın.
+        # 4. Durum Güncelleme
         next_step = current_step
-        
-        user_lower = user_input.lower()
-        bot_lower = bot_response.lower()
+        user_len = len(user_input)
 
-        # Marka/Sektör konuşulduysa
-        if current_step == "get_sector" or current_step == "intro":
-            if len(user_input) > 2: 
-                checklist_state['brand'] = True
-                next_step = "get_products"
-        
-        # Ürünlerden bahsedildiyse
-        if "ürün" in bot_lower or "raf" in bot_lower:
-             checklist_state['product'] = True
-             next_step = "get_details"
-
-        # Maliyet/Boyut konuşulduysa
-        if "maliyet" in bot_lower or "boyut" in bot_lower or "dolar" in user_lower:
+        if current_step == "intro" and user_len > 2:
+            checklist_state['brand'] = True
+            next_step = "get_sector"
+        elif current_step == "get_sector" and user_len > 2:
+            checklist_state['brand'] = True
+            next_step = "get_products" 
+        elif current_step == "get_products" and user_len > 2:
+            checklist_state['product'] = True
+            next_step = "get_details"
+        elif current_step == "get_details" and user_len > 1:
             checklist_state['data'] = True
             next_step = "present_offer"
-
-        # Paket seçimi
-        if "paket" in bot_lower and ("tamam" in user_lower or "olur" in user_lower or "seçtim" in user_lower):
+        elif current_step == "present_offer" and user_len > 1:
             checklist_state['offer'] = True
             next_step = "completed"
 
