@@ -1,71 +1,108 @@
 import streamlit as st
-import styles
-import views
+import sys
+import os
+
+# Brain modülünü import etmek için yol ayarı
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'logic')))
 import brain
 
-# 1. AYARLAR
-st.set_page_config(page_title="Artificial Staff | AI OS", layout="wide", initial_sidebar_state="expanded")
-styles.load_css()
+# 1. SAYFA AYARLARI
+st.set_page_config(
+    page_title="ARTIS | AI Chat",
+    page_icon="🤖",
+    layout="centered", # ChatGPT gibi ortalı
+    initial_sidebar_state="expanded"
+)
 
-# 2. SESSION STATE
-if 'logged_in' not in st.session_state:
-    st.session_state['logged_in'] = False
-if 'current_page' not in st.session_state:
-    st.session_state['current_page'] = 'COMMAND CENTER'
-
-# FORM VERİLERİNİ TUTACAK DEPO
-if 'form_data' not in st.session_state:
-    st.session_state['form_data'] = {
-        'brand_name': '',
-        'sector': 'Tekstil',
-        'star_product': '',
-        'dimensions': '',
-        'selected_package': ''
+# 2. CHATGPT TARZI CSS (STYLES)
+st.markdown("""
+<style>
+    /* Genel Arkaplan */
+    .stApp {
+        background-color: #343541; /* ChatGPT Koyu Gri */
+        color: #ECECF1;
     }
-
-# CHAT GEÇMİŞİ
-if 'chat_history' not in st.session_state:
-    st.session_state['chat_history'] = [{
-        "role": "assistant", 
-        "content": "Hoş geldiniz. Sol taraftaki formları doldururken size yardımcı olmak için buradayım. Washington DC operasyon detaylarını sorabilirsiniz."
-    }]
-
-# RAPOR DURUMU
-if 'submission_complete' not in st.session_state:
-    st.session_state['submission_complete'] = False
-
-# 3. ANA AKIŞ
-if not st.session_state['logged_in']:
-    views.render_login()
-else:
-    views.render_navbar()
     
-    with st.sidebar:
-        st.markdown("<br><br><br>", unsafe_allow_html=True)
-        st.markdown("### NAVIGATION")
-        page = st.radio("MODULES", ["COMMAND CENTER", "ARTIS AI", "FINANCE", "LOGISTICS"], label_visibility="collapsed")
-        st.session_state['current_page'] = page
-        
-        st.markdown("---")
-        if st.button("TERMINATE SESSION"):
-            st.session_state['logged_in'] = False
-            st.rerun()
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: #202123;
+    }
+    
+    /* Chat Input Alanı */
+    .stChatInput {
+        position: fixed;
+        bottom: 20px;
+    }
+    
+    /* Mesaj Kutuları */
+    .stChatMessage {
+        background-color: transparent;
+        border: none;
+    }
+    div[data-testid="chatAvatarIcon-user"] {
+        background-color: #5436DA !important; /* Kullanıcı Mor */
+    }
+    div[data-testid="chatAvatarIcon-assistant"] {
+        background-color: #10A37F !important; /* GPT Yeşil */
+    }
+    
+    /* Başlık Gizle */
+    header {visibility: hidden;}
+    #MainMenu {visibility: hidden;}
+    
+</style>
+""", unsafe_allow_html=True)
 
-    # YÖNLENDİRME
-    if st.session_state['current_page'] == "COMMAND CENTER":
-        if st.session_state['submission_complete']:
-            st.success("BAŞVURUNUZ BAŞARIYLA ALINDI! YÖNETİCİYE İLETİLEN RAPOR AŞAĞIDADIR:")
-            st.code(st.session_state['final_report'], language='text')
-            if st.button("Yeni Başvuru Yap"):
-                st.session_state['submission_complete'] = False
-                st.rerun()
-        else:
-            views.render_command_center()
+# 3. SESSION STATE (HAFIZA)
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Merhaba. Ben ARTIS. Washington DC operasyon merkezine hoş geldiniz. Markanızın adı nedir?"}
+    ]
+
+# 4. SIDEBAR (MENÜ)
+with st.sidebar:
+    st.title("ARTIS v2.5")
+    st.markdown("---")
+    st.info("Washington DC Hub: **ONLINE** 🟢")
+    
+    if st.button("🗑️ Sohbeti Temizle", type="primary"):
+        st.session_state.messages = []
+        st.rerun()
+        
+    st.markdown("---")
+    st.caption("© 2026 Artificial Staff OS")
+
+# 5. CHAT ARAYÜZÜ (ANA AKIŞ)
+
+# Başlık
+st.markdown("<h1 style='text-align: center; color: #ECECF1;'>ARTIS AI</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #ACACBE;'>Global Operations Expert</p>", unsafe_allow_html=True)
+
+# Mesajları Göster
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# Yeni Mesaj Girişi
+if prompt := st.chat_input("Bir şeyler yazın..."):
+    # 1. Kullanıcı mesajını ekle
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # 2. Asistan Cevabı (Streaming)
+    with st.chat_message("assistant"):
+        response_placeholder = st.empty()
+        full_response = ""
+        
+        # Brain'den stream al
+        stream_generator = brain.get_streaming_response(st.session_state.messages)
+        
+        for chunk in stream_generator:
+            full_response += chunk
+            response_placeholder.markdown(full_response + "▌") # İmleç efekti
             
-    elif st.session_state['current_page'] == "FINANCE":
-        views.render_dashboard()
-    elif st.session_state['current_page'] == "ARTIS AI":
-        views.render_chat_interface()
-    elif st.session_state['current_page'] == "LOGISTICS":
-        st.markdown("<h3>GLOBAL LOGISTICS TRACKER</h3>", unsafe_allow_html=True)
-        st.plotly_chart(brain.get_logistics_map(), use_container_width=True)
+        response_placeholder.markdown(full_response)
+    
+    # 3. Cevabı kaydet
+    st.session_state.messages.append({"role": "assistant", "content": full_response})
