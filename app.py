@@ -1,6 +1,16 @@
 import streamlit as st
 from styles import load_css
-from views import render_login_screen, render_welcome_animation, render_services_catalog, render_dashboard, render_artis_ai, render_logistics, render_marketing
+# views.py içindeki tüm render fonksiyonlarını import ediyoruz
+from views import (
+    render_login_screen, 
+    render_welcome_animation, 
+    render_main_hub, 
+    render_services_catalog, # Bu fonksiyonun views.py'da olduğundan emin olun
+    render_dashboard, 
+    render_artis_ai, 
+    render_logistics, 
+    render_marketing
+)
 
 # 1. Sayfa Ayarları (En başta olmalı)
 st.set_page_config(
@@ -9,7 +19,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Session State Kontrolü (Giriş Durumu)
+# 2. Session State Başlatma (Hata almamak için varsayılan değerler)
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 if 'show_welcome' not in st.session_state:
@@ -20,39 +30,55 @@ load_css()
 
 # --- ANA AKIŞ MANTIĞI ---
 
+# DURUM 1: Giriş Yapılmamışsa -> Sadece Login Ekranı Göster
 if not st.session_state.authenticated:
-    # 1. ADIM: GİRİŞ EKRANI
     render_login_screen()
 
-elif st.session_state.show_welcome:
-    # 2. ADIM: KARŞILAMA ANİMASYONU (Sadece 1 kez çalışır)
-    render_welcome_animation()
-
+# DURUM 2: Giriş Yapılmışsa -> Menüyü ve İçeriği Göster
 else:
-    # 3. ADIM: ANA UYGULAMA (Menü Sadece Burada Görünür)
-    with st.sidebar:
-        st.markdown("<h1 style='text-align:center; color:#D4AF37; margin-bottom:0;'>AS</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align:center; color:#666; letter-spacing:2px; font-size:10px; margin-top:0;'>ENTERPRISE</p>", unsafe_allow_html=True)
-        st.markdown("---")
-        
-        page = st.radio(
-            label="Menü",
-            options=["HİZMETLERİMİZ", "DASHBOARD", "ARTIS (AI)", "LOJİSTİK", "PAZARLAMA"],
-            label_visibility="collapsed"
-        )
-        st.markdown("---")
-        if st.button("ÇIKIŞ YAP"):
-            st.session_state.authenticated = False
-            st.rerun()
+    # --- KARŞILAMA ANİMASYONU ---
+    # Eğer 'show_welcome' True ise animasyonu göster ve sonra kapat
+    if st.session_state.show_welcome:
+        render_welcome_animation()
+        # Animasyon fonksiyonu içinde st.rerun() olduğu için burası tekrar çalışacak
+        # ve show_welcome False olduğu için aşağıdaki bloğa geçecek.
+    
+    else:
+        # --- SIDEBAR (YAN MENÜ) ---
+        # Artık giriş yapıldığı için menüyü burada oluşturuyoruz.
+        with st.sidebar:
+            st.markdown("<h1 style='text-align:center; color:#D4AF37; margin-bottom:0;'>AS</h1>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align:center; color:#666; letter-spacing:2px; font-size:10px; margin-top:0;'>ENTERPRISE</p>", unsafe_allow_html=True)
+            st.markdown("---")
+            
+            # Menü Seçenekleri
+            page = st.radio(
+                label="Navigasyon",
+                options=["ANA MERKEZ", "HİZMETLERİMİZ", "DASHBOARD", "ARTIS (AI)", "LOJİSTİK", "PAZARLAMA"],
+                label_visibility="collapsed"
+            )
+            
+            st.markdown("---")
+            
+            # Çıkış Butonu
+            if st.button("ÇIKIŞ YAP"):
+                st.session_state.authenticated = False
+                st.session_state.show_welcome = False
+                st.rerun()
+            
+            st.caption("© 2026 Artificial Staff LLC")
 
-    # Sayfa İçeriklerini Yükle
-    if page == "HİZMETLERİMİZ":
-        render_services_catalog()
-    elif page == "DASHBOARD":
-        render_dashboard()
-    elif page == "ARTIS (AI)":
-        render_artis_ai()
-    elif page == "LOJİSTİK":
-        render_logistics()
-    elif page == "PAZARLAMA":
-        render_marketing()
+        # --- SAYFA YÖNLENDİRME ---
+        # Menüden seçilen sayfayı ana ekrana bas
+        if page == "ANA MERKEZ":
+            render_main_hub() # Hub ekranı (Kartlı menü)
+        elif page == "HİZMETLERİMİZ":
+            render_services_catalog() # Detaylı Hizmet Kataloğu
+        elif page == "DASHBOARD":
+            render_dashboard()
+        elif page == "ARTIS (AI)":
+            render_artis_ai()
+        elif page == "LOJİSTİK":
+            render_logistics()
+        elif page == "PAZARLAMA":
+            render_marketing()
