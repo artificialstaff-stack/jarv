@@ -1,44 +1,37 @@
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-import google.generativeai as genai
+from google import genai  # İstediğin yeni kütüphane
 import streamlit as st
 
-# --- 1. API BAĞLANTISI (SECRETS'TAN OKUMA) ---
+# --- 1. API BAĞLANTISI (YENİ YAPIDA) ---
+# API Key'i kodun içine gömmüyoruz, Secrets'tan çekiyoruz.
 try:
-    # Secrets'tan anahtarı çekiyoruz
     api_key = st.secrets["GOOGLE_API_KEY"]
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-pro')
+    client = genai.Client(api_key=api_key)
 except Exception as e:
-    # Eğer Secrets ayarlanmamışsa hata vermemesi için model'i None yapıyoruz
-    model = None
-    # Hata mesajını loglara basabiliriz ama kullanıcıya göstermiyoruz ki arayüz bozulmasın
+    client = None
+    # Hata: Secrets ayarlarında 'GOOGLE_API_KEY' isminde bir anahtar yoksa burası çalışır.
 
-# --- 2. ARTIS PERSONA (AI KARAKTERİ) ---
+# --- 2. ARTIS PERSONA ---
 ARTIS_PERSONA = """
 Senin adın ARTIS. Sen Türk ihracatçıları ABD pazarına taşıyan "Yapay Zeka Operasyon Müdürüsün".
 Merkezin Washington DC'de, Beyaz Saray'a 15 dakika mesafede fiziksel bir depo ve ofis.
-Konuşma tarzın: Profesyonel, vizyoner, samimi ve çözüm odaklı. Robot gibi değil, iş ortağı gibi konuş.
-
-SOHBET AMACIN:
-Müşteriyi sıkmadan aşağıdaki bilgileri sırayla (tek tek) öğrenmek ve sonunda paket satmak.
-Her seferinde SADECE BİR soru sor.
+Konuşma tarzın: Profesyonel, vizyoner, samimi ve çözüm odaklı.
 
 SOHBET AKIŞI:
 1. TANIŞMA: Marka adını sor.
-2. SEKTÖR: Ne ürettiklerini sor (Tekstil, Gıda vb.).
-3. ÜRÜN DETAYI: Yıldız ürünleri nedir? (Washington DC depomuzda bu ürünlere raf ayırabileceğini söyle).
-4. VERİ TOPLAMA: Lojistik maliyeti hesaplamak için tahmini ürün boyutlarını veya üretim maliyetlerini sor.
-5. SATIŞ: Bilgiler tamamlanınca şu 3 paketi sun ve hangisini istediğini sor:
-   - 1) ORTAKLIK MODELİ: Kargo müşteriye ait, biz satarız, kârdan pay alırız.
-   - 2) KURUMSAL KURULUM ($2000 + $250/ay): Şirket ve mağaza kurarız, onlar yönetir.
-   - 3) TAM OTOMASYON VIP ($2000 + $500/ay): Her şeyi biz yönetiriz.
-   - (Ekstra: Bütçe azsa $500'lık web sitesi paketi de var).
+2. SEKTÖR: Ne ürettiklerini sor.
+3. ÜRÜN DETAYI: Yıldız ürünleri nedir? (DC depomuzda raf ayırabileceğini söyle).
+4. VERİ TOPLAMA: Lojistik için ürün boyutlarını veya maliyetlerini sor.
+5. SATIŞ: Bilgiler tamamlanınca şu 3 paketi sun:
+   - ORTAKLIK MODELİ (Sadece kargo öderler).
+   - KURUMSAL KURULUM ($2000 + $250/ay).
+   - TAM OTOMASYON VIP ($2000 + $500/ay).
 
 ASLA UNUTMA:
-- Cevapların kısa olsun.
-- Washington DC deposunu güven vermek için kullan.
+- Kısa cevap ver.
+- Washington DC deposunu vurgula.
 """
 
 # --- 3. CHART & MAP FONKSİYONLARI ---
@@ -66,17 +59,12 @@ def get_sales_chart():
     fig.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', margin=dict(t=0, b=0, l=0, r=0), height=300)
     return fig
 
-# --- 4. SOHBET YÖNETİCİSİ ---
-
+# --- 4. SOHBET YÖNETİCİSİ (YENİ MODELLE) ---
 class OnboardingBrain:
-    def __init__(self):
-        pass
-
     def process_message(self, user_input, current_step, checklist_state):
-        # 1. API Kontrolü
-        if model is None:
-            # Eğer Secrets'ta anahtar yoksa veya hatalıysa uyarı verir ama çökmez
-            return "Sistem Bağlantı Hatası: API Anahtarı 'Secrets' içinde bulunamadı. Lütfen ayarları kontrol edin.", current_step, checklist_state
+        # 1. Client Kontrolü
+        if client is None:
+            return "HATA: API Anahtarı bulunamadı. Lütfen Secrets panelinde ismin 'GOOGLE_API_KEY' (P değil I ile) olduğundan emin olun.", current_step, checklist_state
 
         # 2. Geçmişi Hazırla
         history = st.session_state.get('onboarding_history', [])
@@ -89,12 +77,16 @@ class OnboardingBrain:
         
         chat_content += f"MÜŞTERİ: {user_input}\nARTIS (Kısa cevap ver):"
 
-        # 3. Gemini'ye Gönder
+        # 3. Gemini 2.0 Flash'a Gönder (Senin istediğin yapı)
         try:
-            response = model.generate_content(chat_content)
+            response = client.models.generate_content(
+                model="gemini-2.0-flash", 
+                contents=chat_content
+            )
             bot_response = response.text
         except Exception as e:
-            bot_response = "Bağlantıda anlık bir sorun oluştu. Lütfen tekrar yazın."
+            # Eğer 2.0 henüz aktif değilse fallback olarak 1.5 kullanabilirsin ama istediğin kodu yazdım.
+            bot_response = f"Bağlantı hatası: {str(e)}. Lütfen tekrar deneyin."
 
         # 4. Durum Güncelleme
         next_step = current_step
