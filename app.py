@@ -3,29 +3,33 @@ import streamlit as st
 from styles import apply_custom_styles
 from views import render_step1_consulting, render_step2_action, render_step3_tracking
 
-# 1. Sayfa Ayarları
-st.set_page_config(page_title="Jarvis Interface", layout="wide", page_icon="🤖")
+# Sayfa Ayarları
+st.set_page_config(page_title="Artificial Staff", layout="wide", page_icon="AS")
 
-# 2. Stilleri Yükle
+# Tasarımı Yükle (EN ÖNEMLİ KISIM)
 apply_custom_styles()
 
-# 3. Yan Menü (Navigasyon)
+# Yan Menü Tasarımı
 with st.sidebar:
-    st.title("ARTIFICIAL STAFF")
-    st.markdown("---")
-    menu = st.radio(
-        "OPERASYON ADIMLARI", 
-        ["1. BİLGİ AL (Jarvis)", "2. İŞE BAŞLA (Form)", "3. DURUM İZLE (Takip)"]
+    st.markdown("""
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h1 style="font-family: 'Cormorant Garamond'; font-size: 36px; margin:0; color:#C5A059;">AS</h1>
+        <span style="font-size: 10px; letter-spacing: 2px; color: #666;">ARTIFICIAL STAFF</span>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    menu = st.radio("", 
+        ["01 // VISION (Jarvis)", "02 // START (Başvuru)", "03 // TRACK (İzleme)"],
+        label_visibility="collapsed"
     )
+    
     st.markdown("---")
-    st.success("🟢 Jarvis Core: Online")
+    st.markdown("<div style='text-align:center; font-size:10px; color:#444;'>US & TR OPERATIONS<br>© 2025</div>", unsafe_allow_html=True)
 
-# 4. Seçime Göre Ekranı Getir
-if menu == "1. BİLGİ AL (Jarvis)":
+# Yönlendirme
+if "VISION" in menu:
     render_step1_consulting()
-
-elif menu == "2. İŞE BAŞLA (Form)":
+elif "START" in menu:
     render_step2_action()
-
-elif menu == "3. DURUM İZLE (Takip)":
+elif "TRACK" in menu:
     render_step3_tracking()
