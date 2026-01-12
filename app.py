@@ -1,5 +1,6 @@
 import streamlit as st
 import time
+from instructions import COMPANY_DATA
 from styles import apply_tech_style
 from ui import render_sidebar, render_inventory_dashboard, render_finance_dashboard
 from brain import get_jarvis_response
@@ -18,12 +19,19 @@ apply_tech_style()
 # 3. Sidebar'ı Çiz ve Seçimi Al
 selected_tab = render_sidebar()
 
-# 4. Session State (Hafıza) Başlatma
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-    intro = "Jarvis v4.2 Aktif. Neural arayüze hoş geldiniz."
-    st.session_state.messages.append({"role": "assistant", "content": intro})
+# --- app.py İçindeki İlgili Kısım ---
 
+if "messages" not in st.session_state:
+    # Jarvis'in kimliğini en başa "gizli" mesaj olarak ekliyoruz
+    st.session_state.messages = [
+        {"role": "system", "content": COMPANY_DATA}
+    ]
+    
+    # Kullanıcının göreceği ilk "Hoş geldin" mesajı
+    st.session_state.messages.append({
+        "role": "assistant", 
+        "content": "Jarvis v4.2 Aktif. Neural arayüze hoş geldiniz. Markanızı tanımlayın."
+    })
 # 5. Ana Ekran Mantığı
 if selected_tab == "🤖 JARVIS CORE":
     st.header("Jarvis Neural Interface")
