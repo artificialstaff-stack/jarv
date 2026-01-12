@@ -2,34 +2,42 @@ import plotly.graph_objects as go
 import random
 import time
 
-# --- ARTIS AI BEYNİ ---
+# --- ARTIS AI (SATIŞ ODAKLI AKILLI ASİSTAN) ---
 def get_artis_response(user_input):
-    """Müşteri sorularına satış odaklı cevaplar veren Artis AI."""
+    """
+    Müşteriyi ikna etmeye ve bilgi vermeye yönelik 'Keyword Matching' beyni.
+    """
     msg = user_input.lower()
     
-    if any(x in msg for x in ['selam', 'merhaba', 'günaydın', 'kimsin']):
-        return "Merhaba. Ben **ARTIS** (Artificial Intelligence Staff). Operasyonel süreçlerinizi yöneten ve satışlarınızı artıran dijital zekayım. Size **Lojistik**, **Şirket Kurulumu** veya **Maliyetler** hakkında bilgi verebilirim."
+    # 1. Selamlaşma
+    if any(x in msg for x in ['selam', 'merhaba', 'günaydın', 'kimsin', 'artıs', 'artis']):
+        return "Merhaba. Ben **ARTIS** (Artificial Intelligence Staff). Operasyonel süreçlerinizi yöneten ve satışlarınızı artıran dijital zekayım. Size **Lojistik**, **Şirket Kurulumu**, **Yatırım Maliyetleri** veya **Satış Stratejileri** hakkında bilgi verebilirim."
 
-    elif any(x in msg for x in ['kargo', 'lojistik', 'nakliye', 'gönderim']):
-        return "📦 **Lojistik Hattı:** Türkiye'den çıkan ürünleriniz Express Kargo (FedEx/UPS) ile **2-4 iş gününde**, Deniz yolu ile **20-30 günde** ABD depolarımıza (NJ & CA) ulaşır. Gümrükleme tarafımızca yapılır."
+    # 2. Lojistik & Kargo
+    elif any(x in msg for x in ['kargo', 'lojistik', 'nakliye', 'teslimat', 'gönderim', 'gümrük']):
+        return "📦 **Lojistik Hattı:** Türkiye'den çıkan ürünleriniz Express Kargo (FedEx/UPS) ile **2-4 iş gününde**, Deniz yolu ile **20-30 günde** ABD depolarımıza (NJ & CA) ulaşır. Gümrükleme tarafımızca yönetilir, siz sadece etiketi basarsınız."
 
-    elif any(x in msg for x in ['şirket', 'llc', 'vergi', 'ein', 'banka']):
-        return "🏛️ **LLC & Bankacılık:** Delaware veya Wyoming'de şirketiniz **3-5 iş günü** içinde kurulur. EIN numaranız alındıktan sonra Mercury Bank hesabınız açılır ve **Stripe/PayPal** ile ödeme almaya başlarsınız."
+    # 3. Şirket Kurulumu (LLC)
+    elif any(x in msg for x in ['şirket', 'llc', 'vergi', 'ein', 'banka', 'stripe', 'paypal']):
+        return "🏛️ **LLC & Finans:** Delaware veya Wyoming eyaletlerinde şirketiniz **3-5 iş günü** içinde kurulur. EIN numaranız alındıktan sonra Mercury Bank hesabınız açılır ve **Stripe/PayPal** entegrasyonu ile tahsilat engeliniz tamamen kalkar."
 
-    elif any(x in msg for x in ['fiyat', 'kaç para', 'ücret', 'maliyet']):
-        return "💰 **Yatırım:** Biz bir gider kalemi değil, dolar kazandıran bir yatırım ortağıyız. Fiyatlandırma işlem hacminize göre değişir. Detaylı paketlerimizi 'Hizmetlerimiz' sekmesinden inceleyebilirsiniz."
+    # 4. Fiyat & Maliyet
+    elif any(x in msg for x in ['fiyat', 'kaç para', 'ücret', 'maliyet', 'paket']):
+        return "💰 **Yatırım Planı:** Biz bir 'gider kalemi' değil, dolar kazandıran bir yatırım ortağıyız. Fiyatlandırma işlem hacminize ve seçtiğiniz modüllere göre değişir. Detaylı paketleri **'HİZMETLERİMİZ'** sekmesinden inceleyebilirsiniz."
 
-    elif any(x in msg for x in ['satış', 'reklam', 'marketing', 'pazar']):
-        return "📈 **Satış Stratejisi:** B2B tarafında yapay zeka ile nokta atışı toptancı buluyoruz. B2C tarafında ise Meta ve Google reklamları ile doğrudan 'satın alma niyeti' olan ABD'li müşteriyi hedefliyoruz."
+    # 5. Satış & Pazarlama
+    elif any(x in msg for x in ['satış', 'reklam', 'müşteri', 'pazar', 'marketing', 'b2b']):
+        return "📈 **Satış Stratejisi:** B2B tarafında yapay zeka ile nokta atışı toptancı buluyoruz (Cold Outreach). B2C tarafında ise Meta/Google reklamları ile doğrudan 'satın alma niyeti' yüksek kitleyi hedefliyoruz."
 
+    # Varsayılan Cevap
     else:
-        return "Bu konuda veri tabanımda hazır bir yanıt yok, ancak operasyon ekibime not ilettim. Şunları sormak ister misiniz: **'Kargo süresi nedir?', 'LLC nasıl kurulur?'**"
+        return "Bu spesifik konuda veri tabanımda hazır bir yanıt yok. Ancak operasyon ekibime not ilettim. Şunları sormak ister misiniz: **'Lojistik süresi ne kadar?', 'LLC avantajları neler?', 'Reklam bütçesi ne olmalı?'**"
 
-# --- GRAFİK FONKSİYONLARI ---
+# --- GRAFİK MOTORU (DASHBOARD İÇİN) ---
 def get_dashboard_metrics():
     return {
         "revenue": {"label": "Hedef Ciro", "value": "$124,500", "delta": "Potansiyel"},
-        "region": {"label": "Pazar", "value": "US & CA", "delta": "Aktif"},
+        "region": {"label": "Aktif Pazar", "value": "US & CA", "delta": "2 Bölge"},
         "visitors": {"label": "Erişim", "value": "330M+", "delta": "ABD Nüfusu"},
         "conversion": {"label": "Hedef Dönüşüm", "value": "2.5%", "delta": "Retail"}
     }
@@ -53,10 +61,12 @@ def get_sales_chart():
 
 def get_map_chart():
     fig = go.Figure()
+    # Rota
     fig.add_trace(go.Scattergeo(
         lon = [28.97, -74.00], lat = [41.00, 40.71], mode = 'lines',
         line = dict(width = 2, color = '#D4AF37'), opacity = 0.8
     ))
+    # Noktalar
     fig.add_trace(go.Scattergeo(
         lon = [28.97, -74.00, 13.40, -118.24],
         lat = [41.00, 40.71, 52.52, 34.05], mode = 'markers',
