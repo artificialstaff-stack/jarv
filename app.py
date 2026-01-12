@@ -1,82 +1,131 @@
 import streamlit as st
 import time
 from instructions import COMPANY_DATA
-from styles import apply_tech_style
-from ui import render_sidebar, render_inventory_dashboard, render_finance_dashboard
-from brain import get_jarvis_response
 
-# 1. Sayfa Ayarları
+# --- SAYFA AYARLARI ---
 st.set_page_config(
-    page_title="JARVIS 2026",
-    page_icon="🧬",
+    page_title="Jarvis Neural Interface",
+    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# 2. Stili Uygula
-apply_tech_style()
+# --- CSS STİLİ (Basit haliyle) ---
+st.markdown("""
+<style>
+    .stApp { background-color: #0e1117; color: white; }
+    .stTextInput > div > div > input { background-color: #262730; color: white; }
+</style>
+""", unsafe_allow_html=True)
 
-# 3. Sidebar'ı Çiz ve Seçimi Al
-selected_tab = render_sidebar()
-
-# --- app.py İçindeki İlgili Kısım ---
-
-if "messages" not in st.session_state:
-    # Jarvis'in kimliğini en başa "gizli" mesaj olarak ekliyoruz
-    st.session_state.messages = [
-        {"role": "system", "content": COMPANY_DATA}
-    ]
+# --- SIDEBAR (YAN MENÜ) ---
+with st.sidebar:
+    st.markdown("### ARTIFICIAL STAFF v4.0")
+    st.markdown("---")
     
-    # Kullanıcının göreceği ilk "Hoş geldin" mesajı
-    st.session_state.messages.append({
-        "role": "assistant", 
-        "content": "Jarvis v4.2 Aktif. Neural arayüze hoş geldiniz. Markanızı tanımlayın."
-    })
-# 5. Ana Ekran Mantığı
-if selected_tab == "🤖 JARVIS CORE":
-    st.header("Jarvis Neural Interface")
+    # Menü Seçimi
+    selected_tab = st.radio(
+        "MODÜLLER",
+        ["🔴 JARVIS CORE", "📦 GLOBAL ENVANTER", "💰 FİNANSAL ANALİZ", "📈 STRATEJİ"]
+    )
     
-    # --- EKRANA MESAJLARI BASAN KISIM ---
-
-for message in st.session_state.messages:
-    # BURASI ÇOK ÖNEMLİ: Eğer rol 'system' ise bu turu atla (ekrana basma)
-    if message["role"] == "system":
-        continue
+    st.markdown("---")
+    
+    # Sistem Durumu Paneli (Görseldeki gibi)
+    st.markdown("SİSTEM DURUMU")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric(label="CPU", value="12%", delta="-1%")
+    with col2:
+        st.metric(label="RAM", value="4.2GB", delta="+0.2")
         
-    # Diğer mesajları (user ve assistant) ekrana bas
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+    st.success("🟢 BAĞLANTI: GÜVENLİ (SSL)")
+    st.info("📍 KONUM: US-EAST-1")
 
-    # Kullanıcıdan Girdi Al
+# --- ANA EKRAN MANTIĞI ---
+
+# 1. JARVIS CORE EKRANI
+if selected_tab == "🔴 JARVIS CORE":
+    st.title("Jarvis Neural Interface")
+    
+    # OpenAI Client Kurulumu (Eğer varsa burayı aktif edin)
+    # import openai
+    # client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+    # --- SOHBET GEÇMİŞİNİ BAŞLAT ---
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+        
+        # GİZLİ TALİMAT (SİSTEM MESAJI) - Ekranda görünmez, beyne işlenir
+        st.session_state.messages.append({
+            "role": "system",
+            "content": COMPANY_DATA
+        })
+        
+        # AÇILIŞ MESAJI - Ekranda görünür
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": "Jarvis v4.2 Aktif. Neural arayüze hoş geldiniz. Markanızı tanımlayın."
+        })
+
+    # --- MESAJLARI EKRANA BASMA (FİLTRELİ) ---
+    for message in st.session_state.messages:
+        # EĞER ROL 'SYSTEM' İSE EKRANA BASMA, ATLA!
+        if message["role"] == "system":
+            continue
+            
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # --- KULLANICI GİRDİSİ ---
     if prompt := st.chat_input("Talimat verin..."):
-        # Kullanıcı mesajını ekle
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user", avatar="👤"):
+        # 1. Kullanıcı mesajını ekrana bas
+        with st.chat_message("user"):
             st.markdown(prompt)
+        # 2. Geçmişe ekle
+        st.session_state.messages.append({"role": "user", "content": prompt})
 
-        # AI Cevabını Üret
-        with st.chat_message("assistant", avatar="🤖"):
+        # --- YANIT ÜRETME KISMI ---
+        # Buraya OpenAI kodunuzu entegre etmelisiniz.
+        # Örnek bir şablon bırakıyorum:
+        
+        with st.chat_message("assistant"):
             message_placeholder = st.empty()
             full_response = ""
             
-            # Brain dosyasından cevabı al
-            ai_response = get_jarvis_response(st.session_state.messages)
+            # --- API ÇAĞRISI (Eğer OpenAI kullanıyorsanız aşağıdaki bloğu açın) ---
+            # stream = client.chat.completions.create(
+            #     model="gpt-4",
+            #     messages=st.session_state.messages, # System mesajı dahil tüm geçmiş gidiyor
+            #     stream=True,
+            # )
+            # for chunk in stream:
+            #     if chunk.choices[0].delta.content is not None:
+            #         full_response += chunk.choices[0].delta.content
+            #         message_placeholder.markdown(full_response + "▌")
             
-            # Yazıyor efekti (Typewriter effect)
-            for chunk in ai_response.split():
+            # --- (Geçici Simülasyon - API Bağlı Değilse Bu Çalışır) ---
+            simulated_response = "Bağlantı simülasyonu: Mesajınız alındı. (API Key entegrasyonunu kontrol edin)."
+            for chunk in simulated_response.split():
                 full_response += chunk + " "
                 time.sleep(0.05)
                 message_placeholder.markdown(full_response + "▌")
+            # -----------------------------------------------------------
+
             message_placeholder.markdown(full_response)
         
+        # Asistan cevabını geçmişe ekle
         st.session_state.messages.append({"role": "assistant", "content": full_response})
 
+# 2. DİĞER EKRANLAR (Hata vermemesi için boş şablonlar)
 elif selected_tab == "📦 GLOBAL ENVANTER":
-    render_inventory_dashboard()
+    st.title("Global Envanter Yönetimi")
+    st.info("Bu modül şu anda bakım aşamasındadır.")
 
 elif selected_tab == "💰 FİNANSAL ANALİZ":
-    render_finance_dashboard()
+    st.title("Finansal Analiz Modülü")
+    st.line_chart([1, 5, 2, 6, 2, 1]) # Örnek grafik
 
-elif selected_tab == "📊 STRATEJİ":
-    st.title("📊 Pazar Stratejisi")
-    st.write("Veri madenciliği modülü çalışıyor...")
+elif selected_tab == "📈 STRATEJİ":
+    st.title("Stratejik Planlama")
+    st.write("Hedef pazar verileri yükleniyor...")
