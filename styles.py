@@ -3,7 +3,6 @@ import streamlit as st
 def load_css():
     st.markdown("""
         <style>
-            /* 1. FONTLAR & GENEL */
             @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&family=Share+Tech+Mono&display=swap');
             
             html, body, [class*="css"] {
@@ -26,7 +25,6 @@ def load_css():
                 text-shadow: 0 0 5px #D4AF37;
             }
 
-            /* 2. UI TEMİZLİĞİ */
             header {visibility: hidden;}
             footer {visibility: hidden;}
             #MainMenu {visibility: hidden;}
@@ -38,7 +36,6 @@ def load_css():
                 max-width: 100%;
             }
 
-            /* Sidebar */
             section[data-testid="stSidebar"] {
                 background-color: #050505;
                 border-right: 1px solid #1A1A1A;
@@ -48,7 +45,6 @@ def load_css():
                 color: #D4AF37;
             }
 
-            /* 3. INPUTLAR */
             .stTextInput input {
                 background-color: #0A0A0A;
                 border: 1px solid #333;
@@ -61,7 +57,6 @@ def load_css():
                 box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
             }
 
-            /* 4. NAVBAR */
             .custom-navbar {
                 position: fixed;
                 top: 0;
@@ -96,7 +91,6 @@ def load_css():
                 font-family: 'Share Tech Mono';
             }
 
-            /* BUTONLAR */
             .stButton button {
                 background-color: transparent;
                 border: 1px solid #D4AF37;
@@ -111,7 +105,6 @@ def load_css():
                 color: #000;
             }
             
-            /* ANİMASYON */
             @keyframes fadeIn {
                 0% { opacity: 0; transform: translateY(20px); }
                 100% { opacity: 1; transform: translateY(0); }
