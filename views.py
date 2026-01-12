@@ -6,59 +6,148 @@ from brain import get_dashboard_metrics, get_sales_chart, get_map_chart, get_mar
 def render_header(title, subtitle):
     col1, col2 = st.columns([3, 1])
     with col1:
-        # Lüks Başlık Yapısı
-        st.markdown(f"""
-        <div>
-            <h2 style='font-family:"Cinzel", serif; color:white; margin-bottom:5px;'>{title}</h2>
-            <p style='font-family:"Inter", sans-serif; color:#888; font-size:14px; margin-top:0;'>{subtitle}</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f"### {title}")
+        st.caption(subtitle)
     with col2:
-        st.markdown("<div style='text-align:right; color:#D4AF37; font-size:11px; letter-spacing:1px; margin-top:20px;'>● SYSTEM ONLINE</div>", unsafe_allow_html=True)
-    st.markdown("<hr style='border-color:rgba(255,255,255,0.1); margin-top:0;'>", unsafe_allow_html=True)
+        st.markdown("<div style='text-align:right; color:#D4AF37; font-size:12px;'>● ONLINE</div>", unsafe_allow_html=True)
+    st.markdown("---")
 
-# --- 1. HİZMET KATALOĞU (YENİLENMİŞ TASARIM) ---
-def render_services_catalog():
-    render_header("Hizmetler & Çözümler", "Artificial Staff Enterprise Ekosistemi")
+# --- 0. CINEMATIC INTRO (MATRIX STYLE) ---
+def render_cinematic_intro():
+    """
+    Bu fonksiyon site ilk açıldığında çalışır.
+    Neo/Matrix tarzı yazıyı yazar ve sonra ana ekrana dönüşür.
+    """
+    # Eğer intro daha önce izlendiyse direkt Hub'a geç
+    if 'intro_complete' in st.session_state and st.session_state.intro_complete:
+        render_main_hub()
+        return
+
+    # Boş bir alan yarat
+    intro_placeholder = st.empty()
     
-    # Modern Giriş Metni
-    st.markdown("""
-    <div style='background:rgba(212, 175, 55, 0.05); border-left:3px solid #D4AF37; padding:15px; border-radius:4px; margin-bottom:40px;'>
-        <p style='color:#ddd; font-size:14px; margin:0;'>
-            İşletmenizi global bir markaya dönüştürmek için tasarlanan <strong>9 Temel Modül</strong>. 
-            Her bir parça, yapay zeka ve otomasyon ile güçlendirilmiştir.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Hizmet Verileri (FontAwesome Sınıfları ile)
-    services = [
-        ("fa-solid fa-code", "Web & Teknoloji", "ABD tüketici algısına uygun, Google Core Web Vitals uyumlu, yüksek dönüşüm odaklı 'Headless' e-ticaret altyapısı."),
-        ("fa-solid fa-building-columns", "LLC Kurulumu", "Delaware/Wyoming kurulumu, EIN, Banka hesabı (Mercury) ve Stripe/PayPal entegrasyonu ile tam finansal özgürlük."),
-        ("fa-solid fa-plane-departure", "Lojistik & Gümrük", "İstanbul'dan New York'a uçtan uca nakliye. Express kargo ile 2-4 günde kapı teslimat garantisi."),
-        ("fa-solid fa-warehouse", "3PL Depolama", "NJ ve CA eyaletlerinde stratejik depolar. Sipariş geldiği gün paketleme ve kargolama (Same-Day Fulfillment)."),
-        ("fa-brands fa-amazon", "Pazaryeri Yönetimi", "Amazon, Etsy, Walmart hesap açılışı. 'Gated' kategorilerin açılması ve A9 algoritmasına uygun SEO."),
-        ("fa-solid fa-hashtag", "Sosyal Medya", "Markanızı bir 'Yaşam Tarzı'na dönüştüren içerik üretimi. Influencer pazarlaması ve topluluk yönetimi."),
-        ("fa-solid fa-bullhorn", "Reklam (Ads)", "Meta (FB/IG) ve Google Ads yönetiminde yapay zeka destekli hedefleme ile yüksek ROAS (Yatırım Getirisi)."),
-        ("fa-solid fa-gears", "Otomasyon (CRM)", "Sipariş, fatura ve müşteri iletişiminde insan hatasını sıfıra indiren Zapier/Make entegrasyonları."),
-        ("fa-solid fa-robot", "B2B AI Satış", "Yapay zeka ajanlarımız, ABD'deki toptancıları bulur, analiz eder ve sizin adınıza soğuk e-posta (Cold Email) atar.")
+    # Yazılacak Metin (Manifesto)
+    manifesto_lines = [
+        "Uyanın...",
+        "Yerel pazarın sınırları sizi boğuyor.",
+        "Maliyetleriniz artıyor, kârınız eriyor.",
+        "Siz Dolar kazanmak istiyorsunuz, ama sistem sizi TL'ye hapsediyor.",
+        "...",
+        "Biz bir köprüyüz.",
+        "Biz bir anahtarız.",
+        "Coğrafya kader değildir.",
+        "Hoş geldiniz."
     ]
 
-    # Grid Yapısı (CSS Class'ları styles.py'dan geliyor)
-    for i in range(0, len(services), 3):
-        cols = st.columns(3)
-        for j in range(3):
-            if i + j < len(services):
-                icon_class, title, desc = services[i+j]
-                with cols[j]:
-                    st.markdown(f"""
-                    <div class="service-card">
-                        <div class="card-icon"><i class="{icon_class}"></i></div>
-                        <div class="card-title">{title}</div>
-                        <div class="card-desc">{desc}</div>
+    # Yazı Animasyonu
+    full_text = ""
+    with intro_placeholder.container():
+        st.markdown("<br><br><br>", unsafe_allow_html=True) # Üst boşluk
+        text_area = st.empty()
+        
+        for line in manifesto_lines:
+            for char in line:
+                full_text += char
+                # HTML ile cursor efekti
+                text_area.markdown(f"""
+                    <div style="display:flex; justify-content:center; align-items:center; height:60vh; text-align:center;">
+                        <div class="neo-text">{full_text}<span class="cursor"></span></div>
                     </div>
-                    """, unsafe_allow_html=True)
-        st.write("") # Satır aralığı
+                """, unsafe_allow_html=True)
+                time.sleep(0.04) # Yazma hızı
+            
+            full_text += "\n" # Satır atla
+            time.sleep(0.5)   # Satır sonu bekleme
+
+        time.sleep(1.5) # Yazı bitince bekle
+        
+        # Animasyon bitişi: Yazılar silinir (Dosyaya dönüşme efekti simülasyonu)
+        text_area.markdown(f"""
+            <div style="display:flex; justify-content:center; align-items:center; height:60vh; text-align:center;">
+                <div class="neo-text" style="color:white; font-size:12px; transition:1s;">
+                    SYSTEM INITIALIZED... DATA COMPRESSED TO CORE.
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        time.sleep(1.5)
+
+    # Intro bitti, durumu kaydet ve Hub'ı göster
+    st.session_state.intro_complete = True
+    intro_placeholder.empty()
+    st.rerun()
+
+# --- 1. MAIN HUB (ANA MERKEZ) ---
+def render_main_hub():
+    """
+    9 Hizmetin ve Şirket Bilgisinin toplandığı ana ekran.
+    """
+    render_header("Global Kontrol Paneli", "Artificial Staff Enterprise v2.4")
+
+    # İki Ana Modül (Baloncuk Yerine Lüks Kartlar)
+    col1, col2 = st.columns(2)
+
+    # MODÜL 1: SYSTEM CORE (Şirket Manifestosu)
+    with col1:
+        st.markdown("""
+        <div class="hub-card">
+            <div class="hub-icon"><i class="fa-solid fa-microchip"></i></div>
+            <div class="hub-title">SYSTEM CORE</div>
+            <div class="hub-desc">Şirket Vizyonu, Manifesto & Strateji</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Burası Manifesto'nun 'dosya' hali. Tıklayınca açılır gibi Expander
+        with st.expander("📂 DOSYAYI AÇ: ARTIFICIAL VIZYONU"):
+            st.markdown("""
+            **KİMLİK:**
+            Artificial Staff LLC, yapay zeka tabanlı bir Operasyon Direktörüdür.
+            
+            **MİSYON:**
+            Türk markalarının yerel rekabetten sıyrılıp, ABD ekonomisine "Uçtan Uca İhracat Altyapısı" ile entegre olmasını sağlamak.
+            
+            **MOTTO:**
+            "Ürünler Türkiye'den, Kazanç Amerika'dan."
+            """)
+
+    # MODÜL 2: SERVICE PROTOCOLS (9 Hizmet)
+    with col2:
+        st.markdown("""
+        <div class="hub-card" style="border-color: rgba(212, 175, 55, 0.4);">
+            <div class="hub-icon"><i class="fa-solid fa-layer-group"></i></div>
+            <div class="hub-title">SERVICE PROTOCOLS</div>
+            <div class="hub-desc">9 Entegre Hizmet Modülü</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Burası Hizmetlerin 'dosya' hali.
+        with st.expander("📂 DOSYAYI AÇ: HİZMET KATALOĞU", expanded=True):
+            render_service_list_compact()
+
+def render_service_list_compact():
+    """Hizmetleri Hub içinde kompakt listeler."""
+    services = [
+        ("💻", "Web & Teknoloji", "ABD odaklı e-ticaret altyapısı."),
+        ("🏛️", "LLC Kurulumu", "Delaware şirket, EIN ve Banka hesabı."),
+        ("✈️", "Lojistik & Gümrük", "Kapıdan kapıya 2-4 günde teslimat."),
+        ("🏭", "3PL Depolama", "NJ ve CA eyaletlerinde stratejik depolar."),
+        ("🛒", "Pazaryeri Yönetimi", "Amazon, Etsy, Walmart hesap yönetimi."),
+        ("📱", "Sosyal Medya", "Global marka algısı yönetimi."),
+        ("📢", "Reklam (Ads)", "Yüksek ROAS hedefli reklam yönetimi."),
+        ("🤖", "Otomasyon (CRM)", "İnsan hatasını sıfıra indiren sistemler."),
+        ("🤝", "B2B AI Satış", "Yapay zeka ile toptan müşteri bulma.")
+    ]
+    
+    # Hizmetleri 2 sütun halinde listele
+    s_c1, s_c2 = st.columns(2)
+    for idx, (icon, title, desc) in enumerate(services):
+        target_col = s_c1 if idx % 2 == 0 else s_c2
+        with target_col:
+            st.markdown(f"""
+            <div class="service-mini-card">
+                <strong style="color:white;">{icon} {title}</strong><br>
+                <span style="color:#888; font-size:11px;">{desc}</span>
+            </div>
+            """, unsafe_allow_html=True)
 
 # --- 2. DASHBOARD ---
 def render_dashboard():
