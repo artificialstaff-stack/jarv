@@ -2,7 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 
 # Sayfa Ayarları
-st.set_page_config(page_title="Artificial Staff - Jarvis (2026 Edition)", page_icon="🤖")
+st.set_page_config(page_title="Artificial Staff - Jarvis v2.5", page_icon="🤖")
 
 # API Anahtarı Kontrolü
 if "GOOGLE_API_KEY" not in st.secrets:
@@ -11,59 +11,49 @@ if "GOOGLE_API_KEY" not in st.secrets:
 
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
-# --- 2026 MODEL SEÇİMİ ---
-# Senin belirttiğin sürümü hedefliyoruz
-MODEL_NAME = 'gemini-2.5-flash'
+# LİSTEDE GÖRDÜĞÜMÜZ TAM MODEL İSMİ (2026 Standartı)
+MODEL_NAME = 'models/gemini-2.5-flash'
 
-# Yan Menü (Sidebar): Mevcut Modelleri Kontrol Etme Paneli
 with st.sidebar:
     st.header("🔧 Sistem Durumu")
-    st.write(f"Hedeflenen Model: `{MODEL_NAME}`")
-    
-    # 2026'da hangi modellerin aktif olduğunu listeleme
-    try:
-        st.write("📡 Aktif Modeller Listeleniyor...")
-        available_models = []
-        for m in genai.list_models():
-            if 'generateContent' in m.supported_generation_methods:
-                available_models.append(m.name)
-                st.code(m.name) # Mevcut modelleri buraya yazdırır
-    except Exception as e:
-        st.error(f"Model listesi alınamadı: {e}")
+    st.success(f"Aktif Model: {MODEL_NAME}")
+    st.info("Not: Kota hatası alırsanız 30 saniye bekleyin.")
 
 # Modeli Başlatma
 try:
     model = genai.GenerativeModel(MODEL_NAME)
-except:
-    # Eğer 2.5-flash bulunamazsa, listedeki ilk uygun modeli seçmeye çalış (Fallback)
-    st.warning(f"{MODEL_NAME} bulunamadı, alternatif aranıyor...")
-    model = genai.GenerativeModel('models/gemini-2.0-flash-exp') # Yedek
+except Exception as e:
+    st.error(f"Model yüklenemedi: {e}")
 
-# Sohbet Başlatma
-if "chat" not in st.session_state:
-    st.session_state.chat = model.start_chat(history=[])
+# Sohbet Hafızası (Kota dostu: Sadece son 10 mesajı saklar)
+if "messages" not in st.session_state:
     st.session_state.messages = []
-    intro = ("Sistem Tarihi: 11 Ocak 2026\n"
-             "Merhaba! Ben **Jarvis v2.5**. Artificial Staff operasyonel zekasıyım. "
-             "Amerika pazarındaki operasyonlarınızı yönetmek için hazırım. Başlayalım mı?")
+    intro = "Merhaba! Ben Jarvis. 2026 operasyonlarınız için hazırım. Lojistik veya pazaryeri hakkında ne işlem yapalım?"
     st.session_state.messages.append({"role": "assistant", "content": intro})
 
-# Mesajları Göster
+# Mesajları Ekrana Yazdır
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
 # Kullanıcı Girişi
-if prompt := st.chat_input("Jarvis (v2.5) ile konuşun..."):
+if prompt := st.chat_input("Jarvis v2.5'e talimat ver..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        context = "Sen Jarvis'sin. Yıl 2026. Artificial Staff şirketinin gelişmiş yapay zeka asistanısın. Profesyonel, vizyoner ve çözüm odaklısın. "
+        # Jarvis'in Kimliği ve Yıl Bilgisi
+        context = "Sen Jarvis'sin. Yıl 2026. Artificial Staff operasyon asistanısın. Kısa ve öz cevap ver. "
+        
         try:
-            response = st.session_state.chat.send_message(context + prompt)
+            # chat.send_message yerine doğrudan generate_content kullanarak kota tasarrufu yapıyoruz
+            response = model.generate_content(context + prompt)
+            
             st.markdown(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            st.error(f"Hata oluştu: {str(e)}")
+            if "429" in str(e):
+                st.warning("⚠️ Ücretsiz kullanım kotanız doldu. Lütfen 1 dakika bekleyip tekrar deneyin veya farklı bir API Key kullanın.")
+            else:
+                st.error(f"Hata: {str(e)}")
