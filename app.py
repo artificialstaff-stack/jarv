@@ -2,78 +2,80 @@ import streamlit as st
 import google.generativeai as genai
 from instructions import COMPANY_DATA
 
-# Sayfa Yapılandırması
-st.set_page_config(page_title="Jarvis 2.5 | Artificial Staff", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="Jarvis v2.5 | Artificial Staff", page_icon="💎", layout="wide")
 
-# --- PREMIUM TEMA (CSS) ---
+# --- 2026 PRESTIGE UI (CSS) ---
 st.markdown("""
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,700&family=Inter:wght@300;500&display=swap');
+    
     .stApp {
-        background-color: #0E1117;
-        color: #E0E0E0;
-    }
-    .stChatMessage {
-        border-radius: 15px;
-        padding: 15px;
-        margin-bottom: 10px;
-    }
-    /* Kullanıcı mesaj balonu */
-    [data-testid="stChatMessageUser"] {
-        background-color: #1E2633 !important;
-        border: 1px solid #30363D;
-    }
-    /* Jarvis mesaj balonu */
-    [data-testid="stChatMessageAssistant"] {
-        background-color: #0B0E14 !important;
-        border-left: 5px solid #00D4FF;
-    }
-    .stChatInputContainer {
-        padding-bottom: 20px;
-    }
-    h1 {
-        color: #00D4FF;
+        background: radial-gradient(circle at top right, #1a1c23, #08090a);
+        color: #d1d1d1;
         font-family: 'Inter', sans-serif;
+    }
+    
+    /* Premium Cam Efekti Mesajlar */
+    [data-testid="stChatMessage"] {
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: blur(10px);
+        border-radius: 20px !important;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    /* Jarvis'in Özel İmzası (Mavi/Altın Işıltı) */
+    [data-testid="stChatMessageAssistant"] {
+        border-right: 2px solid #b89b5e !important; /* Altın Detay */
+    }
+
+    h1 {
+        font-family: 'Playfair Display', serif;
+        letter-spacing: 4px;
+        background: linear-gradient(90deg, #d1d1d1, #b89b5e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
         text-align: center;
+    }
+    
+    .stChatInputContainer input {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid #b89b5e !important;
+        border-radius: 30px !important;
+        color: #fff !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
 st.title("ARTIFICIAL STAFF")
-st.markdown("<p style='text-align: center; color: #888;'>Operasyonel Zeka - Jarvis v2.5</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-style: italic; color: #b89b5e;'>Exclusive Global Operations Hub</p>", unsafe_allow_html=True)
 
-# API Ayarı
+# --- ENGINE ---
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 model = genai.GenerativeModel('models/gemini-2.5-flash')
 
-# Hafıza Yönetimi
 if "messages" not in st.session_state:
     st.session_state.messages = []
-    # İlk karşılama
-    intro = "Selam! Ben Jarvis. Artificial Staff'e hoş geldin. Türkiye'deki gücümüzü Amerika'ya taşımak için buradayım. Hikayenizi merak ediyorum, isminiz nedir?"
+    # Jarvis'in Prestijli Açılışı
+    intro = "İyi akşamlar. Ben Jarvis. Artificial Staff'in küresel operasyon ağına hoş geldiniz. Vizyonunuzu dünya pazarına taşımak için tüm sistemlerimiz hazır. Bugün hangi büyük adımı atıyoruz?"
     st.session_state.messages.append({"role": "assistant", "content": intro})
 
-# Sohbeti Görüntüle
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Giriş Alanı
-if prompt := st.chat_input("Jarvis ile konuşun..."):
+if prompt := st.chat_input("Planınızı buraya fısıldayın..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        # Jarvis'in daha önceki cevaplarını ve kimliğini hatırlaması için
-        full_context = f"{COMPANY_DATA}\n\nSohbet Geçmişi:\n{st.session_state.messages}\n\nMüşterinin Son Yanıtı: {prompt}\n\nJarvis'in Vereceği Tek Soru:"
-        
+        context = f"{COMPANY_DATA}\n\nGeçmiş: {st.session_state.messages[-3:]}\n\nLiderden Gelen Mesaj: {prompt}"
         try:
-            response = model.generate_content(full_context)
+            response = model.generate_content(context)
             st.markdown(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            st.error(f"Sistem hatası: {e}")
-
-# Alt Bilgi
-st.markdown("---")
-st.caption("© 2026 Artificial Staff Global Operations. Tüm hakları saklıdır.")
+            st.error("Operasyonel bir duraksama yaşandı. Lütfen tekrar deneyin.")
