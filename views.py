@@ -1,53 +1,64 @@
 import streamlit as st
 import time
-# Grafik ve Zeka fonksiyonlarını brain.py'den çekiyoruz
 from brain import get_dashboard_metrics, get_sales_chart, get_map_chart, get_marketing_chart, get_artis_response
 
-# --- HEADER (Üst Başlık) ---
+# --- HEADER ---
 def render_header(title, subtitle):
     col1, col2 = st.columns([3, 1])
     with col1:
-        st.markdown(f"### {title}")
-        st.caption(subtitle)
+        # Lüks Başlık Yapısı
+        st.markdown(f"""
+        <div>
+            <h2 style='font-family:"Cinzel", serif; color:white; margin-bottom:5px;'>{title}</h2>
+            <p style='font-family:"Inter", sans-serif; color:#888; font-size:14px; margin-top:0;'>{subtitle}</p>
+        </div>
+        """, unsafe_allow_html=True)
     with col2:
-        st.markdown("<div style='text-align:right; color:#D4AF37; font-size:12px;'>● ONLINE</div>", unsafe_allow_html=True)
-    st.markdown("---")
+        st.markdown("<div style='text-align:right; color:#D4AF37; font-size:11px; letter-spacing:1px; margin-top:20px;'>● SYSTEM ONLINE</div>", unsafe_allow_html=True)
+    st.markdown("<hr style='border-color:rgba(255,255,255,0.1); margin-top:0;'>", unsafe_allow_html=True)
 
-# --- 1. HİZMET KATALOĞU (YENİ SAYFA - Müşteri İkna Alanı) ---
+# --- 1. HİZMET KATALOĞU (YENİLENMİŞ TASARIM) ---
 def render_services_catalog():
     render_header("Hizmetler & Çözümler", "Artificial Staff Enterprise Ekosistemi")
     
-    st.info("İşletmenizi global bir markaya dönüştürmek için ihtiyacınız olan 9 temel yapı taşı.")
+    # Modern Giriş Metni
+    st.markdown("""
+    <div style='background:rgba(212, 175, 55, 0.05); border-left:3px solid #D4AF37; padding:15px; border-radius:4px; margin-bottom:40px;'>
+        <p style='color:#ddd; font-size:14px; margin:0;'>
+            İşletmenizi global bir markaya dönüştürmek için tasarlanan <strong>9 Temel Modül</strong>. 
+            Her bir parça, yapay zeka ve otomasyon ile güçlendirilmiştir.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # Hizmet Verileri (Sunumdan alındı)
+    # Hizmet Verileri (FontAwesome Sınıfları ile)
     services = [
-        ("💻", "Web & Teknoloji", "ABD tüketici algısına uygun, yüksek dönüşüm odaklı e-ticaret altyapısı."),
-        ("🏛️", "LLC Kurulumu", "Delaware/Wyoming kurulumu, EIN, Banka hesabı ve Stripe/PayPal çözümü."),
-        ("✈️", "Lojistik & Gümrük", "Depodan kapıya uçtan uca nakliye. Express kargo ile 2-4 günde teslimat."),
-        ("🏭", "3PL Depolama", "NJ ve CA eyaletlerinde stratejik depolar. 24 saatte sipariş işleme."),
-        ("🛒", "Pazaryeri Yönetimi", "Amazon, Etsy, Walmart hesap açılışı ve A9 algoritmasına uygun SEO."),
-        ("📱", "Sosyal Medya", "Markayı 'Yaşam Tarzı'na dönüştüren içerik üretimi ve Influencer pazarlaması."),
-        ("📢", "Reklam (Ads)", "Meta ve Google reklamlarında yüksek ROAS (Yatırım Getirisi) hedefli yönetim."),
-        ("🤖", "Otomasyon (CRM)", "Sipariş ve fatura süreçlerinde insan hatasını sıfıra indiren sistemler."),
-        ("🤝", "B2B AI Satış", "Yapay zeka ile ABD'li toptancıları bulup otomatik iletişime geçen satış ordusu.")
+        ("fa-solid fa-code", "Web & Teknoloji", "ABD tüketici algısına uygun, Google Core Web Vitals uyumlu, yüksek dönüşüm odaklı 'Headless' e-ticaret altyapısı."),
+        ("fa-solid fa-building-columns", "LLC Kurulumu", "Delaware/Wyoming kurulumu, EIN, Banka hesabı (Mercury) ve Stripe/PayPal entegrasyonu ile tam finansal özgürlük."),
+        ("fa-solid fa-plane-departure", "Lojistik & Gümrük", "İstanbul'dan New York'a uçtan uca nakliye. Express kargo ile 2-4 günde kapı teslimat garantisi."),
+        ("fa-solid fa-warehouse", "3PL Depolama", "NJ ve CA eyaletlerinde stratejik depolar. Sipariş geldiği gün paketleme ve kargolama (Same-Day Fulfillment)."),
+        ("fa-brands fa-amazon", "Pazaryeri Yönetimi", "Amazon, Etsy, Walmart hesap açılışı. 'Gated' kategorilerin açılması ve A9 algoritmasına uygun SEO."),
+        ("fa-solid fa-hashtag", "Sosyal Medya", "Markanızı bir 'Yaşam Tarzı'na dönüştüren içerik üretimi. Influencer pazarlaması ve topluluk yönetimi."),
+        ("fa-solid fa-bullhorn", "Reklam (Ads)", "Meta (FB/IG) ve Google Ads yönetiminde yapay zeka destekli hedefleme ile yüksek ROAS (Yatırım Getirisi)."),
+        ("fa-solid fa-gears", "Otomasyon (CRM)", "Sipariş, fatura ve müşteri iletişiminde insan hatasını sıfıra indiren Zapier/Make entegrasyonları."),
+        ("fa-solid fa-robot", "B2B AI Satış", "Yapay zeka ajanlarımız, ABD'deki toptancıları bulur, analiz eder ve sizin adınıza soğuk e-posta (Cold Email) atar.")
     ]
 
-    # Grid Yapısı (3'lü Kartlar)
+    # Grid Yapısı (CSS Class'ları styles.py'dan geliyor)
     for i in range(0, len(services), 3):
         cols = st.columns(3)
         for j in range(3):
             if i + j < len(services):
-                icon, title, desc = services[i+j]
+                icon_class, title, desc = services[i+j]
                 with cols[j]:
-                    # CSS Class 'metric-container' styles.py dosyasından geliyor
                     st.markdown(f"""
-                    <div style="background:rgba(255,255,255,0.03); padding:20px; border:1px solid rgba(255,255,255,0.1); border-radius:10px; height:220px;">
-                        <div style="font-size:30px; margin-bottom:10px;">{icon}</div>
-                        <h4 style="color:#fff; margin:0; font-family:'Cinzel', serif;">{title}</h4>
-                        <p style="color:#888; font-size:12px; margin-top:10px; line-height:1.4;">{desc}</p>
+                    <div class="service-card">
+                        <div class="card-icon"><i class="{icon_class}"></i></div>
+                        <div class="card-title">{title}</div>
+                        <div class="card-desc">{desc}</div>
                     </div>
                     """, unsafe_allow_html=True)
-        st.write("") # Satır boşluğu
+        st.write("") # Satır aralığı
 
 # --- 2. DASHBOARD ---
 def render_dashboard():
@@ -61,7 +72,6 @@ def render_dashboard():
     with c4: st.metric(metrics["conversion"]["label"], metrics["conversion"]["value"], metrics["conversion"]["delta"])
 
     st.markdown("### 📈 Büyüme Projeksiyonu")
-    # GÜNCELLEME: use_container_width yerine width='stretch' kullanıldı
     st.plotly_chart(get_sales_chart(), width="stretch")
 
 # --- 3. ARTIS AI ---
@@ -75,12 +85,11 @@ def render_artis_ai():
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    if prompt := st.chat_input("Sorunuzu yazın (Örn: Lojistik süresi nedir?)..."):
+    if prompt := st.chat_input("Sorunuzu yazın..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
         
-        # Brain'den zeki cevap al
         response = get_artis_response(prompt)
         time.sleep(0.5)
         
