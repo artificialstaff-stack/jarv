@@ -23,81 +23,96 @@ def render_login():
                 st.session_state['logged_in'] = True
                 st.rerun()
 
-def render_checklist_item(title, subtitle, is_completed):
-    border_color = "#D4AF37" if is_completed else "#333333"
-    bg_color = "rgba(212, 175, 55, 0.1)" if is_completed else "rgba(20,20,20,0.5)"
-    icon = "✅ TAMAMLANDI" if is_completed else "⏳ BEKLİYOR"
-    text_color = "#FFF" if is_completed else "#666"
-    glow = "box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);" if is_completed else ""
-
-    html = f"""
-    <div style="border: 1px solid {border_color}; background-color: {bg_color}; padding: 15px; border-radius: 8px; margin-bottom: 12px; transition: all 0.5s ease; {glow}">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0; font-size:1rem; color:{text_color}; font-family:'Cinzel'">{title}</h3>
-            <span style="font-family:'Share Tech Mono'; font-size:0.7rem; color:{border_color}">{icon}</span>
-        </div>
-        <p style="margin:5px 0 0 0; font-size:0.8rem; color:#888; font-family:'Inter'">{subtitle}</p>
-    </div>
-    """
-    st.markdown(html, unsafe_allow_html=True)
-
 def render_command_center():
     st.markdown("<h1 style='font-size:3rem; margin-bottom:10px;'>OPERASYON MERKEZİ</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#888; margin-bottom:30px;'>Yapay Zeka (Gemini) ile operasyon kurulumunu tamamlayın.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#888; margin-bottom:30px;'>Lütfen sol taraftaki adımları tamamlayın. ARTIS size eşlik edecektir.</p>", unsafe_allow_html=True)
 
-    col_left, col_right = st.columns([1, 1], gap="large")
+    col_form, col_chat = st.columns([1.2, 0.8], gap="large")
 
-    # SOL: CHECKLIST
-    with col_left:
-        st.markdown("### 📋 KURULUM ADIMLARI")
-        status = st.session_state.checklist
+    # --- SOL: ADIM ADIM FORM (ACCORDION) ---
+    with col_form:
         
-        render_checklist_item("1. MARKA & SEKTÖR", "Kimlik analizi.", status.get('brand', False))
-        render_checklist_item("2. ÜRÜN ENVANTERİ", "Yıldız ürün tespiti.", status.get('product', False))
-        render_checklist_item("3. MALİYET & LOJİSTİK", "DC depo planlaması.", status.get('data', False))
-        render_checklist_item("4. PAKET SEÇİMİ", "İş modeli onayı.", status.get('offer', False))
+        # 1. MARKA & SEKTÖR
+        with st.expander("1. MARKA VE SEKTÖR BİLGİLERİ", expanded=True):
+            st.session_state.form_data['brand_name'] = st.text_input("Marka Adınız", value=st.session_state.form_data.get('brand_name', ''))
+            st.session_state.form_data['sector'] = st.selectbox("Sektör", ["Tekstil", "Gıda", "Kozmetik", "Mobilya", "Diğer"], index=0)
+            
+            if st.button("Kaydet ve Devam Et", key="btn1"):
+                st.toast("Marka bilgileri kaydedildi.", icon="✅")
+                # Yapay Zekaya tetikleyici mesaj gönder (Görünmez)
+                handle_ai_trigger("Marka adımı girdim: " + st.session_state.form_data['brand_name'], "MARKA GİRİŞİ")
 
-        if all(status.values()):
-            st.markdown("<div style='background:#D4AF37; color:black; padding:20px; border-radius:10px; text-align:center; font-weight:bold; margin-top:20px;'>🚀 OPERASYON BAŞLATILIYOR...</div>", unsafe_allow_html=True)
+        # 2. ÜRÜN DETAYLARI
+        with st.expander("2. ÜRÜN VE ENVANTER", expanded=False):
+            st.session_state.form_data['star_product'] = st.text_input("Yıldız Ürününüz (Örn: İpek Eşarp)", value=st.session_state.form_data.get('star_product', ''))
+            st.session_state.form_data['dimensions'] = st.text_input("Tahmini Koli Boyutları / Ağırlık", placeholder="Örn: 40x40x60cm, 10kg", value=st.session_state.form_data.get('dimensions', ''))
+            
+            if st.button("Envanteri İşle", key="btn2"):
+                st.toast("Ürün verileri işlendi.", icon="📦")
+                handle_ai_trigger("Ürünlerimi girdim: " + st.session_state.form_data['star_product'], "ÜRÜN GİRİŞİ")
 
-    # SAĞ: GEMINI CHAT
-    with col_right:
-        st.markdown("### 💬 ARTIS AI")
+        # 3. PAKET SEÇİMİ
+        with st.expander("3. ÇALIŞMA MODELİ VE PAKET", expanded=False):
+            st.info("Washington DC depomuz ve operasyon ekibimiz için size uygun modeli seçin.")
+            package = st.radio("Paket Seçimi", [
+                "ORTAKLIK (Sadece Kargo Öde, Kârdan Paylaş)",
+                "KURUMSAL ($2000 Kurulum + $250/ay Yönetim)",
+                "VIP TAM OTOMASYON ($2000 Kurulum + $500/ay Full Servis)",
+                "WEB BAŞLANGIÇ ($500 Web Sitesi)"
+            ])
+            st.session_state.form_data['selected_package'] = package
+            
+            if st.button("Paketi Onayla", key="btn3"):
+                st.toast("Paket seçimi doğrulandı.", icon="🤝")
+                handle_ai_trigger("Paketimi seçtim: " + package, "PAKET SEÇİMİ")
+
+        # 4. GÖNDER VE BİTİR
+        st.markdown("---")
+        if st.button("🚀 BAŞVURUYU TAMAMLA VE GÖNDER", type="primary"):
+            report = brain.generate_final_report(st.session_state.form_data)
+            st.session_state['final_report'] = report
+            st.session_state['submission_complete'] = True
+            st.rerun()
+
+    # --- SAĞ: AI ASİSTAN (COPILOT) ---
+    with col_chat:
+        st.markdown("### 💬 ARTIS COPILOT")
+        
         chat_container = st.container(height=500)
-        
-        for msg in st.session_state.onboarding_history:
+        for msg in st.session_state.chat_history:
             with chat_container.chat_message(msg["role"]):
                 st.write(msg["content"])
 
-        if prompt := st.chat_input("Cevabınızı buraya yazın...", key="onboarding_input"):
-            st.session_state.onboarding_history.append({"role": "user", "content": prompt})
+        if prompt := st.chat_input("Bir soru sorun veya danışın..."):
+            st.session_state.chat_history.append({"role": "user", "content": prompt})
             with chat_container.chat_message("user"):
                 st.write(prompt)
-
-            # Gemini'ye Gönder
-            onboarding_bot = brain.OnboardingBrain()
-            bot_response, next_step, new_checklist = onboarding_bot.process_message(
-                prompt, st.session_state.onboarding_step, st.session_state.checklist
-            )
-
-            st.session_state.onboarding_step = next_step
-            st.session_state.checklist = new_checklist
-            st.session_state.onboarding_history.append({"role": "assistant", "content": bot_response})
             
+            # AI Cevap
+            bot = brain.OnboardingBrain()
+            # O an hangi input açıksa ona göre context verilebilir, şimdilik genel.
+            response = bot.process_message(prompt, "GENEL YARDIM")
+            
+            st.session_state.chat_history.append({"role": "assistant", "content": response})
             with chat_container.chat_message("assistant"):
-                st.write(bot_response)
-            
-            time.sleep(0.5)
-            st.rerun()
+                st.write(response)
+
+# Yardımcı Fonksiyon: Butonlara basınca AI'ın otomatik yorum yapması için
+def handle_ai_trigger(user_msg, context):
+    st.session_state.chat_history.append({"role": "user", "content": user_msg})
+    bot = brain.OnboardingBrain()
+    response = bot.process_message(user_msg, context)
+    st.session_state.chat_history.append({"role": "assistant", "content": response})
+    # Sayfayı yenilemeye gerek yok, chat bir sonraki etkileşimde güncellenir veya anlık görünmesi için rerun yapılabilir.
+    # st.rerun()
 
 def render_dashboard():
+    # ... (Mevcut kodlar)
     st.markdown("<h3>FINANSAL PANEL</h3>", unsafe_allow_html=True)
     c1, c2 = st.columns([2, 1])
-    with c1:
-        st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
-    with c2:
-        st.plotly_chart(brain.get_logistics_map(), use_container_width=True)
+    with c1: st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
+    with c2: st.plotly_chart(brain.get_logistics_map(), use_container_width=True)
 
 def render_chat_interface():
-    st.markdown("<h3>GENEL ZEKA (ARTIS AI)</h3>", unsafe_allow_html=True)
-    st.info("Bu modül kurulum sonrası aktif olacaktır.")
+    # ...
+    st.info("Bu modül kurulumdan sonra aktifleşir.")
