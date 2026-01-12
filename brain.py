@@ -1,20 +1,25 @@
+# brain.py
+import streamlit as st
 import time
 
-def get_jarvis_response(messages):
+def get_ai_response(messages):
     """
-    Bu fonksiyon şu an simülasyon yapıyor.
-    İleride buraya OpenAI veya LangChain kodlarını bağlayabilirsin.
+    OpenAI API çağrısını yönetir.
+    Eğer API Key yoksa simülasyon yapar.
     """
-    last_user_message = messages[-1]["content"].lower()
     
-    # Basit bir cevap simülasyonu
-    time.sleep(1) # Yapay zeka düşünüyor efekti
+    # --- API VARSA BURAYI AKTİF EDİN ---
+    # import openai
+    # client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+    # try:
+    #     response = client.chat.completions.create(
+    #         model="gpt-4",
+    #         messages=messages
+    #     )
+    #     return response.choices[0].message.content
+    # except Exception as e:
+    #     return f"Hata: {str(e)}"
     
-    if "merhaba" in last_user_message:
-        return "Merhaba efendim. Sistemler hazır. Size nasıl yardımcı olabilirim?"
-    elif "stok" in last_user_message:
-        return "Global stok verilerine erişiyorum... Şu anda depoda 12 kritik ürün tespit edildi."
-    elif "finans" in last_user_message:
-        return "Finansal raporlar derleniyor. Bugünkü harcama limitiniz %15 oranında altında."
-    else:
-        return "Bu komutu işleme aldım. Analiz yapıyorum, lütfen bekleyin..."
+    # --- SİMÜLASYON MODU (API YOKSA BU ÇALIŞIR) ---
+    time.sleep(1) # Düşünme efekti
+    return "Analiz tamamlandı. Amazon FBA için Delaware eyaleti vergi avantajı sağlar. Ancak depo kullanımı için Wyoming daha uygun olabilir. 2. Aşamadan şirketinizi hemen kurabiliriz."
