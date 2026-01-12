@@ -1,6 +1,7 @@
 import streamlit as st
 import styles
 import views
+import brain
 
 # 1. PAGE CONFIG
 st.set_page_config(
@@ -54,7 +55,11 @@ else:
     # Router
     if st.session_state['current_page'] == "COMMAND CENTER":
         views.render_hero()
-        views.render_bento_menu()
+        # --- DEĞİŞEN KISIM BURASI ---
+        # Eskiden burada views.render_bento_menu() yazıyordu.
+        # Artık yeni fonksiyonumuzu çağırıyoruz:
+        views.render_command_center() 
+        # -----------------------------
         
     elif st.session_state['current_page'] == "FINANCE":
         views.render_dashboard()
