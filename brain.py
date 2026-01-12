@@ -1,18 +1,20 @@
-import google.generativeai as genai
-import streamlit as st
-from instructions import COMPANY_DATA
+import time
 
 def get_jarvis_response(messages):
-    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-    # 2026'da en hızlı yanıt veren motor
-    model = genai.GenerativeModel('models/gemini-1.5-flash')
+    """
+    Bu fonksiyon şu an simülasyon yapıyor.
+    İleride buraya OpenAI veya LangChain kodlarını bağlayabilirsin.
+    """
+    last_user_message = messages[-1]["content"].lower()
     
-    # Sadece son konuşmaları alarak hızı artırıyoruz
-    history = "\n".join([f"{m['role']}: {m['content']}" for m in messages[-4:]])
-    prompt = f"{COMPANY_DATA}\n\n[Sohbet Kaydı]\n{history}\n\nJarvis (Kısa, net ve vizyoner):"
+    # Basit bir cevap simülasyonu
+    time.sleep(1) # Yapay zeka düşünüyor efekti
     
-    try:
-        response = model.generate_content(prompt)
-        return response.text
-    except:
-        return "Sistem senkronizasyonu bekleniyor... Lütfen devam edin."
+    if "merhaba" in last_user_message:
+        return "Merhaba efendim. Sistemler hazır. Size nasıl yardımcı olabilirim?"
+    elif "stok" in last_user_message:
+        return "Global stok verilerine erişiyorum... Şu anda depoda 12 kritik ürün tespit edildi."
+    elif "finans" in last_user_message:
+        return "Finansal raporlar derleniyor. Bugünkü harcama limitiniz %15 oranında altında."
+    else:
+        return "Bu komutu işleme aldım. Analiz yapıyorum, lütfen bekleyin..."
