@@ -1,140 +1,99 @@
 import streamlit as st
 import time
-from brain import get_dashboard_metrics, get_sales_chart, get_map_chart, get_marketing_chart, get_artis_response
+from brain import get_artis_response, get_dashboard_metrics, get_sales_chart
 
-# [VIEW-00] COMMON HEADER
-def render_header(title, subtitle):
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.markdown(f"### {title}")
-        st.caption(subtitle)
-    with col2:
-        st.markdown("<div style='text-align:right; color:#D4AF37; font-size:12px;'>● SYSTEM ONLINE</div>", unsafe_allow_html=True)
-    st.markdown("---")
-
-# [VIEW-01] LOGIN SCREEN
+# --- LOGIN EKRANI ---
 def render_login_screen():
-    col1, col2, col3 = st.columns([1, 2, 1])
+    col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        st.markdown("<h1 style='text-align:center; color:#D4AF37; font-family:Cinzel; font-size:60px; margin-bottom:0;'>AS</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align:center; color:#666; letter-spacing:4px; font-size:12px;'>ENTERPRISE SYSTEM</p>", unsafe_allow_html=True)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align:center; font-family:Cinzel; font-size:60px; color:#D4AF37; margin-bottom:0;'>AS</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align:center; color:#666; font-size:12px; letter-spacing:4px;'>ENTERPRISE ACCESS</p>", unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
         
-        with st.form("login_form"):
-            username = st.text_input("Kullanıcı Adı", placeholder="admin")
-            password = st.text_input("Şifre", type="password", placeholder="••••••")
+        with st.form("login"):
+            username = st.text_input("ID", placeholder="admin")
+            password = st.text_input("PASS", type="password", placeholder="••••")
             st.markdown("<br>", unsafe_allow_html=True)
-            submit = st.form_submit_button("SİSTEME GİRİŞ YAP")
-            
-            if submit:
+            if st.form_submit_button("Sisteme Giriş"):
                 if username == "admin" and password == "admin":
                     st.session_state.authenticated = True
-                    st.session_state.show_welcome = True
                     st.rerun()
                 else:
-                    st.error("Erişim Reddedildi.")
+                    st.error("Erişim Reddedildi")
 
-# [VIEW-02] WELCOME ANIMATION
-def render_welcome_animation():
-    placeholder = st.empty()
-    messages = [
-        "Sisteme hoş geldiniz...",
-        "Artificial Staff, yerel sınırları kaldırmak için tasarlandı.",
-        "Siz üretiminize odaklanın, global operasyonu bize bırakın.",
-        "Panel hazırlanıyor..."
-    ]
-    with placeholder.container():
-        st.markdown("<br><br><br>", unsafe_allow_html=True)
-        for msg in messages:
-            text_area = st.empty()
-            full_text = ""
-            for char in msg:
-                full_text += char
-                text_area.markdown(f"<div class='welcome-text'>{full_text}</div>", unsafe_allow_html=True)
-                time.sleep(0.03)
-            time.sleep(1.2)
-            text_area.empty()
-    
-    st.session_state.show_welcome = False
-    st.rerun()
+# --- ANA EKRAN (PERPLEXITY TARZI HOME) ---
+def render_artis_home():
+    # Başlık ve Karşılama
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<h1 class='hero-title'>ARTIFICIAL STAFF</h1>", unsafe_allow_html=True)
+    st.markdown("<p class='hero-subtitle'>Global operasyonlarınız için neyi bilmek istersiniz?</p>", unsafe_allow_html=True)
 
-# [VIEW-03] MAIN HUB (ANA MERKEZ)
-def render_main_hub():
-    render_header("Global Kontrol Paneli", "Merkezi Yönetim Ekranı")
-    col1, col2 = st.columns(2)
-
-    # Sol: Şirket Profili
-    with col1:
-        st.markdown("""
-        <div class="hub-card">
-            <div class="hub-icon"><i class="fa-solid fa-building"></i></div>
-            <div class="hub-title">ŞİRKET PROFİLİ</div>
-            <div class="hub-desc">Vizyon, Misyon & Strateji</div>
-        </div>
-        """, unsafe_allow_html=True)
-        with st.expander("Şirket Hakkında"):
-            st.info("Artificial Staff, Türk üreticileri ABD pazarına taşıyan uçtan uca ihracat ortağıdır.")
-
-    # Sağ: Hizmetler
+    # Chat / Arama Alanı (Sayfanın Ortasında)
+    col1, col2, col3 = st.columns([1, 6, 1])
     with col2:
-        st.markdown("""
-        <div class="hub-card" style="border-color:rgba(212, 175, 55, 0.4);">
-            <div class="hub-icon"><i class="fa-solid fa-layer-group"></i></div>
-            <div class="hub-title">HİZMET MODÜLLERİ</div>
-            <div class="hub-desc">9 Entegre Hizmet</div>
-        </div>
-        """, unsafe_allow_html=True)
-        with st.expander("Tüm Hizmetleri Görüntüle", expanded=True):
-            render_services_catalog()
+        user_input = st.chat_input("Bir soru sorun (Örn: Lojistik süresi nedir?)...")
+    
+    # Hızlı Erişim Butonları (Öneriler)
+    st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
+    b1, b2, b3, b4 = st.columns(4)
+    with b1: 
+        if st.button("📦 Lojistik Durumu"): pass
+    with b2:
+        if st.button("💰 Maliyet Analizi"): pass
+    with b3:
+        if st.button("🏛️ Şirket Kurulumu"): pass
+    with b4:
+        if st.button("📈 Pazar Trendleri"): pass
 
-# [VIEW-04] SERVICE CATALOG LIST
-def render_services_catalog():
+    # Cevap Alanı (Varsa)
+    if user_input:
+        st.markdown("---")
+        with st.chat_message("user"):
+            st.write(user_input)
+        
+        response = get_artis_response(user_input)
+        with st.chat_message("assistant"):
+            st.markdown(f"<span style='color:#D4AF37'><strong>ARTIS:</strong></span> {response}", unsafe_allow_html=True)
+
+# --- HİZMETLER (KART GÖRÜNÜMÜ) ---
+def render_services():
+    st.markdown("### Hizmetler & Çözümler")
+    st.markdown("---")
+    
     services = [
-        ("💻 Web", "ABD odaklı e-ticaret altyapısı."),
-        ("🏛️ LLC", "Delaware şirket ve Banka hesabı."),
-        ("✈️ Lojistik", "Kapıdan kapıya 2-4 günde teslimat."),
-        ("🏭 Depo", "NJ ve CA'da stratejik depolar."),
-        ("🛒 Pazaryeri", "Amazon & Walmart hesap yönetimi."),
-        ("📱 Sosyal", "Global marka yönetimi."),
-        ("📢 Reklam", "Meta & Google Ads performansı."),
-        ("🤖 CRM", "Fatura ve sipariş otomasyonu."),
-        ("🤝 B2B", "Yapay zeka ile toptan müşteri.")
+        ("fa-solid fa-code", "Web & Teknoloji", "ABD uyumlu e-ticaret altyapısı."),
+        ("fa-solid fa-building-columns", "LLC Kurulumu", "Delaware şirket ve banka hesabı."),
+        ("fa-solid fa-plane", "Lojistik", "2-4 günde kapı teslim kargo."),
+        ("fa-solid fa-warehouse", "Depolama", "NJ/CA 3PL depolama hizmeti."),
+        ("fa-brands fa-amazon", "Pazaryeri", "Amazon & Walmart hesap yönetimi."),
+        ("fa-solid fa-bullhorn", "Reklam", "Meta & Google Ads yönetimi.")
     ]
-    for title, desc in services:
-        st.markdown(f"<div class='service-mini-card'><strong>{title}</strong><br><span style='font-size:11px; color:#888;'>{desc}</span></div>", unsafe_allow_html=True)
+    
+    # Grid oluştur
+    rows = [services[i:i+3] for i in range(0, len(services), 3)]
+    for row in rows:
+        cols = st.columns(3)
+        for idx, (icon, title, desc) in enumerate(row):
+            with cols[idx]:
+                st.markdown(f"""
+                <div class="info-card">
+                    <div class="card-icon"><i class="{icon}"></i></div>
+                    <div class="card-title">{title}</div>
+                    <div class="card-desc">{desc}</div>
+                </div>
+                """, unsafe_allow_html=True)
+        st.write("")
 
-# [VIEW-05] DASHBOARD PAGE
+# --- DASHBOARD ---
 def render_dashboard():
-    render_header("Global Operasyon Merkezi", "Anlık Veri Akışı")
+    st.markdown("### Finansal Genel Bakış")
     metrics = get_dashboard_metrics()
     c1, c2, c3, c4 = st.columns(4)
     with c1: st.metric(metrics["revenue"]["label"], metrics["revenue"]["value"], metrics["revenue"]["delta"])
     with c2: st.metric(metrics["region"]["label"], metrics["region"]["value"], metrics["region"]["delta"])
     with c3: st.metric(metrics["visitors"]["label"], metrics["visitors"]["value"], metrics["visitors"]["delta"])
     with c4: st.metric(metrics["conversion"]["label"], metrics["conversion"]["value"], metrics["conversion"]["delta"])
-    st.markdown("### 📈 Büyüme Projeksiyonu")
-    st.plotly_chart(get_sales_chart(), width="stretch")
-
-# [VIEW-06] ARTIS AI PAGE
-def render_artis_ai():
-    render_header("ARTIS AI", "Yapay Zeka Asistanı")
-    if "messages" not in st.session_state: st.session_state.messages = [{"role": "assistant", "content": "Merhaba! Ben ARTIS. Size nasıl yardımcı olabilirim?"}]
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]): st.write(msg["content"])
-    if prompt := st.chat_input("Sorunuzu yazın..."):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"): st.write(prompt)
-        response = get_artis_response(prompt)
-        time.sleep(0.5)
-        st.session_state.messages.append({"role": "assistant", "content": response})
-        with st.chat_message("assistant"): st.write(response)
-
-# [VIEW-07] LOGISTICS & MARKETING
-def render_logistics():
-    render_header("Lojistik", "Kargo Takip")
-    st.plotly_chart(get_map_chart(), width="stretch")
-
-def render_marketing():
-    render_header("Pazarlama", "Reklam Performansı")
-    st.plotly_chart(get_marketing_chart(), width="stretch")
+    
+    st.markdown("### Satış Trendi")
+    st.plotly_chart(get_sales_chart(), use_container_width=True)
