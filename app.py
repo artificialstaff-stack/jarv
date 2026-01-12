@@ -36,11 +36,16 @@ if "messages" not in st.session_state:
 if selected_tab == "🤖 JARVIS CORE":
     st.header("Jarvis Neural Interface")
     
-    # Mesajları Ekrana Bas
-    for msg in st.session_state.messages:
-        avatar = "🤖" if msg["role"] == "assistant" else "👤"
-        with st.chat_message(msg["role"], avatar=avatar):
-            st.markdown(msg["content"])
+    # --- EKRANA MESAJLARI BASAN KISIM ---
+
+for message in st.session_state.messages:
+    # BURASI ÇOK ÖNEMLİ: Eğer rol 'system' ise bu turu atla (ekrana basma)
+    if message["role"] == "system":
+        continue
+        
+    # Diğer mesajları (user ve assistant) ekrana bas
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
     # Kullanıcıdan Girdi Al
     if prompt := st.chat_input("Talimat verin..."):
