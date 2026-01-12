@@ -1,38 +1,51 @@
 import streamlit as st
 from styles import load_css
-from views import render_login_screen, render_artis_home, render_services, render_dashboard
+from views import render_login_screen, render_jarvis_core, render_global_hub, render_finances, render_logistics_view
 
-# Ayarlar
+# [APP-01] AYARLAR
 st.set_page_config(page_title="Artificial Staff", layout="wide", initial_sidebar_state="expanded")
 
-# Durumlar
 if 'authenticated' not in st.session_state: st.session_state.authenticated = False
 
 load_css()
 
-# AKIŞ
+# [APP-02] ANA AKIŞ
 if not st.session_state.authenticated:
     render_login_screen()
 else:
-    # Sidebar (Sadece Giriş Yapınca)
+    # --- COMMAND CENTER SIDEBAR ---
     with st.sidebar:
-        st.markdown("<div style='text-align:center; color:#D4AF37; font-family:Cinzel; font-size:32px; margin-bottom:20px;'>AS</div>", unsafe_allow_html=True)
+        # Logo ve Alt Başlık (Resimdeki Gibi)
+        st.markdown("<div class='sidebar-logo'>ARTIFICIAL<br>STAFF</div>", unsafe_allow_html=True)
+        st.markdown("<div class='sidebar-sub'>COMMAND CENTER</div>", unsafe_allow_html=True)
         
+        # Menü (İngilizce/Teknik Terimler - Resimdeki gibi)
         page = st.radio(
-            "MENÜ",
-            ["ARTIS AI", "HİZMETLER", "DASHBOARD"],
+            "MODULES",
+            ["JARVIS CORE", "GLOBAL HUB", "FINANCES", "LOGISTICS", "STRATEGY"],
             label_visibility="collapsed"
         )
         
-        st.markdown("---")
-        if st.button("ÇIKIŞ"):
+        # Alt Bilgi (Status)
+        st.markdown("""
+        <div class='sidebar-status'>
+            <div><span class='status-dot'></span> SYSTEM: ACTIVE</div>
+            <div style='margin-top:5px;'><i class="fa-solid fa-lock"></i> SECURITY: SSL-V3</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button("LOGOUT", use_container_width=True):
             st.session_state.authenticated = False
             st.rerun()
 
-    # Sayfalar
-    if page == "ARTIS AI":
-        render_artis_home()
-    elif page == "HİZMETLER":
-        render_services()
-    elif page == "DASHBOARD":
-        render_dashboard()
+    # --- SAYFA YÖNLENDİRME ---
+    if page == "JARVIS CORE":
+        render_jarvis_core() # Ana Ekran (Perplexity Tarzı)
+    elif page == "GLOBAL HUB":
+        render_global_hub() # Hizmetler (Kartlar)
+    elif page == "FINANCES":
+        render_finances() # Dashboard
+    elif page == "LOGISTICS":
+        render_logistics_view() # Harita
+    elif page == "STRATEGY":
+        st.info("Strateji modülü yapım aşamasında.")
