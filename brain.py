@@ -19,7 +19,87 @@ def get_artis_response(query):
         return "ARTIS MARKETING KERNEL: Meta Ads CPM for 'Made in Turkey' home textiles in California is currently $18.50. I recommend shifting 30% of the budget to TikTok Shop ads where ROAS is trending at 4.2x."
     else:
         return "ARTIS CORE: Input received. I am analyzing your business vector relative to US Market entry protocols. Please specify: Logistics, Finance, or Marketing operations."
+# --- YENİ SATIŞ VE ONBOARDING MANTIĞI ---
 
+class OnboardingBrain:
+    def __init__(self):
+        # Akıllı Akış Adımları
+        self.steps = [
+            "intro",           # Tanışma
+            "get_sector",      # Sektör (Genel)
+            "get_products",    # Ürünler (Özel)
+            "get_details",     # Maliyet/Boyut (Gizli Veri)
+            "present_offer",   # Paket Sunumu
+            "finalize"         # Kapanış
+        ]
+
+    def process_message(self, user_input, current_step, checklist_state):
+        response_text = ""
+        next_step = current_step
+        user_input = user_input.lower()
+        
+        # 1. ADIM: TANIŞMA -> SEKTÖR
+        if current_step == "intro":
+            response_text = "Merhaba, ben ARTIS. Amerika operasyonunuzu yönetecek yapay zekayım. Sizi dünyaya açmadan önce biraz tanıyalım. Markanızın adı nedir?"
+            next_step = "get_sector"
+
+        # 2. ADIM: SEKTÖR (GENEL)
+        elif current_step == "get_sector":
+            checklist_state['brand'] = True # Marka alındı
+            response_text = f"Memnun oldum. Sisteme kaydettim. Peki genel olarak hangi sektörde faaliyet gösteriyorsunuz? (Tekstil, Gıda, Kozmetik, Ev Dekorasyon vb.)"
+            next_step = "get_products"
+
+        # 3. ADIM: ÜRÜNLER (ÖZEL)
+        elif current_step == "get_products":
+            response_text = "Harika bir sektör. Peki bu sektörde spesifik olarak ne üretiyorsunuz? (Örn: 'Kadın giyimde ipek eşarp' veya 'Organik zeytinyağı' gibi). Yıldız ürününüz nedir?"
+            next_step = "get_details"
+
+        # 4. ADIM: DETAYLAR (GİZLİ VERİ TOPLAMA - SAMİMİ)
+        elif current_step == "get_details":
+            checklist_state['product'] = True # Ürün bilgisi alındı
+            response_text = "Çok ilgi çekici. Bu ürünlerin Amerika pazarında potansiyeli yüksek. \n\nWashington DC'de, Beyaz Saray'a sadece 15 dk mesafedeki fiziksel depomuzda bunlara yer açabilirim. 😉 \n\nLojistik partnerimizle maliyet çalışabilmem için; ürünlerin kabaca boyutları veya tahmini üretim maliyetleri hakkında aklınızda bir rakam var mı?"
+            next_step = "present_offer"
+
+        # 5. ADIM: PAKET SUNUMU
+        elif current_step == "present_offer":
+            checklist_state['data'] = True # Kritik veriler alındı
+            response_text = """
+            Verileri işledim. Sizin için 3 farklı çalışma modeli hazırladım:
+            
+            1️⃣ **ORTAKLIK MODELİ:** Siz ürünleri yollarsınız, kargo masrafını ödersiniz. Biz kendi mağazalarımızda satarız, kârdan pay alırız. (Sıfır Kurulum Maliyeti)
+            
+            2️⃣ **KURUMSAL KURULUM ($2000):** Size ait LLC şirket ve Pazaryeri mağazalarını kurarız. Ürünleri kendi markanızla satarsınız. Biz yönetiriz ($250/ay).
+            
+            3️⃣ **TAM OTOMASYON ($2000 + $500/ay):** Şirket, Mağaza, Reklam, Sosyal Medya ve Vergi süreçlerinin tamamını biz yönetiriz.
+            
+            *(Not: Bütçeniz kısıtlıysa $500'a basit bir web sitesi ile de başlayabiliriz.)*
+            
+            Hangi model size daha yakın geliyor?
+            """
+            next_step = "finalize"
+
+        # 6. ADIM: FİNAL
+        elif current_step == "finalize":
+            if "1" in user_input or "ortak" in user_input:
+                selected = "ORTAKLIK MODELİ"
+            elif "2" in user_input or "kurumsal" in user_input:
+                selected = "KURUMSAL MODEL"
+            elif "3" in user_input or "tam" in user_input or "full" in user_input:
+                selected = "VIP TAM PAKET"
+            elif "500" in user_input or "web" in user_input:
+                selected = "WEB BAŞLANGIÇ PAKETİ"
+            else:
+                selected = "ÖZEL TEKLİF"
+            
+            checklist_state['offer'] = True # Paket seçildi
+            response_text = f"**{selected}** harika bir seçim. Lojistik partnerimize bilgilerinizi iletiyorum. Ürünlerinizi evinizden alıp DC depomuza getirmek için operasyonu başlatıyorum. Hoş geldiniz."
+            next_step = "completed"
+
+        elif current_step == "completed":
+            response_text = "Kayıtlar tamamlandı. Sol menüden 'Finans' sekmesine geçerek tahmini gelir simülasyonunu inceleyebilirsiniz."
+
+        return response_text, next_step, checklist_state
+        
 # --- YENİ ONBOARDING MANTIĞI ---
 
 class OnboardingBrain:
