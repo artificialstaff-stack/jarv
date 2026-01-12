@@ -1,86 +1,48 @@
 import streamlit as st
 
-def apply_luxury_theme():
-    st.markdown("""
-        <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500&display=swap');
-        
-        /* Ana Ekran Arka Planı - Uzay Derinliği */
-        .stApp {
-            background: radial-gradient(circle at 50% 50%, #1a1b21 0%, #050505 100%);
-            color: #ffffff;
-            font-family: 'Inter', sans-serif;
-        }
-
-        /* Cam Efekti Sidebar */
-        [data-testid="stSidebar"] {
-            background: rgba(15, 15, 15, 0.7) !important;
-            backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(184, 155, 94, 0.2);
-            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
-        }
-
-        /* Modern Chat Balonları */
-        [data-testid="stChatMessage"] {
-            background: rgba(255, 255, 255, 0.03) !important;
-            border: 1px solid rgba(255, 255, 255, 0.05) !important;
-            border-radius: 20px !important;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-        [data-testid="stChatMessage"]:hover {
-            border-color: #B89B5E;
-            box-shadow: 0 0 20px rgba(184, 155, 94, 0.1);
-        }
-
-        /* Yapay Zeka Başlığı - Neon Efekti */
-        .brand-title {
-            font-family: 'Orbitron', sans-serif;
-            color: #B89B5E;
-            text-align: center;
-            letter-spacing: 10px;
-            text-shadow: 0 0 20px rgba(184, 155, 94, 0.5);
-            font-size: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        /* Giriş Kutusu - Floating Look */
-        .stChatInputContainer {
-            padding-bottom: 30px;
-            background: transparent !important;
-        }
-        .stChatInputContainer input {
-            background: rgba(255, 255, 255, 0.05) !important;
-            border: 1px solid rgba(184, 155, 94, 0.3) !important;
-            border-radius: 30px !important;
-            color: white !important;
-            padding: 15px 25px !important;
-        }
-
-        /* Dashboard Kartları */
-        .stat-card {
-            background: linear-gradient(145deg, #1e1e24, #0a0a0c);
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid rgba(184, 155, 94, 0.1);
-            text-align: center;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
 def render_sidebar():
     with st.sidebar:
-        st.markdown('<div class="brand-title">ARTIFICIAL<br>STAFF</div>', unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center;'>ARTIFICIAL<br><span style='font-size:14px; letter-spacing: 3px; color: #aaa;'>STAFF v4.0</span></h2>", unsafe_allow_html=True)
+        st.markdown("---")
         
-        # Modern İkonik Menü
-        selection = st.radio(
-            "COMMAND CENTER",
-            ["🤖 JARVIS CORE", "📦 INVENTORY", "🚢 LOGISTICS", "💰 FINANCES", "📈 STRATEGY"],
+        # Navigasyon
+        selected = st.radio(
+            "MODÜLLER",
+            ["🤖 JARVIS CORE", "📦 GLOBAL ENVANTER", "💰 FİNANSAL ANALİZ", "📊 STRATEJİ"],
             index=0
         )
+        
         st.markdown("---")
-        st.markdown("🟢 **SİSTEM: AKTİF**")
-        st.markdown("🔐 **GÜVENLİK: SSL-V3**")
-        return selection
+        
+        # Sistem Durumu (Sanki canlıymış gibi)
+        st.caption("SİSTEM DURUMU")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("CPU", "12%", "-1%")
+        with col2:
+            st.metric("RAM", "4.2GB", "+0.2")
+            
+        st.success("🟢 BAĞLANTI: GÜVENLİ (SSL)")
+        st.info("📍 KONUM: US-EAST-1")
+        
+        return selected
+
+def render_inventory_dashboard():
+    st.title("📦 Global Envanter")
+    
+    # Üst Bilgi Kartları
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Toplam Ürün", "1,204", "12")
+    c2.metric("Kritik Stok", "8", "-2", delta_color="inverse")
+    c3.metric("Tahmini Değer", "$420K", "+5%")
+    c4.metric("Aktif Sipariş", "34", "4")
+    
+    st.markdown("### 🔍 Hızlı İşlem Menüsü")
+    st.info("Veri akışı bekleniyor... Jarvis üzerinden manuel giriş yapabilirsiniz.")
+
+def render_finance_dashboard():
+    st.title("💰 Finansal Kokpit")
+    c1, c2 = st.columns(2)
+    c1.metric("Aylık Ciro", "$54,000", "+%12")
+    c2.metric("Reklam Harcaması", "$4,200", "-%3")
+    st.warning("Detaylı grafikler yükleniyor...")
