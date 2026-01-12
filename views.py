@@ -1,24 +1,25 @@
 import streamlit as st
 import time
+# Grafik ve Zeka fonksiyonlarını brain.py'den çekiyoruz
 from brain import get_dashboard_metrics, get_sales_chart, get_map_chart, get_marketing_chart, get_artis_response
 
-# --- HEADER ---
+# --- HEADER (Üst Başlık) ---
 def render_header(title, subtitle):
     col1, col2 = st.columns([3, 1])
     with col1:
-        st.markdown(f"**{title}**")
+        st.markdown(f"### {title}")
         st.caption(subtitle)
     with col2:
-        st.markdown("<div style='text-align:right; color:#D4AF37;'>● ONLINE</div>", unsafe_allow_html=True)
+        st.markdown("<div style='text-align:right; color:#D4AF37; font-size:12px;'>● ONLINE</div>", unsafe_allow_html=True)
     st.markdown("---")
 
-# --- 1. HİZMET KATALOĞU (Müşteri Vitrini) ---
+# --- 1. HİZMET KATALOĞU (YENİ SAYFA - Müşteri İkna Alanı) ---
 def render_services_catalog():
     render_header("Hizmetler & Çözümler", "Artificial Staff Enterprise Ekosistemi")
     
     st.info("İşletmenizi global bir markaya dönüştürmek için ihtiyacınız olan 9 temel yapı taşı.")
 
-    # Hizmet Verileri
+    # Hizmet Verileri (Sunumdan alındı)
     services = [
         ("💻", "Web & Teknoloji", "ABD tüketici algısına uygun, yüksek dönüşüm odaklı e-ticaret altyapısı."),
         ("🏛️", "LLC Kurulumu", "Delaware/Wyoming kurulumu, EIN, Banka hesabı ve Stripe/PayPal çözümü."),
@@ -31,21 +32,22 @@ def render_services_catalog():
         ("🤝", "B2B AI Satış", "Yapay zeka ile ABD'li toptancıları bulup otomatik iletişime geçen satış ordusu.")
     ]
 
-    # Grid Yapısı
+    # Grid Yapısı (3'lü Kartlar)
     for i in range(0, len(services), 3):
         cols = st.columns(3)
         for j in range(3):
             if i + j < len(services):
                 icon, title, desc = services[i+j]
                 with cols[j]:
+                    # CSS Class 'metric-container' styles.py dosyasından geliyor
                     st.markdown(f"""
-                    <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:10px; border:1px solid #333; height:200px;">
+                    <div style="background:rgba(255,255,255,0.03); padding:20px; border:1px solid rgba(255,255,255,0.1); border-radius:10px; height:220px;">
                         <div style="font-size:30px; margin-bottom:10px;">{icon}</div>
-                        <h4 style="color:#fff; margin:0;">{title}</h4>
-                        <p style="color:#888; font-size:12px; margin-top:5px;">{desc}</p>
+                        <h4 style="color:#fff; margin:0; font-family:'Cinzel', serif;">{title}</h4>
+                        <p style="color:#888; font-size:12px; margin-top:10px; line-height:1.4;">{desc}</p>
                     </div>
                     """, unsafe_allow_html=True)
-        st.write("") # Boşluk
+        st.write("") # Satır boşluğu
 
 # --- 2. DASHBOARD ---
 def render_dashboard():
@@ -59,24 +61,26 @@ def render_dashboard():
     with c4: st.metric(metrics["conversion"]["label"], metrics["conversion"]["value"], metrics["conversion"]["delta"])
 
     st.markdown("### 📈 Büyüme Projeksiyonu")
-    st.plotly_chart(get_sales_chart(), use_container_width=True)
+    # GÜNCELLEME: use_container_width yerine width='stretch' kullanıldı
+    st.plotly_chart(get_sales_chart(), width="stretch")
 
 # --- 3. ARTIS AI ---
 def render_artis_ai():
     render_header("ARTIS AI", "Yapay Zeka Operasyon Asistanı")
     
     if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": "Merhaba! Ben ARTIS. Global operasyonlarınız için buradayım."}]
+        st.session_state.messages = [{"role": "assistant", "content": "Merhaba! Ben ARTIS. Global operasyonlarınız için buradayım. Size nasıl yardımcı olabilirim?"}]
 
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    if prompt := st.chat_input("Sorunuzu yazın..."):
+    if prompt := st.chat_input("Sorunuzu yazın (Örn: Lojistik süresi nedir?)..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
         
+        # Brain'den zeki cevap al
         response = get_artis_response(prompt)
         time.sleep(0.5)
         
@@ -88,7 +92,7 @@ def render_artis_ai():
 def render_logistics():
     render_header("Lojistik Ağı", "Canlı Takip")
     c1, c2 = st.columns([3, 1])
-    with c1: st.plotly_chart(get_map_chart(), use_container_width=True)
+    with c1: st.plotly_chart(get_map_chart(), width="stretch")
     with c2: 
         st.info("📦 **TR-8821**: İstanbul -> NY (Gümrükte)")
         st.success("✅ **EU-1029**: İstanbul -> Berlin (Teslim Edildi)")
@@ -97,7 +101,7 @@ def render_logistics():
 def render_marketing():
     render_header("Pazarlama 360°", "Kanal Performansı")
     c1, c2 = st.columns(2)
-    with c1: st.plotly_chart(get_marketing_chart(), use_container_width=True)
+    with c1: st.plotly_chart(get_marketing_chart(), width="stretch")
     with c2:
         st.metric("Google ROAS", "4.2x", "+0.3x")
         st.metric("Meta ROAS", "3.1x", "-0.1x")
