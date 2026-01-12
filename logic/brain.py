@@ -10,20 +10,15 @@ def get_client():
     if not api_key: return None
     return genai.Client(api_key=api_key)
 
-def get_system_prompt(user_data):
-    return f"""
-    Sen ARTIS. Washington DC merkezli Lojistik Yapay Zekasısın.
-    Muhatap: {user_data.get('name', 'Kullanıcı')} ({user_data.get('brand', 'Marka')})
-    Görevin: Lojistik, gümrük, depo ve büyüme stratejileri hakkında profesyonel, kısa ve net Türkçe destek vermek.
-    """
-
 def get_streaming_response(messages_history, user_data):
     client = get_client()
     if not client:
         yield "⚠️ API Anahtarı eksik."
         return
 
-    contents = [types.Content(role="user", parts=[types.Part.from_text(text=get_system_prompt(user_data))])]
+    sys_prompt = f"Sen ARTIS Lojistik AI asistanısın. Muhatap: {user_data.get('name')}. Marka: {user_data.get('brand')}. Kısa ve profesyonel Türkçe cevap ver."
+    
+    contents = [types.Content(role="user", parts=[types.Part.from_text(text=sys_prompt)])]
     for msg in messages_history:
         role = "user" if msg["role"] == "user" else "model"
         if msg["content"]:
@@ -31,16 +26,13 @@ def get_streaming_response(messages_history, user_data):
 
     try:
         response = client.models.generate_content_stream(
-            model="gemini-2.5-flash",
-            contents=contents,
-            config=types.GenerateContentConfig(temperature=0.7)
+            model="gemini-2.5-flash", contents=contents, config=types.GenerateContentConfig(temperature=0.7)
         )
         for chunk in response:
             if chunk.text: yield chunk.text
     except Exception:
-        yield "⚠️ Sistem yoğunluğu. Lütfen tekrar deneyin."
+        yield "⚠️ Sistem şu an yoğun. Lütfen bekleyin."
 
-# --- GRAFİKLER ---
 def get_sales_chart():
     df = pd.DataFrame({'Tarih': pd.date_range('2026-01-01', periods=30), 'Gelir': np.random.normal(30000, 5000, 30)})
     fig = go.Figure()
