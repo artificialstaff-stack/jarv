@@ -2,18 +2,17 @@ import streamlit as st
 
 def load_css():
     st.markdown("""
-        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         
         <style>
-            /* --- GLOBAL RESET --- */
+            /* --- GLOBAL AYARLAR --- */
             :root {
                 --bg-dark: #050505;
                 --gold: #D4AF37;
-                --gold-dim: rgba(212, 175, 55, 0.5);
-                --glass-bg: rgba(255, 255, 255, 0.03);
-                --glass-border: rgba(255, 255, 255, 0.08);
                 --text-white: #FFFFFF;
+                --glass-border: rgba(255, 255, 255, 0.1);
+                --card-bg: rgba(255, 255, 255, 0.03);
             }
 
             .stApp {
@@ -21,93 +20,113 @@ def load_css():
                 font-family: 'Inter', sans-serif;
             }
 
-            /* Header/Footer Gizleme */
+            /* Header ve Footer'ı Gizle */
             header[data-testid="stHeader"], footer {display: none;}
 
-            /* --- MATRIX TYPEWRITER EFFECT --- */
-            .neo-text {
-                font-family: 'Share Tech Mono', monospace; /* Matrix benzeri font */
-                color: var(--gold);
-                font-size: 24px;
-                line-height: 1.6;
-                white-space: pre-wrap;
-                text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+            /* --- SIDEBAR TASARIMI --- */
+            section[data-testid="stSidebar"] {
+                background-color: #080808;
+                border-right: 1px solid var(--glass-border);
             }
             
-            .cursor {
-                display: inline-block;
-                width: 10px;
-                height: 24px;
-                background-color: var(--gold);
-                animation: blink 1s infinite;
-                vertical-align: middle;
-            }
-
-            @keyframes blink {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0; }
-            }
-
-            /* --- HUB MODULE CARDS (BALONCUK YERİNE) --- */
-            .hub-card {
-                background: linear-gradient(145deg, rgba(20,20,20,1) 0%, rgba(5,5,5,1) 100%);
-                border: 1px solid var(--glass-border);
-                border-radius: 12px;
-                padding: 40px;
-                text-align: center;
-                cursor: pointer;
-                transition: all 0.4s ease;
-                height: 250px;
+            /* --- LOGIN EKRANI --- */
+            .login-container {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                box-shadow: 0 0 20px rgba(0,0,0,0.8);
+                margin-top: 100px;
             }
-
-            .hub-card:hover {
-                border-color: var(--gold);
-                box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
-                transform: translateY(-5px);
-            }
-
-            .hub-icon {
-                font-size: 40px;
-                color: var(--gold);
-                margin-bottom: 20px;
-                text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-            }
-
-            .hub-title {
-                font-family: 'Cinzel', serif;
-                font-size: 20px;
+            
+            /* Input Alanları */
+            div[data-baseweb="input"] {
+                background-color: rgba(255, 255, 255, 0.05);
+                border: 1px solid var(--glass-border);
                 color: white;
-                letter-spacing: 2px;
+                border-radius: 8px;
             }
-
-            .hub-desc {
-                font-family: 'Inter', sans-serif;
-                font-size: 12px;
-                color: #666;
-                margin-top: 10px;
-            }
-
-            /* --- SERVICE GRID (İÇERİK) --- */
-            .service-mini-card {
-                background: rgba(255,255,255,0.02);
-                border-left: 2px solid var(--gold);
-                padding: 15px;
-                margin-bottom: 10px;
+            
+            /* Butonlar */
+            div[data-testid="stButton"] button {
+                background: linear-gradient(45deg, #D4AF37, #B69246);
+                color: #000;
+                font-weight: bold;
+                border: none;
+                width: 100%;
+                padding: 10px;
+                font-family: 'Cinzel', serif;
                 transition: 0.3s;
             }
-            .service-mini-card:hover {
-                background: rgba(212, 175, 55, 0.05);
-                padding-left: 20px;
+            div[data-testid="stButton"] button:hover {
+                box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+                transform: scale(1.02);
+                color: #000;
             }
 
-            /* --- SCROLLBAR --- */
-            ::-webkit-scrollbar { width: 6px; }
-            ::-webkit-scrollbar-track { background: #000; }
-            ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+            /* --- KARŞILAMA METNİ (ANIMASYONLU) --- */
+            .welcome-text {
+                font-family: 'Inter', sans-serif;
+                font-size: 24px;
+                color: #e0e0e0;
+                text-align: center;
+                line-height: 1.5;
+                font-weight: 300;
+                animation: fadeIn 1s ease-in;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            /* --- HUB KARTLARI (BALONCUK YERİNE) --- */
+            .hub-card {
+                background: linear-gradient(145deg, rgba(20,20,20,1) 0%, rgba(5,5,5,1) 100%);
+                border: 1px solid var(--glass-border);
+                border-radius: 12px;
+                padding: 30px;
+                text-align: center;
+                height: 220px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            }
+            .hub-card:hover {
+                border-color: var(--gold);
+                transform: translateY(-5px);
+                box-shadow: 0 10px 30px rgba(212, 175, 55, 0.1);
+            }
+            .hub-icon {
+                font-size: 32px;
+                color: var(--gold);
+                margin-bottom: 15px;
+            }
+            .hub-title {
+                font-family: 'Cinzel', serif;
+                font-size: 16px;
+                color: white;
+                margin-bottom: 8px;
+            }
+            .hub-desc {
+                font-size: 12px;
+                color: #888;
+            }
+
+            /* --- METRIC KARTLARI --- */
+            div[data-testid="metric-container"] {
+                background-color: var(--card-bg);
+                border: 1px solid var(--glass-border);
+                padding: 15px;
+                border-radius: 10px;
+            }
+            div[data-testid="metric-container"] label {
+                font-family: 'Cinzel', serif;
+                color: #888;
+            }
+            div[data-testid="metric-container"] div[data-testid="stMetricValue"] {
+                color: #fff;
+            }
         </style>
     """, unsafe_allow_html=True)
