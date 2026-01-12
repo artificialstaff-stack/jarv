@@ -90,3 +90,51 @@ def get_sales_chart():
         height=300
     )
     return fig
+    
+# --- YENİ EKLENEN FONKSİYON: ŞİRKET ANALİZİ ---
+def analyze_client_business(data):
+    """
+    Müşteri formundan gelen verileri işler ve yapılması gerekenleri listeler.
+    """
+    audit_report = []
+    score = 100
+    
+    # 1. Şirket Yapısı Kontrolü
+    if data['us_entity'] == "Yok (Sadece TR Şirketi)":
+        audit_report.append({
+            "criticality": "HIGH",
+            "module": "LEGAL",
+            "action": "ABD LLC KURULUMU GEREKLİ",
+            "detail": "Amerikan bankacılık sistemine ve Stripe/PayPal altyapısına erişim için Wyoming veya Delaware LLC kurulumu başlatılmalı."
+        })
+        score -= 40
+    elif data['ein_status'] == "Yok":
+        audit_report.append({
+            "criticality": "HIGH",
+            "module": "LEGAL",
+            "action": "EIN (VERGİ NO) BAŞVURUSU",
+            "detail": "Şirketiniz var ancak IRS veritabanında aktif değilsiniz. Gümrük işlemleri için EIN şart."
+        })
+        score -= 20
+
+    # 2. Lojistik Kontrolü
+    if data['fulfillment'] == "Kendi Depomdan (Türkiye)":
+        audit_report.append({
+            "criticality": "MEDIUM",
+            "module": "LOGISTICS",
+            "action": "3PL / FBA GEÇİŞİ ÖNERİLİYOR",
+            "detail": "Tek tek kargo gönderimi kârlılığı %60 düşürüyor. Ürünleri toplu olarak ABD deposuna çekmeliyiz."
+        })
+        score -= 15
+
+    # 3. Pazarlama Kontrolü
+    if data['marketing_budget'] < 1000:
+        audit_report.append({
+            "criticality": "LOW",
+            "module": "ADS",
+            "action": "BÜTÇE REVİZYONU",
+            "detail": "ABD pazarında test verisi toplamak için minimum $1500/ay başlangıç bütçesi önerilir."
+        })
+        score -= 10
+        
+    return score, audit_report
