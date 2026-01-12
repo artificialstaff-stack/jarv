@@ -2,17 +2,19 @@ import streamlit as st
 
 def load_css():
     st.markdown("""
-        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         
         <style>
-            /* --- 1. GLOBAL RESET & THEME --- */
+            /* --- GLOBAL RESET --- */
             :root {
                 --bg-dark: #050505;
-                --bg-card: rgba(255, 255, 255, 0.03);
-                --border-light: rgba(255, 255, 255, 0.08);
                 --gold: #D4AF37;
-                --text-silver: #888888;
+                --gold-glow: rgba(212, 175, 55, 0.3);
+                --glass-bg: rgba(255, 255, 255, 0.03);
+                --glass-border: rgba(255, 255, 255, 0.08);
                 --text-white: #FFFFFF;
+                --text-gray: #A0A0A0;
             }
 
             .stApp {
@@ -20,134 +22,90 @@ def load_css():
                 font-family: 'Inter', sans-serif;
             }
 
-            /* Hide Streamlit Header/Footer/Menu */
-            header[data-testid="stHeader"] {display: none;}
-            footer {display: none;}
-            #MainMenu {display: none;}
-            
-            /* --- 2. TYPOGRAPHY --- */
-            h1, h2, h3, h4 {
-                font-family: 'Cinzel', serif !important;
-                color: var(--text-white) !important;
-                font-weight: 600 !important;
-            }
-            
-            p, span, label, div {
-                font-family: 'Inter', sans-serif;
-                color: var(--text-silver);
+            /* Header/Footer Gizleme */
+            header[data-testid="stHeader"], footer {display: none;}
+
+            /* --- SERVICE CARDS (LÜKS KARTLAR) --- */
+            .service-card {
+                background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid var(--glass-border);
+                border-radius: 16px;
+                padding: 30px 25px;
+                height: 280px; /* Kartları eşitlemek için */
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
             }
 
-            /* --- 3. SIDEBAR STYLING --- */
+            /* Hover Efekti: Kart yukarı kalkar ve kenarı parlar */
+            .service-card:hover {
+                transform: translateY(-8px);
+                border-color: var(--gold);
+                box-shadow: 0 15px 40px -10px rgba(0,0,0,0.8), 0 0 20px -10px var(--gold-glow);
+            }
+
+            /* İkon Tasarımı */
+            .card-icon {
+                font-size: 32px;
+                background: -webkit-linear-gradient(45deg, #D4AF37, #F3E5AB);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin-bottom: 20px;
+                filter: drop-shadow(0 0 10px rgba(212,175,55,0.3));
+            }
+
+            /* Başlık Tasarımı */
+            .card-title {
+                font-family: 'Cinzel', serif;
+                font-size: 18px;
+                font-weight: 600;
+                color: var(--text-white);
+                margin-bottom: 12px;
+                letter-spacing: 0.5px;
+            }
+
+            /* Açıklama Tasarımı */
+            .card-desc {
+                font-family: 'Inter', sans-serif;
+                font-size: 13px;
+                color: var(--text-gray);
+                line-height: 1.6;
+                font-weight: 300;
+            }
+
+            /* --- SIDEBAR --- */
             section[data-testid="stSidebar"] {
                 background-color: #000000;
-                border-right: 1px solid var(--border-light);
+                border-right: 1px solid var(--glass-border);
             }
             
-            /* Custom Sidebar Nav Buttons (Radio) */
-            .stRadio > div { background-color: transparent; }
+            /* Sidebar Butonları */
             .stRadio > div > label {
-                background-color: transparent;
-                color: var(--text-silver);
-                border: 1px solid transparent;
+                color: var(--text-gray);
                 padding: 12px;
                 border-radius: 8px;
-                transition: all 0.3s;
-                cursor: pointer;
-                margin-bottom: 5px;
+                transition: 0.3s;
+                border: 1px solid transparent;
             }
             .stRadio > div > label:hover {
                 color: var(--gold);
-                background-color: var(--bg-card);
-                border: 1px solid var(--border-light);
+                background: var(--glass-bg);
+                border-color: var(--glass-border);
             }
-            
-            /* Selected State */
+            /* Seçili Olan */
             .stRadio > div [data-testid="stMarkdownContainer"] > p {
-                font-size: 14px;
-                font-weight: 500;
+                font-weight: 600;
+                letter-spacing: 1px;
             }
 
-            /* --- 4. BENTO GRID METRIC CARDS --- */
-            div[data-testid="metric-container"] {
-                background-color: var(--bg-card);
-                backdrop-filter: blur(10px);
-                border: 1px solid var(--border-light);
-                padding: 20px;
-                border-radius: 12px;
-                transition: transform 0.3s ease, border-color 0.3s ease;
-            }
-            div[data-testid="metric-container"]:hover {
-                transform: translateY(-4px);
-                border-color: rgba(212, 175, 55, 0.4);
-            }
-            div[data-testid="metric-container"] label {
-                font-size: 11px !important;
-                text-transform: uppercase;
-                letter-spacing: 1.5px;
-            }
-            div[data-testid="metric-container"] div[data-testid="stMetricValue"] {
-                font-size: 28px !important;
-                color: var(--text-white) !important;
-            }
-            div[data-testid="metric-container"] div[data-testid="stMetricDelta"] {
-                background-color: rgba(46, 125, 50, 0.15);
-                padding: 4px 8px;
-                border-radius: 4px;
-                color: #4ade80 !important; /* Vivid Green */
-            }
-            div[data-testid="metric-container"] div[data-testid="stMetricDelta"] svg {
-                fill: #4ade80 !important;
-            }
-
-            /* --- 5. NOTIFICATION PANEL (HTML/CSS) --- */
-            .notification-box {
-                background-color: var(--bg-card);
-                border: 1px solid var(--border-light);
-                border-radius: 12px;
-                padding: 20px;
-                height: 400px;
-                overflow-y: auto;
-            }
-            .notif-item {
-                display: flex;
-                align-items: flex-start;
-                padding: 12px;
-                margin-bottom: 12px;
-                border-radius: 8px;
-                background: rgba(255, 255, 255, 0.02);
-                border-left: 2px solid #333;
-                transition: all 0.2s;
-            }
-            .notif-item:hover {
-                background: rgba(255, 255, 255, 0.05);
-                border-left: 2px solid var(--gold);
-            }
-            .status-dot {
-                min-width: 8px;
-                height: 8px;
-                border-radius: 50%;
-                margin-top: 6px;
-                margin-right: 12px;
-                box-shadow: 0 0 5px rgba(255,255,255,0.2);
-            }
-            .notif-content h4 {
-                font-family: 'Inter', sans-serif !important;
-                font-size: 14px !important;
-                margin: 0 !important;
-                color: var(--text-white) !important;
-                font-weight: 600 !important;
-            }
-            .notif-content p {
-                font-size: 12px !important;
-                margin: 4px 0 0 0 !important;
-                color: #888 !important;
-                line-height: 1.4 !important;
-            }
-
-            /* --- 6. SCROLLBAR --- */
+            /* --- SCROLLBAR --- */
             ::-webkit-scrollbar { width: 6px; }
             ::-webkit-scrollbar-track { background: #000; }
             ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-            ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
         </style>
     """, unsafe_allow_html=True)
