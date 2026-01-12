@@ -1,10 +1,8 @@
 import streamlit as st
 import plotly.graph_objects as go
-import pandas as pd
-import numpy as np
-from brain import get_dashboard_metrics, get_sales_chart
+from brain import get_dashboard_metrics, get_sales_chart, get_map_chart
 
-# --- ORTAK HEADER ---
+# --- COMMON HEADER ---
 def render_header(title, subtitle):
     col1, col2 = st.columns([3, 1])
     with col1:
@@ -24,11 +22,11 @@ def render_header(title, subtitle):
         """, unsafe_allow_html=True)
     st.markdown("<hr style='border-color: rgba(255,255,255,0.08); margin-bottom: 30px;'>", unsafe_allow_html=True)
 
-# --- 1. DASHBOARD SAYFASI ---
+# --- 1. DASHBOARD PAGE ---
 def render_dashboard():
     render_header("Global Operasyon Merkezi", "Anlık Veri Akışı ve Pazar Analizi")
     
-    # Metrikler
+    # Metrics Bento Grid
     metrics = get_dashboard_metrics()
     c1, c2, c3, c4 = st.columns(4)
     with c1: st.metric(metrics["revenue"]["label"], metrics["revenue"]["value"], metrics["revenue"]["delta"])
@@ -38,18 +36,19 @@ def render_dashboard():
 
     st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
 
-    # Grafik ve Bildirimler
+    # Chart & Notifications Split
     col_chart, col_notif = st.columns([2, 1])
     
     with col_chart:
         st.markdown("### 📈 Satış Trendi")
         st.markdown("<div style='background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px;'>", unsafe_allow_html=True)
+        # Fix: using theme="streamlit" and letting streamlit handle width if needed, or specific kwargs
         st.plotly_chart(get_sales_chart(), use_container_width=True, config={'displayModeBar': False})
         st.markdown("</div>", unsafe_allow_html=True)
 
     with col_notif:
-        # BUG FIX: HTML içeriği burada temizlendi ve CSS class'ları styles.py ile eşleşti
         st.markdown("### 🔔 Canlı Bildirimler")
+        # Pure HTML implementation that matches styles.py classes
         html_content = """
         <div class="notification-box">
             <div class="notif-item">
@@ -84,85 +83,43 @@ def render_dashboard():
         """
         st.markdown(html_content, unsafe_allow_html=True)
 
-# --- 2. JARVIS (AI MANAGER) SAYFASI ---
+# --- 2. JARVIS AI PAGE ---
 def render_ai_manager():
     render_header("JARVIS AI", "Yapay Zeka Operasyon Asistanı")
     
-    # Session state for chat history
+    # Initialize chat history
     if "messages" not in st.session_state:
         st.session_state.messages = [
-            {"role": "assistant", "content": "Merhaba, ben JARVIS. Bugün operasyonlarında sana nasıl yardımcı olabilirim? (Stok durumu, yeni pazar analizi veya lojistik rotaları hakkında sorabilirsin.)"}
+            {"role": "assistant", "content": "Merhaba. Operasyon verilerini analiz ettim. Bugün size nasıl yardımcı olabilirim?"}
         ]
 
-    # Chat history container
-    chat_container = st.container()
-    
-    # Input area
-    prompt = st.chat_input("Talimat verin (Örn: Geçen ayki iade oranlarını analiz et...)")
+    # Display chat messages
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            # Coloring logic: Gold for AI, White for User
+            color = "#D4AF37" if message["role"] == "assistant" else "#FFF"
+            st.markdown(f"<span style='color: {color}'>{message['content']}</span>", unsafe_allow_html=True)
 
-    with chat_container:
-        for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
-                st.markdown(f"<span style='color: {'#D4AF37' if message['role'] == 'assistant' else '#FFF'}'>{message['content']}</span>", unsafe_allow_html=True)
+    # Chat Input
+    if prompt := st.chat_input("Talimat verin (Örn: İade oranlarını analiz et...)"):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(f"<span style='color: #FFF'>{prompt}</span>", unsafe_allow_html=True)
+        
+        # Simulated Response
+        response = "Veriler analiz ediliyor... Geçen ayki iade oranı %2.1. Bu, sektör ortalamasının altında. Özellikle tekstil kategorisinde performans yüksek."
+        st.session_state.messages.append({"role": "assistant", "content": response})
+        with st.chat_message("assistant"):
+            st.markdown(f"<span style='color: #D4AF37'>{response}</span>", unsafe_allow_html=True)
 
-        if prompt:
-            # User message
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(f"<span style='color: #FFF'>{prompt}</span>", unsafe_allow_html=True)
-            
-            # AI Response Simulation
-            response = "Veritabanına bağlanılıyor... Analiz tamamlandı. Geçen ay iade oranı %2.1 seviyesinde kaldı, bu sektör ortalamasının altında. Özellikle Tekstil kategorisinde müşteri memnuniyeti yüksek."
-            st.session_state.messages.append({"role": "assistant", "content": response})
-            with st.chat_message("assistant"):
-                st.markdown(f"<span style='color: #D4AF37'>{response}</span>", unsafe_allow_html=True)
-
-# --- 3. LOJİSTİK SAYFASI (HARİTA) ---
+# --- 3. LOGISTICS PAGE ---
 def render_logistics():
     render_header("Lojistik Ağı", "Canlı Kargo Takibi ve Rota Yönetimi")
     
     col1, col2 = st.columns([3, 1])
     
     with col1:
-        # MAP DATA
-        fig = go.Figure()
-
-        # Rota Çizgileri (İstanbul -> NY, İstanbul -> Berlin)
-        fig.add_trace(go.Scattergeo(
-            lon = [28.97, -74.00], lat = [41.00, 40.71],
-            mode = 'lines',
-            line = dict(width = 2, color = '#D4AF37'),
-            opacity = 0.8,
-            name="Express Hattı (USA)"
-        ))
-        
-        # Noktalar (Şehirler)
-        fig.add_trace(go.Scattergeo(
-            lon = [28.97, -74.00, 13.40, -118.24],
-            lat = [41.00, 40.71, 52.52, 34.05],
-            mode = 'markers',
-            marker = dict(size = 8, color = '#D4AF37', line=dict(width=1, color='white')),
-            text = ["Istanbul (HQ)", "New York (Hub)", "Berlin", "Los Angeles"],
-            name="Depolar"
-        ))
-
-        fig.update_layout(
-            geo = dict(
-                scope = 'world',
-                projection_type = 'equirectangular',
-                showland = True,
-                landcolor = "#111",
-                showocean = True,
-                oceancolor = "#050505",
-                showcountries = True,
-                countrycolor = "#333",
-                bgcolor = "rgba(0,0,0,0)"
-            ),
-            margin=dict(l=0, r=0, t=0, b=0),
-            paper_bgcolor="rgba(0,0,0,0)",
-            height=500
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(get_map_chart(), use_container_width=True)
 
     with col2:
         st.markdown("### 📦 Aktif Sevkiyatlar")
@@ -181,7 +138,7 @@ def render_logistics():
         </div>
         """, unsafe_allow_html=True)
 
-# --- 4. PAZARLAMA SAYFASI ---
+# --- 4. MARKETING PAGE ---
 def render_marketing():
     render_header("Pazarlama 360°", "Kampanya Performansı ve ROAS Analizi")
     
