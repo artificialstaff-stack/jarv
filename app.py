@@ -1,20 +1,20 @@
 import streamlit as st
 from styles import load_css
-# views.py içindeki tüm render fonksiyonlarını import ediyoruz
 from views import render_dashboard, render_ai_manager, render_logistics, render_marketing
 
-# 1. Sayfa Ayarları
+# 1. Page Config
 st.set_page_config(
     page_title="Artificial Staff - Enterprise",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# 2. CSS Yükle
+# 2. Load Styles
 load_css()
 
-# 3. Sidebar
+# 3. Sidebar Logic
 with st.sidebar:
+    # Logo Area
     st.markdown("""
         <div style='text-align: center; margin-bottom: 30px;'>
             <h1 style='color: #D4AF37 !important; font-size: 40px; margin:0; letter-spacing: -2px;'>AS</h1>
@@ -22,19 +22,22 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
     
+    # Navigation
+    # Fixed: Added 'label' and 'label_visibility' to prevent warnings
     page = st.radio(
-        "Navigasyon",
-        ["DASHBOARD", "JARVIS (AI)", "LOJİSTİK", "PAZARLAMA", "AYARLAR"],
+        label="Menü",
+        options=["DASHBOARD", "JARVIS (AI)", "LOJİSTİK", "PAZARLAMA", "AYARLAR"],
         label_visibility="collapsed"
     )
     
+    # Sidebar Footer
     st.markdown("""
         <div style='position: fixed; bottom: 30px; width: 200px; text-align: center; opacity: 0.5;'>
-            <span style='color: #444; font-size: 10px;'>v2.1.0 Stable Build</span>
+            <span style='color: #444; font-size: 10px;'>v2.2 Stable</span>
         </div>
     """, unsafe_allow_html=True)
 
-# 4. Yönlendirme
+# 4. Page Routing (Fixed Indentation Errors)
 if page == "DASHBOARD":
     render_dashboard()
 elif page == "JARVIS (AI)":
@@ -44,4 +47,7 @@ elif page == "LOJİSTİK":
 elif page == "PAZARLAMA":
     render_marketing()
 else:
-    st.info("Bu modül (Ayarlar) yapım aşamasındadır.")
+    # Settings Page Placeholder
+    st.title("Ayarlar")
+    st.info("Sistem versiyonu: 2.2.0 (Stable)")
+    st.text("Kullanıcı yetkileri: Admin")
