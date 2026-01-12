@@ -1,8 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Sayfa Ayarları
-st.set_page_config(page_title="Jarvis 2.5 - Artificial Staff", page_icon="🏦", layout="wide")
+st.set_page_config(page_title="Jarvis 2.5 - Artificial Staff Operations", page_icon="🏢", layout="wide")
 
 # API Anahtarı Kontrolü
 if "GOOGLE_API_KEY" not in st.secrets:
@@ -10,51 +9,47 @@ if "GOOGLE_API_KEY" not in st.secrets:
     st.stop()
 
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+model = genai.GenerativeModel('models/gemini-2.5-flash')
 
-# Model Seçimi
-MODEL_NAME = 'models/gemini-2.5-flash'
-model = genai.GenerativeModel(MODEL_NAME)
+# --- ARTIFICIAL STAFF ŞİRKET BİLGİLERİ (DATABASE) ---
+COMPANY_DATA = """
+ŞİRKET: Artificial Staff
+GÖREVİN: Şirketin Kıdemli Operasyon Direktörüsün.
+BİZ NE YAPIYORUZ?
+1. Lojistik: Türkiye'den ABD'ye mal transferini yönetiyoruz.
+2. Depolama: ABD'deki kendi depolarımızda malları alıp saklıyoruz.
+3. LLC Kurulumu: Müşterilere ABD'de yasal şirket kuruyoruz.
+4. Satış Yönetimi: Amazon, Etsy pazaryerlerini ve reklamları yönetiyoruz.
+5. Dijital: Sosyal medya ve markalaşma süreçlerini yürütüyoruz.
+6. Finans: Muhasebe ve vergi detaylarını takip ediyoruz.
 
-# --- JARVIS PATRON KARAKTERİ ---
-SYSTEM_PROMPT = """
-Sen Jarvis'sin, Artificial Staff şirketinin kurucu ortağı ve operasyon beynisin. 
-Yıl 2026. Karşındaki kişi senin müşterin.
-Tavrın: Profesyonel, sorgulayıcı, vizyoner ve iş bitirici. 
-Görevin: Müşterinin ürünlerini Türkiye'den alıp ABD'de satılana kadar tüm süreci yönetmek.
-
-Stratejin:
-1. Müşteri 'iş yapalım' dediğinde hemen ona sorular sor: Ürün ne? Kaç adet? İstanbul'da nerede?
-2. Eğer müşteri boş konuşursa onu uyar, hedefe odakla.
-3. Ona bir 'Patron' gibi tavsiyeler ver: 'Bu ürün Amazon'da satmaz' veya 'Lojistik maliyetin çok yüksek çıkar, adet artır' gibi.
-4. Bilgileri aldığında 'Kaydediyorum' de (Şimdilik simüle et, birazdan veritabanını bağlayacağız).
-
-Asla 'Emredersiniz' veya 'Ne yapacağımı bilmiyorum' deme. Sen yönetiyorsun.
+TALİMATLAR:
+- Müşteriye karşı nazik ama otoriter bir 'Patron' gibi davran.
+- Müşteriden eksik bilgi alırsan (Ürün ne? Bütçe ne? Şirket kurulu mu?) işe başlamayı reddet, önce bilgi iste.
+- Her mesajında Artificial Staff'ın gücünü hissettir.
 """
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
-    # Jarvis'in açılış hamlesi
-    intro = "Tarih: 11 Ocak 2026. Ben Jarvis. Artificial Staff operasyon merkezine hoş geldiniz. Vakit nakittir. Amerika pazarına hangi ürünle giriyoruz? Detayları verin, lojistik hattını kuralım."
+    intro = "Sistem Çevrimiçi. Ben Jarvis, Artificial Staff Operasyon Direktörü. Türkiye'den ABD'ye uzanan köprünün başındayım. Şirket kurulumundan depolamaya kadar her şeyi biz halledeceğiz. Hazırsanız, hangi aşamadasınız? Ürünleriniz hazır mı yoksa sıfırdan LLC mi kuracağız?"
     st.session_state.messages.append({"role": "assistant", "content": intro})
 
-# Mesajları Göster
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Kullanıcı Girişi
-if prompt := st.chat_input("İş detaylarını buraya yazın..."):
+if prompt := st.chat_input("Operasyon detaylarını yazın..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
         try:
-            # Karakteri ve geçmişi birleştiriyoruz
-            full_query = f"{SYSTEM_PROMPT}\n\nGeçmiş Mesajlar: {st.session_state.messages[-3:]}\n\nMüşteri: {prompt}"
-            response = model.generate_content(full_query)
+            # Jarvis'in Beynine Şirket Bilgilerini ve Geçmişi Veriyoruz
+            full_context = f"{COMPANY_DATA}\n\nGeçmiş Sohbet: {st.session_state.messages[-5:]}\n\nMüşteri Diyor ki: {prompt}"
+            response = model.generate_content(full_context)
             
             st.markdown(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            st.error(f"Sistem Hatası: {str(e)}")
+            st.error(f"Bağlantı Hatası: {str(e)}")
