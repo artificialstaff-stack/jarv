@@ -1,11 +1,9 @@
 # app.py
 import streamlit as st
 from styles import apply_custom_styles
-# Views dosyasından ilgili fonksiyonları çekiyoruz
 from views import (
     render_login, render_intro_video, render_welcome, render_profile, 
-    render_service_selection, render_jarvis, render_execution,
-    render_mini_player
+    render_service_selection, render_jarvis, render_execution
 )
 
 # 1. Sayfa Ayarları
@@ -16,7 +14,7 @@ apply_custom_styles()
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
 if "intro_watched" not in st.session_state:
-    st.session_state["intro_watched"] = False # Başlangıçta izlenmedi
+    st.session_state["intro_watched"] = False
 if "current_page" not in st.session_state:
     st.session_state["current_page"] = "WELCOME"
 
@@ -32,7 +30,6 @@ elif not st.session_state["intro_watched"]:
 
 # C. GİRİŞ YAPILDI VE INTRO İZLENDİ -> DASHBOARD
 else:
-    # --- SIDEBAR ---
     with st.sidebar:
         st.markdown("""
         <div style="text-align: center; margin-bottom: 20px;">
@@ -42,23 +39,14 @@ else:
         """, unsafe_allow_html=True)
         
         selected_menu = st.radio("NAVİGASYON", 
-            ["🏠 ANA MERKEZ", "👤 PROFİL", "🚀 KURULUM", "🧠 JARVIS", "📦 LOJİSTİK", "📈 PAZARLAMA"],
+            ["🏠 ANA MERKEZ", "👤 PROFİL", "🚀 KURULUM", "🧠 JARVIS", "📦 LOJİSTİK"],
             label_visibility="collapsed"
         )
         
-        # Sidebar'da "Intro Tekrar İzle" butonu (Views içindeki render_mini_player içinde de var)
         st.markdown("---")
-        if st.button("↺ INTRO REPLAY"):
-            st.session_state["intro_watched"] = False
-            st.rerun()
-            
         if st.button("ÇIKIŞ YAP"):
             st.session_state["logged_in"] = False
             st.rerun()
-
-    # --- ANA EKRAN ---
-    # Her sayfada sağ altta mini player görünsün
-    render_mini_player()
 
     if selected_menu == "🏠 ANA MERKEZ":
         render_welcome()
@@ -76,6 +64,3 @@ else:
     elif selected_menu == "📦 LOJİSTİK":
         st.title("📦 Lojistik")
         st.info("Modül yükleniyor...")
-    elif selected_menu == "📈 PAZARLAMA":
-        st.title("📈 Pazarlama")
-        st.info("Veriler analiz ediliyor...")
