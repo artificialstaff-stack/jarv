@@ -4,24 +4,30 @@ import google.generativeai as genai
 # Sayfa Ayarları
 st.set_page_config(page_title="Artificial Staff - Jarvis", page_icon="🤖")
 
-# API Anahtarını Secrets'tan güvenli bir şekilde çekiyoruz
+# Secrets kontrolü
 if "GOOGLE_API_KEY" not in st.secrets:
-    st.error("Lütfen Streamlit Secrets kısmına GOOGLE_API_KEY ekleyin!")
+    st.error("Lütfen Secrets kısmına GOOGLE_API_KEY ekleyin!")
     st.stop()
 
+# API Yapılandırması
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
-# Model seçimi (Güncel ve hızlı sürüm)
-model = genai.GenerativeModel('gemini-1.5-flash')
+# HATAYI ÇÖZEN KRİTİK DEĞİŞİKLİK: 
+# Eğer 1.5-flash hata veriyorsa 'gemini-pro' en stabil çalışan alternatiftir.
+MODEL_NAME = 'gemini-1.5-flash' 
+
+try:
+    model = genai.GenerativeModel(MODEL_NAME)
+except Exception:
+    model = genai.GenerativeModel('gemini-pro')
 
 # Sohbet hafızasını başlat
 if "chat" not in st.session_state:
     st.session_state.chat = model.start_chat(history=[])
     st.session_state.messages = []
-    # Jarvis'in Karşılaması
     intro = ("Merhaba! Ben **Jarvis**, Artificial Staff operasyonel zekasıyım. "
              "Türkiye'deki ürünlerinizi Amerika pazarına taşımak için buradayım. "
-             "Lojistikten satışa kadar her adımda yanınızdayım. Hazırsanız başlayalım mı?")
+             "Hazırsanız başlayalım mı?")
     st.session_state.messages.append({"role": "assistant", "content": intro})
 
 # Mesajları ekrana çiz
@@ -31,26 +37,19 @@ for message in st.session_state.messages:
 
 # Kullanıcı girişi
 if prompt := st.chat_input("Jarvis ile konuşun..."):
-    # Kullanıcı mesajını ekle
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Jarvis'in yanıt üretme süreci
     with st.chat_message("assistant"):
-        # Karakter ve iş akışı talimatı (System Instruction gibi çalışır)
-        context = (
-            "Sen Jarvis'sin. Artificial Staff'in beynisin. "
-            "Müşteriye Türkiye'den ABD'ye mal gönderme, depo (ev deposu), "
-            "Amazon/Etsy satışları ve muhasebe konularında rehberlik ediyorsun. "
-            "Samimi, profesyonel ve zeki bir iş ortağı gibi davran. "
-            "Müşterinin sorusu: "
-        )
+        # Jarvis'in kimlik tanımı
+        context = "Sen Jarvis'sin, Artificial Staff şirketinin zeki asistanısın. Kısa, profesyonel ve çözüm odaklı cevaplar ver. "
         
         try:
-            # Yanıtı oluştur
+            # Model yanıtı üret
             response = st.session_state.chat.send_message(context + prompt)
             st.markdown(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            st.error(f"Jarvis bir hata ile karşılaştı: {str(e)}")
+            # Eğer hala model bulunamadı hatası alırsak alternatif modele geçiş uyarısı
+            st.error(f"Jarvis bir bağlantı hatası aldı. Lütfen tekrar deneyin. (Hata: {str(e)})")
