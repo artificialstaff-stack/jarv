@@ -3,7 +3,7 @@ import streamlit as st
 def load_css():
     st.markdown("""
         <style>
-            /* 1. FONTLAR & GENEL AYARLAR */
+            /* 1. FONTLAR & GENEL */
             @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&family=Share+Tech+Mono&display=swap');
             
             html, body, [class*="css"] {
@@ -20,14 +20,13 @@ def load_css():
                 text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
             }
             
-            /* Metric Değerleri */
             div[data-testid="stMetricValue"] {
                 font-family: 'Share Tech Mono', monospace;
                 color: #D4AF37 !important;
                 text-shadow: 0 0 5px #D4AF37;
             }
 
-            /* 2. UI GİZLEME VE DÜZENLEME */
+            /* 2. UI TEMİZLİĞİ */
             header {visibility: hidden;}
             footer {visibility: hidden;}
             #MainMenu {visibility: hidden;}
@@ -49,7 +48,7 @@ def load_css():
                 color: #D4AF37;
             }
 
-            /* 3. INPUT ALANLARI (Perplexity Style) */
+            /* 3. INPUTLAR */
             .stTextInput input {
                 background-color: #0A0A0A;
                 border: 1px solid #333;
@@ -62,9 +61,7 @@ def load_css():
                 box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
             }
 
-            /* 4. CUSTOM COMPONENTS */
-            
-            /* Navbar */
+            /* 4. NAVBAR */
             .custom-navbar {
                 position: fixed;
                 top: 0;
@@ -99,14 +96,7 @@ def load_css():
                 font-family: 'Share Tech Mono';
             }
 
-            /* Checklist Item Animation */
-            @keyframes border-pulse {
-                0% { border-color: #333; }
-                50% { border-color: #D4AF37; }
-                100% { border-color: #333; }
-            }
-            
-            /* Butonlar */
+            /* BUTONLAR */
             .stButton button {
                 background-color: transparent;
                 border: 1px solid #D4AF37;
@@ -121,7 +111,7 @@ def load_css():
                 color: #000;
             }
             
-            /* Fade In Animation */
+            /* ANİMASYON */
             @keyframes fadeIn {
                 0% { opacity: 0; transform: translateY(20px); }
                 100% { opacity: 1; transform: translateY(0); }
