@@ -4,42 +4,53 @@ import google.generativeai as genai
 # Sayfa Ayarları
 st.set_page_config(page_title="Artificial Staff - Jarvis", page_icon="🤖")
 
-# API Anahtarını Streamlit Secrets'dan çekiyoruz
-# (Streamlit panelinde Settings > Secrets kısmına GOOGLE_API_KEY eklemelisin)
-try:
-    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-    model = genai.GenerativeModel('gemini-pro')
-except:
-    st.error("Lütfen Google API Key'i ayarlara ekleyin.")
+# API Anahtarını Secrets'tan güvenli bir şekilde çekiyoruz
+if "GOOGLE_API_KEY" not in st.secrets:
+    st.error("Lütfen Streamlit Secrets kısmına GOOGLE_API_KEY ekleyin!")
+    st.stop()
 
-# Jarvis'in Karakter Tanımı (System Prompt)
+genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+
+# Model seçimi (Güncel ve hızlı sürüm)
+model = genai.GenerativeModel('gemini-1.5-flash')
+
+# Sohbet hafızasını başlat
 if "chat" not in st.session_state:
     st.session_state.chat = model.start_chat(history=[])
-    # Jarvis'e kim olduğunu öğretiyoruz
     st.session_state.messages = []
-    intro_text = ("Merhaba! Ben **Jarvis**, Artificial Staff'in operasyonel zekasıyım. "
-                  "Türkiye'deki işinizi Amerika'ya taşımak için buradayım. "
-                  "Lojistik, depo ve satış süreçlerinizi birlikte yöneteceğiz. "
-                  "Hazırsanız başlayalım mı?")
-    st.session_state.messages.append({"role": "assistant", "content": intro_text})
+    # Jarvis'in Karşılaması
+    intro = ("Merhaba! Ben **Jarvis**, Artificial Staff operasyonel zekasıyım. "
+             "Türkiye'deki ürünlerinizi Amerika pazarına taşımak için buradayım. "
+             "Lojistikten satışa kadar her adımda yanınızdayım. Hazırsanız başlayalım mı?")
+    st.session_state.messages.append({"role": "assistant", "content": intro})
 
-# Sohbeti Ekrana Yazdır
+# Mesajları ekrana çiz
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Müşteri Yazdığında
-if prompt := st.chat_input("Jarvis'e bir şey sorun..."):
+# Kullanıcı girişi
+if prompt := st.chat_input("Jarvis ile konuşun..."):
+    # Kullanıcı mesajını ekle
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Jarvis'in Düşünme Süreci
+    # Jarvis'in yanıt üretme süreci
     with st.chat_message("assistant"):
-        # Jarvis'e arka planda kim olduğunu hatırlatıyoruz ki karakterden çıkmasın
-        full_prompt = f"Sen Jarvis'sin, Artificial Staff operasyon asistanısın. Müşterinin şu mesajına bir iş ortağı gibi mantıklı ve samimi cevap ver: {prompt}"
+        # Karakter ve iş akışı talimatı (System Instruction gibi çalışır)
+        context = (
+            "Sen Jarvis'sin. Artificial Staff'in beynisin. "
+            "Müşteriye Türkiye'den ABD'ye mal gönderme, depo (ev deposu), "
+            "Amazon/Etsy satışları ve muhasebe konularında rehberlik ediyorsun. "
+            "Samimi, profesyonel ve zeki bir iş ortağı gibi davran. "
+            "Müşterinin sorusu: "
+        )
         
-        response = st.session_state.chat.send_message(full_prompt)
-        st.markdown(response.text)
-        
-    st.session_state.messages.append({"role": "assistant", "content": response.text})
+        try:
+            # Yanıtı oluştur
+            response = st.session_state.chat.send_message(context + prompt)
+            st.markdown(response.text)
+            st.session_state.messages.append({"role": "assistant", "content": response.text})
+        except Exception as e:
+            st.error(f"Jarvis bir hata ile karşılaştı: {str(e)}")
