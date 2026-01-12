@@ -138,4 +138,10 @@ class OnboardingBrain:
                 selected = "ÖZEL TEKLİF"
             
             checklist_state['offer'] = True # Paket seçildi
-            response_text = f"**{selected}** harika bir seçim. Anlaşmalı lojistik firmamıza bilgilerin
+            response_text = f"**{selected}** harika bir seçim. Anlaşmalı lojistik firmamıza bilgilerinizi iletiyorum. Ürünlerinizi evinizden alıp DC depomuza getirmek için operasyonu başlatıyorum. Aramıza hoş geldiniz."
+            next_step = "completed"
+
+        elif current_step == "completed":
+            response_text = "Kayıtlar tamamlandı. Sol menüden 'Finans' sekmesine geçerek tahmini gelir simülasyonunu inceleyebilirsiniz."
+
+        return response_text, next_step, checklist_state
