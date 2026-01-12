@@ -2,7 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 
 # Sayfa Ayarları
-st.set_page_config(page_title="Artificial Staff - Jarvis v2.5", page_icon="🤖")
+st.set_page_config(page_title="Jarvis 2.5 - Artificial Staff", page_icon="🏦", layout="wide")
 
 # API Anahtarı Kontrolü
 if "GOOGLE_API_KEY" not in st.secrets:
@@ -11,49 +11,50 @@ if "GOOGLE_API_KEY" not in st.secrets:
 
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
-# LİSTEDE GÖRDÜĞÜMÜZ TAM MODEL İSMİ (2026 Standartı)
+# Model Seçimi
 MODEL_NAME = 'models/gemini-2.5-flash'
+model = genai.GenerativeModel(MODEL_NAME)
 
-with st.sidebar:
-    st.header("🔧 Sistem Durumu")
-    st.success(f"Aktif Model: {MODEL_NAME}")
-    st.info("Not: Kota hatası alırsanız 30 saniye bekleyin.")
+# --- JARVIS PATRON KARAKTERİ ---
+SYSTEM_PROMPT = """
+Sen Jarvis'sin, Artificial Staff şirketinin kurucu ortağı ve operasyon beynisin. 
+Yıl 2026. Karşındaki kişi senin müşterin.
+Tavrın: Profesyonel, sorgulayıcı, vizyoner ve iş bitirici. 
+Görevin: Müşterinin ürünlerini Türkiye'den alıp ABD'de satılana kadar tüm süreci yönetmek.
 
-# Modeli Başlatma
-try:
-    model = genai.GenerativeModel(MODEL_NAME)
-except Exception as e:
-    st.error(f"Model yüklenemedi: {e}")
+Stratejin:
+1. Müşteri 'iş yapalım' dediğinde hemen ona sorular sor: Ürün ne? Kaç adet? İstanbul'da nerede?
+2. Eğer müşteri boş konuşursa onu uyar, hedefe odakla.
+3. Ona bir 'Patron' gibi tavsiyeler ver: 'Bu ürün Amazon'da satmaz' veya 'Lojistik maliyetin çok yüksek çıkar, adet artır' gibi.
+4. Bilgileri aldığında 'Kaydediyorum' de (Şimdilik simüle et, birazdan veritabanını bağlayacağız).
 
-# Sohbet Hafızası (Kota dostu: Sadece son 10 mesajı saklar)
+Asla 'Emredersiniz' veya 'Ne yapacağımı bilmiyorum' deme. Sen yönetiyorsun.
+"""
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
-    intro = "Merhaba! Ben Jarvis. 2026 operasyonlarınız için hazırım. Lojistik veya pazaryeri hakkında ne işlem yapalım?"
+    # Jarvis'in açılış hamlesi
+    intro = "Tarih: 11 Ocak 2026. Ben Jarvis. Artificial Staff operasyon merkezine hoş geldiniz. Vakit nakittir. Amerika pazarına hangi ürünle giriyoruz? Detayları verin, lojistik hattını kuralım."
     st.session_state.messages.append({"role": "assistant", "content": intro})
 
-# Mesajları Ekrana Yazdır
+# Mesajları Göster
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
 # Kullanıcı Girişi
-if prompt := st.chat_input("Jarvis v2.5'e talimat ver..."):
+if prompt := st.chat_input("İş detaylarını buraya yazın..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        # Jarvis'in Kimliği ve Yıl Bilgisi
-        context = "Sen Jarvis'sin. Yıl 2026. Artificial Staff operasyon asistanısın. Kısa ve öz cevap ver. "
-        
         try:
-            # chat.send_message yerine doğrudan generate_content kullanarak kota tasarrufu yapıyoruz
-            response = model.generate_content(context + prompt)
+            # Karakteri ve geçmişi birleştiriyoruz
+            full_query = f"{SYSTEM_PROMPT}\n\nGeçmiş Mesajlar: {st.session_state.messages[-3:]}\n\nMüşteri: {prompt}"
+            response = model.generate_content(full_query)
             
             st.markdown(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            if "429" in str(e):
-                st.warning("⚠️ Ücretsiz kullanım kotanız doldu. Lütfen 1 dakika bekleyip tekrar deneyin veya farklı bir API Key kullanın.")
-            else:
-                st.error(f"Hata: {str(e)}")
+            st.error(f"Sistem Hatası: {str(e)}")
