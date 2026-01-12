@@ -1,6 +1,6 @@
 import streamlit as st
 from styles import load_css
-from views import render_dashboard, render_ai_manager, render_logistics, render_marketing
+from views import render_dashboard, render_artis_ai, render_logistics, render_marketing, render_services_catalog
 
 # 1. Page Config
 st.set_page_config(
@@ -22,26 +22,27 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
     
-    # Navigation
-    # Fixed: Added 'label' and 'label_visibility' to prevent warnings
+    # Navigation (Updated with Services)
     page = st.radio(
         label="Menü",
-        options=["DASHBOARD", "JARVIS (AI)", "LOJİSTİK", "PAZARLAMA", "AYARLAR"],
+        options=["HİZMETLERİMİZ", "DASHBOARD", "ARTIS (AI)", "LOJİSTİK", "PAZARLAMA", "AYARLAR"],
         label_visibility="collapsed"
     )
     
     # Sidebar Footer
     st.markdown("""
         <div style='position: fixed; bottom: 30px; width: 200px; text-align: center; opacity: 0.5;'>
-            <span style='color: #444; font-size: 10px;'>v2.2 Stable</span>
+            <span style='color: #444; font-size: 10px;'>v2.3 ARTIS Upgrade</span>
         </div>
     """, unsafe_allow_html=True)
 
-# 4. Page Routing (Fixed Indentation Errors)
-if page == "DASHBOARD":
+# 4. Page Routing
+if page == "HİZMETLERİMİZ":
+    render_services_catalog()
+elif page == "DASHBOARD":
     render_dashboard()
-elif page == "JARVIS (AI)":
-    render_ai_manager()
+elif page == "ARTIS (AI)":
+    render_artis_ai()
 elif page == "LOJİSTİK":
     render_logistics()
 elif page == "PAZARLAMA":
@@ -49,5 +50,5 @@ elif page == "PAZARLAMA":
 else:
     # Settings Page Placeholder
     st.title("Ayarlar")
-    st.info("Sistem versiyonu: 2.2.0 (Stable)")
+    st.info("Sistem versiyonu: 2.3.0 (Stable)")
     st.text("Kullanıcı yetkileri: Admin")
