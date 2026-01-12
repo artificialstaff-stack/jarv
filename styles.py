@@ -8,49 +8,11 @@ def apply_custom_styles():
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;600&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
 
-        /* GENEL */
         .stApp { background-color: #030303; font-family: 'Inter', sans-serif; }
         section[data-testid="stSidebar"] { background-color: #000000; border-right: 1px solid #222; }
-        
-        /* GİZLİ TEKNİK: Üstteki beyaz boşluğu yok et */
         div.block-container { padding-top: 1rem; padding-bottom: 0rem; }
 
-        /* INTRO OVERLAY (TAM EKRAN KAPLAMA) */
-        .intro-overlay {
-            position: fixed;
-            top: 0; 
-            left: 0; 
-            width: 100vw; 
-            height: 100vh;
-            background-color: #000;
-            z-index: 999999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            overflow: hidden;
-        }
-        
-        .intro-bg-video {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover;
-            opacity: 0.5;
-            z-index: 1;
-        }
-        
-        .intro-text-wrapper {
-            z-index: 10;
-            position: relative;
-            background: rgba(0,0,0,0.4); /* Yazı okunsun diye hafif karartma */
-            padding: 40px;
-            border-radius: 20px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-        }
-
-        /* --- BUTONLAR --- */
+        /* BUTONLAR */
         .stButton > button {
             background-color: #D4AF37; 
             color: #000; 
@@ -74,5 +36,8 @@ def apply_custom_styles():
             text-align: center;
             margin-top: 10vh;
         }
+        
+        h1, h2, h3 { font-family: 'Cormorant Garamond', serif !important; color: #fff !important; }
+        p, label { color: #aaa; }
     </style>
     """, unsafe_allow_html=True)
