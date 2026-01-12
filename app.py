@@ -12,15 +12,27 @@ if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 if 'current_page' not in st.session_state:
     st.session_state['current_page'] = 'COMMAND CENTER'
-if 'checklist' not in st.session_state:
-    st.session_state['checklist'] = {'brand': False, 'product': False, 'data': False, 'offer': False}
-if 'onboarding_step' not in st.session_state:
-    st.session_state['onboarding_step'] = 'intro'
-if 'onboarding_history' not in st.session_state:
-    st.session_state['onboarding_history'] = [{
+
+# FORM VERİLERİNİ TUTACAK DEPO
+if 'form_data' not in st.session_state:
+    st.session_state['form_data'] = {
+        'brand_name': '',
+        'sector': 'Tekstil',
+        'star_product': '',
+        'dimensions': '',
+        'selected_package': ''
+    }
+
+# CHAT GEÇMİŞİ
+if 'chat_history' not in st.session_state:
+    st.session_state['chat_history'] = [{
         "role": "assistant", 
-        "content": "Sistem başlatıldı. Washington DC operasyon merkezine hoş geldiniz. Ben ARTIS. Markanızın adı nedir?"
+        "content": "Hoş geldiniz. Sol taraftaki formları doldururken size yardımcı olmak için buradayım. Washington DC operasyon detaylarını sorabilirsiniz."
     }]
+
+# RAPOR DURUMU
+if 'submission_complete' not in st.session_state:
+    st.session_state['submission_complete'] = False
 
 # 3. ANA AKIŞ
 if not st.session_state['logged_in']:
@@ -39,8 +51,17 @@ else:
             st.session_state['logged_in'] = False
             st.rerun()
 
+    # YÖNLENDİRME
     if st.session_state['current_page'] == "COMMAND CENTER":
-        views.render_command_center()
+        if st.session_state['submission_complete']:
+            st.success("BAŞVURUNUZ BAŞARIYLA ALINDI! YÖNETİCİYE İLETİLEN RAPOR AŞAĞIDADIR:")
+            st.code(st.session_state['final_report'], language='text')
+            if st.button("Yeni Başvuru Yap"):
+                st.session_state['submission_complete'] = False
+                st.rerun()
+        else:
+            views.render_command_center()
+            
     elif st.session_state['current_page'] == "FINANCE":
         views.render_dashboard()
     elif st.session_state['current_page'] == "ARTIS AI":
