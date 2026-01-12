@@ -4,14 +4,14 @@ import plotly.graph_objects as go
 from google import genai  # İstediğin yeni kütüphane
 import streamlit as st
 
-# --- 1. API BAĞLANTISI (YENİ YAPIDA) ---
-# API Key'i kodun içine gömmüyoruz, Secrets'tan çekiyoruz.
+# --- 1. API BAĞLANTISI (YENİ SDK & SECRETS) ---
 try:
+    # Secrets panelindeki "GOOGLE_API_KEY"i okur. 
+    # (Panelde APT yazdıysan API olarak düzeltmelisin)
     api_key = st.secrets["GOOGLE_API_KEY"]
     client = genai.Client(api_key=api_key)
 except Exception as e:
     client = None
-    # Hata: Secrets ayarlarında 'GOOGLE_API_KEY' isminde bir anahtar yoksa burası çalışır.
 
 # --- 2. ARTIS PERSONA ---
 ARTIS_PERSONA = """
@@ -59,12 +59,12 @@ def get_sales_chart():
     fig.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', margin=dict(t=0, b=0, l=0, r=0), height=300)
     return fig
 
-# --- 4. SOHBET YÖNETİCİSİ (YENİ MODELLE) ---
+# --- 4. SOHBET YÖNETİCİSİ (GEMINI 2.5 FLASH) ---
 class OnboardingBrain:
     def process_message(self, user_input, current_step, checklist_state):
         # 1. Client Kontrolü
         if client is None:
-            return "HATA: API Anahtarı bulunamadı. Lütfen Secrets panelinde ismin 'GOOGLE_API_KEY' (P değil I ile) olduğundan emin olun.", current_step, checklist_state
+            return "HATA: API Anahtarı bulunamadı. Lütfen Secrets panelinde anahtar adının 'GOOGLE_API_KEY' (P değil I ile) olduğundan emin olun.", current_step, checklist_state
 
         # 2. Geçmişi Hazırla
         history = st.session_state.get('onboarding_history', [])
@@ -77,16 +77,16 @@ class OnboardingBrain:
         
         chat_content += f"MÜŞTERİ: {user_input}\nARTIS (Kısa cevap ver):"
 
-        # 3. Gemini 2.0 Flash'a Gönder (Senin istediğin yapı)
+        # 3. Gemini 2.5 Flash'a Gönder
         try:
+            # İSTEDİĞİN YENİ MODEL VE KOD YAPISI BURADA:
             response = client.models.generate_content(
-                model="gemini-2.0-flash", 
+                model="gemini-2.5-flash", 
                 contents=chat_content
             )
             bot_response = response.text
         except Exception as e:
-            # Eğer 2.0 henüz aktif değilse fallback olarak 1.5 kullanabilirsin ama istediğin kodu yazdım.
-            bot_response = f"Bağlantı hatası: {str(e)}. Lütfen tekrar deneyin."
+            bot_response = f"Bağlantı hatası: {str(e)}. (Model adını veya API Key'i kontrol edin)."
 
         # 4. Durum Güncelleme
         next_step = current_step
