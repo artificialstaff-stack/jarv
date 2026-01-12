@@ -22,4 +22,4 @@ def get_ai_response(messages):
     
     # --- SİMÜLASYON MODU (API YOKSA BU ÇALIŞIR) ---
     time.sleep(1) # Düşünme efekti
-    return "Analiz tamamlandı. Amazon FBA için Delaware eyaleti vergi avantajı sağlar. Ancak depo kullanımı için Wyoming daha uygun olabilir. 2. Aşamadan şirketinizi hemen kurabiliriz."
+    return "Artificial Staff veritabanına göre; Delaware eyaleti vergi avantajı ve yatırımcı dostu yapısıyla öne çıkar. E-ticaret için en popüler tercihtir. Sizin sektörünüz için Wyoming de gizlilik avantajı sunabilir."
