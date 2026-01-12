@@ -3,7 +3,7 @@ import streamlit as st
 def load_css():
     st.markdown("""
         <style>
-            /* 1. IMPORTS & TYPOGRAPHY */
+            /* 1. FONTLAR & GENEL AYARLAR */
             @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&family=Share+Tech+Mono&display=swap');
             
             html, body, [class*="css"] {
@@ -20,20 +20,18 @@ def load_css():
                 text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
             }
             
-            /* Metric Values */
+            /* Metric Değerleri */
             div[data-testid="stMetricValue"] {
                 font-family: 'Share Tech Mono', monospace;
-                color: #D4AF37 !important; /* Gold */
+                color: #D4AF37 !important;
                 text-shadow: 0 0 5px #D4AF37;
             }
 
-            /* 2. UI OVERRIDES */
-            /* Hide Default Header/Footer */
+            /* 2. UI GİZLEME VE DÜZENLEME */
             header {visibility: hidden;}
             footer {visibility: hidden;}
             #MainMenu {visibility: hidden;}
             
-            /* Main Container Adjustment for Fixed Navbar */
             .main .block-container {
                 padding-top: 5rem;
                 padding-left: 2rem;
@@ -41,7 +39,7 @@ def load_css():
                 max-width: 100%;
             }
 
-            /* Sidebar - The Command Center */
+            /* Sidebar */
             section[data-testid="stSidebar"] {
                 background-color: #050505;
                 border-right: 1px solid #1A1A1A;
@@ -51,7 +49,7 @@ def load_css():
                 color: #D4AF37;
             }
 
-            /* 3. INPUT FIELDS (Perplexity Style) */
+            /* 3. INPUT ALANLARI (Perplexity Style) */
             .stTextInput input {
                 background-color: #0A0A0A;
                 border: 1px solid #333;
@@ -73,7 +71,7 @@ def load_css():
                 left: 0;
                 width: 100%;
                 height: 70px;
-                background: rgba(0, 0, 0, 0.8);
+                background: rgba(0, 0, 0, 0.9);
                 backdrop-filter: blur(10px);
                 z-index: 9999;
                 display: flex;
@@ -101,39 +99,14 @@ def load_css():
                 font-family: 'Share Tech Mono';
             }
 
-            /* Bento Grid Card */
-            .hub-card {
-                background: rgba(20, 20, 20, 0.6);
-                border: 1px solid rgba(255, 255, 255, 0.05);
-                border-radius: 12px;
-                padding: 25px;
-                transition: all 0.3s ease;
-                height: 200px;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                cursor: pointer;
-            }
-            .hub-card:hover {
-                border-color: #D4AF37;
-                box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
-                transform: translateY(-5px);
-            }
-            .card-title {
-                font-family: 'Cinzel';
-                font-size: 1.2rem;
-                margin-bottom: 10px;
-                color: #FFF;
-            }
-            .card-desc {
-                font-family: 'Inter';
-                font-size: 0.8rem;
-                color: #888;
+            /* Checklist Item Animation */
+            @keyframes border-pulse {
+                0% { border-color: #333; }
+                50% { border-color: #D4AF37; }
+                100% { border-color: #333; }
             }
             
-            /* Buttons */
+            /* Butonlar */
             .stButton button {
                 background-color: transparent;
                 border: 1px solid #D4AF37;
@@ -141,13 +114,14 @@ def load_css():
                 font-family: 'Cinzel';
                 transition: 0.3s;
                 border-radius: 4px;
+                width: 100%;
             }
             .stButton button:hover {
                 background-color: #D4AF37;
                 color: #000;
             }
             
-            /* Animations */
+            /* Fade In Animation */
             @keyframes fadeIn {
                 0% { opacity: 0; transform: translateY(20px); }
                 100% { opacity: 1; transform: translateY(0); }
