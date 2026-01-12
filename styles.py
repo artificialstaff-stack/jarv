@@ -2,72 +2,154 @@ import streamlit as st
 
 def load_css():
     st.markdown("""
-        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         
         <style>
-            /* [STYLE-01] GLOBAL THEME */
+            /* --- 1. GLOBAL TEMELLER (PERPLEXITY DARK) --- */
             :root {
-                --bg-dark: #050505;
+                --bg-color: #191A1A; /* Perplexity tarzı koyu gri */
+                --sidebar-bg: #111111;
                 --gold: #D4AF37;
-                --glass-border: rgba(255, 255, 255, 0.1);
+                --text-main: #E8E8E8;
+                --text-dim: #9ca3af;
+                --border-color: rgba(255, 255, 255, 0.1);
+                --input-bg: #202222;
             }
-            .stApp { background-color: var(--bg-dark); font-family: 'Inter', sans-serif; }
-            header[data-testid="stHeader"], footer { display: none; }
 
-            /* [STYLE-02] SIDEBAR */
-            section[data-testid="stSidebar"] {
-                background-color: #080808;
-                border-right: 1px solid var(--glass-border);
+            .stApp {
+                background-color: var(--bg-color);
+                font-family: 'Inter', sans-serif;
+                color: var(--text-main);
             }
-            /* Menü butonlarını özelleştirme */
+
+            /* Gereksizleri Gizle */
+            header[data-testid="stHeader"], footer {display: none;}
+            
+            /* --- 2. SIDEBAR (Sol Menü) --- */
+            section[data-testid="stSidebar"] {
+                background-color: var(--sidebar-bg);
+                border-right: 1px solid var(--border-color);
+            }
             .stRadio > div > label {
-                padding: 10px; border-radius: 5px; transition: 0.3s;
-                border: 1px solid transparent; margin-bottom: 5px;
+                color: var(--text-dim);
+                padding: 10px 15px;
+                border-radius: 8px;
+                transition: all 0.2s;
+                font-weight: 500;
+                border: 1px solid transparent;
             }
             .stRadio > div > label:hover {
-                background: rgba(255,255,255,0.05); border-color: var(--gold); color: var(--gold);
+                color: var(--gold);
+                background-color: rgba(212, 175, 55, 0.05);
+                border-color: rgba(212, 175, 55, 0.2);
+            }
+            /* Seçili Olan */
+            .stRadio > div [data-testid="stMarkdownContainer"] > p {
+                font-weight: 600;
+                color: #fff;
             }
 
-            /* [STYLE-03] LOGIN SCREEN */
-            div[data-baseweb="input"] {
-                background-color: rgba(255,255,255,0.05);
-                border: 1px solid var(--glass-border);
-                color: white; border-radius: 8px;
+            /* --- 3. INPUT ALANI (PERPLEXITY STYLE SEARCH) --- */
+            /* Chat Input ve Text Input */
+            .stTextInput input, .stChatInput textarea {
+                background-color: var(--input-bg) !important;
+                border: 1px solid var(--border-color) !important;
+                border-radius: 24px !important; /* Yuvarlak köşeler */
+                color: white !important;
+                padding: 15px 20px !important;
+                font-size: 16px !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             }
+            .stTextInput input:focus, .stChatInput textarea:focus {
+                border-color: var(--gold) !important;
+                box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2) !important;
+            }
+
+            /* --- 4. BUTONLAR (Pill/Chip Style) --- */
             div[data-testid="stButton"] button {
-                background: linear-gradient(45deg, #D4AF37, #B69246);
-                color: #000; font-family: 'Cinzel', serif; font-weight: bold;
-                border: none; width: 100%; padding: 12px; transition: 0.3s;
-            }
-            div[data-testid="stButton"] button:hover {
-                box-shadow: 0 0 20px rgba(212,175,55,0.4); transform: scale(1.02);
-            }
-
-            /* [STYLE-04] WELCOME ANIMATION TEXT */
-            .welcome-text {
-                font-family: 'Inter'; font-size: 24px; color: #ddd;
-                text-align: center; font-weight: 300; animation: fadeIn 1s;
-            }
-            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-            /* [STYLE-05] HUB CARDS */
-            .hub-card {
-                background: linear-gradient(145deg, rgba(20,20,20,1) 0%, rgba(5,5,5,1) 100%);
-                border: 1px solid var(--glass-border); border-radius: 12px;
-                padding: 30px; text-align: center; height: 220px;
-                display: flex; flex-direction: column; align-items: center; justify-content: center;
+                background-color: rgba(255, 255, 255, 0.05);
+                color: var(--text-dim);
+                border: 1px solid var(--border-color);
+                border-radius: 20px;
+                padding: 8px 16px;
+                font-size: 13px;
+                font-weight: 500;
                 transition: 0.3s;
             }
-            .hub-card:hover { border-color: var(--gold); transform: translateY(-5px); }
-            .hub-icon { font-size: 32px; color: var(--gold); margin-bottom: 15px; }
-            .hub-title { font-family: 'Cinzel'; font-size: 18px; color: white; }
-            .hub-desc { font-size: 12px; color: #888; margin-top: 5px; }
+            div[data-testid="stButton"] button:hover {
+                border-color: var(--gold);
+                color: var(--gold);
+                background-color: rgba(212, 175, 55, 0.05);
+            }
 
-            /* [STYLE-06] SERVICE MINI CARDS */
-            .service-mini-card {
-                background: rgba(255,255,255,0.02); border-left: 2px solid var(--gold);
-                padding: 15px; margin-bottom: 10px; border-radius: 0 8px 8px 0;
+            /* --- 5. KARTLAR (Minimalist & Clean) --- */
+            .info-card {
+                background-color: #202222;
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+                padding: 24px;
+                transition: transform 0.2s, border-color 0.2s;
+                height: 100%;
+            }
+            .info-card:hover {
+                border-color: rgba(212, 175, 55, 0.5);
+                transform: translateY(-2px);
+            }
+            .card-icon {
+                font-size: 24px;
+                color: var(--gold);
+                margin-bottom: 16px;
+            }
+            .card-title {
+                font-family: 'Inter', sans-serif;
+                font-size: 16px;
+                font-weight: 600;
+                color: #fff;
+                margin-bottom: 8px;
+            }
+            .card-desc {
+                font-size: 13px;
+                color: var(--text-dim);
+                line-height: 1.5;
+            }
+
+            /* --- 6. METRIK KUTULARI --- */
+            div[data-testid="metric-container"] {
+                background-color: #202222;
+                border: 1px solid var(--border-color);
+                padding: 20px;
+                border-radius: 12px;
+            }
+            div[data-testid="metric-container"] label {
+                font-size: 12px;
+                color: var(--text-dim);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            div[data-testid="metric-container"] div[data-testid="stMetricValue"] {
+                font-family: 'Inter', sans-serif;
+                font-size: 28px;
+                color: #fff;
+            }
+
+            /* --- 7. KARŞILAMA YAZISI --- */
+            .hero-title {
+                font-family: 'Cinzel', serif;
+                font-size: 48px;
+                text-align: center;
+                background: linear-gradient(180deg, #FFFFFF 0%, #888888 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin-bottom: 10px;
+            }
+            .hero-subtitle {
+                font-family: 'Inter', sans-serif;
+                font-size: 16px;
+                text-align: center;
+                color: var(--text-dim);
+                margin-bottom: 40px;
+                font-weight: 300;
             }
         </style>
     """, unsafe_allow_html=True)
