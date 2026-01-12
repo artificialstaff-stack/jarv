@@ -4,97 +4,132 @@ import time
 from brain import get_ai_response
 from instructions import COMPANY_DATA
 
-# --- 1. AŞAMA: BİLGİ AL (JARVIS CHAT) ---
+# --- 1. EKRAN: STRATEJİK DANIŞMANLIK (JARVIS) ---
 def render_step1_consulting():
-    st.title("🧠 Jarvis Danışmanlık Hattı")
-    st.info("ABD pazarında satış, şirket kurulumu ve lojistik hakkında her şeyi sorun.")
+    st.markdown("## 🧠 Global Entegrasyon Asistanı")
+    st.markdown("""
+    <div style='background-color: #1c1c24; padding: 15px; border-radius: 10px; border-left: 5px solid #00a8ff;'>
+    <strong>Artificial Staff Vizyonu:</strong> Yerel pazardaki rekabetten sıyrılıp, dünyanın en büyük ekonomisine açılmanız için gereken 
+    tüm altyapıyı (Hukuk, Finans, Lojistik, Yazılım) tek çatı altında sunuyoruz.
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.divider()
 
     if "messages" not in st.session_state:
         st.session_state.messages = [{"role": "system", "content": COMPANY_DATA}]
-        st.session_state.messages.append({"role": "assistant", "content": "Jarvis Online. Amerika operasyonunuz için aklınızdaki soruları yanıtlamaya hazırım."})
+        # İlk mesajı daha profesyonel yaptık
+        st.session_state.messages.append({"role": "assistant", "content": "Jarvis v4.2 Online. ABD operasyonunuz, LLC kurulumu veya lojistik süreçleri hakkında stratejik planlamaya hazırım."})
 
-    # Geçmişi Göster
+    # Mesajları Göster
     for msg in st.session_state.messages:
         if msg["role"] == "system": continue
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-    # Yeni Soru
-    if prompt := st.chat_input("Örn: Hangi eyalette şirket kurmalıyım?"):
+    # Input Alanı
+    if prompt := st.chat_input("Soru sorun (Örn: Neden Delaware eyaletinde şirket kurmalıyım?)"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Cevap Üret
         with st.chat_message("assistant"):
-            with st.spinner("Veriler analiz ediliyor..."):
+            with st.spinner("Artificial Staff veritabanı analiz ediliyor..."):
                 response_text = get_ai_response(st.session_state.messages)
                 st.markdown(response_text)
         
         st.session_state.messages.append({"role": "assistant", "content": response_text})
 
-# --- 2. AŞAMA: İŞE BAŞLA (FORM) ---
+# --- 2. EKRAN: OPERASYON BAŞLATMA (FORM) ---
 def render_step2_action():
-    st.title("🚀 Operasyonu Başlat")
-    st.write("Strateji tamam. Şimdi şirketinizi resmiyete dökelim.")
+    st.markdown("## 🚀 Operasyon Kurulum Merkezi")
+    st.write("Markanızı global bir oyuncuya dönüştürmek için resmi süreci başlatın.")
+    
+    st.divider()
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("📋 Şirket Kimliği")
-        c_name = st.text_input("Şirket İsmi Seçeneği 1")
-        c_name2 = st.text_input("Şirket İsmi Seçeneği 2")
-        owner = st.text_input("Kurucu Ad Soyad")
+        st.subheader("Kurumsal Kimlik")
+        c_name = st.text_input("Tescil Edilecek Şirket İsmi")
+        owner = st.text_input("Hissedar Ad Soyad (Pasaporttaki hali)")
+        email = st.text_input("Kurumsal İletişim E-Posta")
+        sector = st.selectbox("Hedef Sektör", ["E-Ticaret (Amazon/Etsy/Walmart)", "B2B İhracat", "Yazılım & SaaS", "Lojistik & Tedarik", "Diğer"])
     
     with col2:
-        st.subheader("📦 Paket Seçimi")
-        plan = st.radio("Hizmet Seviyesi", ["Standart ($1500) - 15 Gün", "Turbo ($2000) - 3 Gün ⚡"], index=0)
-        sector = st.selectbox("Sektör", ["E-Ticaret", "Yazılım", "Lojistik", "Diğer"])
+        st.subheader("Entegrasyon Paketi")
+        # Paket isimlerini ve açıklamalarını sunuma uygun hale getirdik
+        plan = st.radio("Hizmet Seviyesi Seçimi", 
+            [
+                "GLOBAL STARTUP ($1500) | LLC + Banka + Temel Lojistik", 
+                "ENTERPRISE SCALING ($2500) | Full Entegrasyon + B2B AI Satış + Marka Kaydı"
+            ], 
+            index=0
+        )
+        
+        st.info("""
+        **Seçilen Paket Kapsamı:**
+        * 🏢 **Yasal:** LLC Kurulumu, EIN, Registered Agent (Delaware/Wyoming).
+        * 🏦 **Finans:** Mercury/Brex Banka Hesabı, Stripe & PayPal Altyapısı.
+        * 📦 **Lojistik:** Uçtan Uca Nakliye ve Gümrükleme Desteği.
+        * ⚡ **Teknoloji:** 0.4s Hızlı Web Altyapısı ve SEO (Enterprise Pakette).
+        """)
 
-    st.markdown("---")
+    st.divider()
     
-    if st.button("BAŞVURUYU GÖNDER VE SÜRECİ BAŞLAT"):
+    if st.button("RESMİ BAŞVURU SÜRECİNİ BAŞLAT", type="primary"):
         if c_name and owner:
-            # Veriyi "Veritabanına" (Session State) Kaydet
             st.session_state["active_order"] = {
                 "company": c_name,
                 "owner": owner,
                 "plan": plan,
-                "status": "Evraklar İnceleniyor",
-                "progress": 10
+                "status": "Compliance Check (Uyumluluk Kontrolü)",
+                "progress": 5
             }
-            st.success("✅ Başvuru alındı! 3. Aşamadan durumunuzu takip edebilirsiniz.")
-            time.sleep(1)
+            st.success("✅ Başvuru sisteme işlendi. Operasyon ekibimiz uyumluluk kontrollerini başlattı. 'Durum İzle' ekranından takip edebilirsiniz.")
+            time.sleep(1.5)
             st.rerun()
         else:
-            st.error("Lütfen şirket ismi ve kurucu adını giriniz.")
+            st.error("⚠️ Lütfen yasal işlemler için şirket ismi ve hissedar bilgilerini eksiksiz giriniz.")
 
-# --- 3. AŞAMA: İZLEME (DASHBOARD) ---
+# --- 3. EKRAN: SÜREÇ TAKİBİ (DASHBOARD) ---
 def render_step3_tracking():
-    st.title("📊 Operasyon Kontrol Merkezi")
+    st.markdown("## 📊 Operasyon Kontrol Paneli")
     
     if "active_order" not in st.session_state:
-        st.warning("⚠️ Henüz aktif bir şirket kurulum süreciniz yok. Lütfen '2. İŞE BAŞLA' sekmesinden başvuru yapın.")
+        st.warning("⚠️ Henüz aktif bir global operasyon kaydı bulunamadı. Lütfen 'İşe Başla' menüsünden kurulumu başlatın.")
         st.stop()
     
     data = st.session_state["active_order"]
     
-    # Üst Bilgi Kartları
+    # Dashboard Metrikleri
     c1, c2, c3 = st.columns(3)
-    c1.metric("Şirket Adı", data["company"])
-    c2.metric("Paket", "Turbo" if "Turbo" in data["plan"] else "Standart")
-    c3.metric("Tahmini Bitiş", "3 Gün" if "Turbo" in data["plan"] else "15 Gün")
+    c1.metric("Şirket", data["company"], "US Entity")
+    c2.metric("Paket", "Enterprise" if "Enterprise" in data["plan"] else "Startup", "Active")
+    c3.metric("Tahmini Teslim", "3-5 İş Günü", "On Time")
     
-    st.markdown("---")
-    st.subheader("Süreç Durumu")
+    st.divider()
     
-    # İlerleme Çubuğu
+    st.subheader("Canlı Süreç Akışı")
     st.progress(data["progress"])
-    st.info(f"📍 Güncel Durum: **{data['status']}**")
     
-    st.markdown("### 📝 Yapılacaklar Listesi")
-    st.checkbox("Başvuru Alındı", value=True, disabled=True)
-    st.checkbox("Evrak Kontrolü", value=(data['progress'] > 20), disabled=True)
-    st.checkbox("Eyalet Başvurusu (Filing)", value=False, disabled=True)
-    st.checkbox("EIN Numarası", value=False, disabled=True)
-    st.checkbox("Banka Hesabı Açılışı", value=False, disabled=True)
+    st.caption(f"📍 Mevcut Aşama: **{data['status']}**")
+    
+    col_checklist, col_logs = st.columns([1, 1])
+    
+    with col_checklist:
+        st.markdown("### 📝 Yapılacaklar Listesi")
+        st.checkbox("Başvuru & KYC Doğrulaması", value=True, disabled=True)
+        st.checkbox("Eyalet Dosyalama (State Filing)", value=(data['progress'] > 20), disabled=True)
+        st.checkbox("EIN (Vergi No) Tahsisi", value=False, disabled=True)
+        st.checkbox("Mercury Banka Hesabı Açılışı", value=False, disabled=True)
+        st.checkbox("Global Lojistik Entegrasyonu", value=False, disabled=True)
+        
+    with col_logs:
+        st.markdown("### 📡 Sistem Logları")
+        st.code(f"""
+        [SYSTEM] New Order Created: {data['company']} LLC
+        [INFO] Region: US-East-1
+        [STATUS] Verifying identity documents...
+        [STATUS] Waiting for State approval...
+        """, language="bash")
