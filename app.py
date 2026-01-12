@@ -9,17 +9,14 @@ if "GOOGLE_API_KEY" not in st.secrets:
     st.error("Lütfen Secrets kısmına GOOGLE_API_KEY ekleyin!")
     st.stop()
 
-# API Yapılandırması
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
-# HATAYI ÇÖZEN KRİTİK DEĞİŞİKLİK: 
-# Eğer 1.5-flash hata veriyorsa 'gemini-pro' en stabil çalışan alternatiftir.
-MODEL_NAME = 'gemini-1.5-flash' 
-
+# SENİN İSTEDİĞİN MODEL (Ekran görüntüsündeki en yeni sürüm)
+# Eğer 2.0 hata verirse 1.5'i deneyecek akıllı bir yapı kurdum.
 try:
-    model = genai.GenerativeModel(MODEL_NAME)
-except Exception:
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-2.0-flash-exp')
+except:
+    model = genai.GenerativeModel('gemini-1.5-flash')
 
 # Sohbet hafızasını başlat
 if "chat" not in st.session_state:
@@ -42,14 +39,11 @@ if prompt := st.chat_input("Jarvis ile konuşun..."):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        # Jarvis'in kimlik tanımı
-        context = "Sen Jarvis'sin, Artificial Staff şirketinin zeki asistanısın. Kısa, profesyonel ve çözüm odaklı cevaplar ver. "
+        context = "Sen Jarvis'sin. Artificial Staff şirketinin zeki asistanısın. Kısa, net ve çözüm odaklı cevap ver. "
         
         try:
-            # Model yanıtı üret
             response = st.session_state.chat.send_message(context + prompt)
             st.markdown(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            # Eğer hala model bulunamadı hatası alırsak alternatif modele geçiş uyarısı
-            st.error(f"Jarvis bir bağlantı hatası aldı. Lütfen tekrar deneyin. (Hata: {str(e)})")
+            st.error(f"Hata: {str(e)}. Lütfen sayfayı yenileyin.")
