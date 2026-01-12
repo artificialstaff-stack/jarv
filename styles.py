@@ -2,7 +2,7 @@ import streamlit as st
 
 def load_css():
     st.markdown("""
-        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         
         <style>
@@ -10,11 +10,10 @@ def load_css():
             :root {
                 --bg-dark: #050505;
                 --gold: #D4AF37;
-                --gold-glow: rgba(212, 175, 55, 0.3);
+                --gold-dim: rgba(212, 175, 55, 0.5);
                 --glass-bg: rgba(255, 255, 255, 0.03);
                 --glass-border: rgba(255, 255, 255, 0.08);
                 --text-white: #FFFFFF;
-                --text-gray: #A0A0A0;
             }
 
             .stApp {
@@ -25,82 +24,85 @@ def load_css():
             /* Header/Footer Gizleme */
             header[data-testid="stHeader"], footer {display: none;}
 
-            /* --- SERVICE CARDS (LÜKS KARTLAR) --- */
-            .service-card {
-                background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-                backdrop-filter: blur(20px);
-                -webkit-backdrop-filter: blur(20px);
-                border: 1px solid var(--glass-border);
-                border-radius: 16px;
-                padding: 30px 25px;
-                height: 280px; /* Kartları eşitlemek için */
-                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                position: relative;
-                overflow: hidden;
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-start;
-            }
-
-            /* Hover Efekti: Kart yukarı kalkar ve kenarı parlar */
-            .service-card:hover {
-                transform: translateY(-8px);
-                border-color: var(--gold);
-                box-shadow: 0 15px 40px -10px rgba(0,0,0,0.8), 0 0 20px -10px var(--gold-glow);
-            }
-
-            /* İkon Tasarımı */
-            .card-icon {
-                font-size: 32px;
-                background: -webkit-linear-gradient(45deg, #D4AF37, #F3E5AB);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                margin-bottom: 20px;
-                filter: drop-shadow(0 0 10px rgba(212,175,55,0.3));
-            }
-
-            /* Başlık Tasarımı */
-            .card-title {
-                font-family: 'Cinzel', serif;
-                font-size: 18px;
-                font-weight: 600;
-                color: var(--text-white);
-                margin-bottom: 12px;
-                letter-spacing: 0.5px;
-            }
-
-            /* Açıklama Tasarımı */
-            .card-desc {
-                font-family: 'Inter', sans-serif;
-                font-size: 13px;
-                color: var(--text-gray);
+            /* --- MATRIX TYPEWRITER EFFECT --- */
+            .neo-text {
+                font-family: 'Share Tech Mono', monospace; /* Matrix benzeri font */
+                color: var(--gold);
+                font-size: 24px;
                 line-height: 1.6;
-                font-weight: 300;
-            }
-
-            /* --- SIDEBAR --- */
-            section[data-testid="stSidebar"] {
-                background-color: #000000;
-                border-right: 1px solid var(--glass-border);
+                white-space: pre-wrap;
+                text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
             }
             
-            /* Sidebar Butonları */
-            .stRadio > div > label {
-                color: var(--text-gray);
-                padding: 12px;
-                border-radius: 8px;
-                transition: 0.3s;
-                border: 1px solid transparent;
+            .cursor {
+                display: inline-block;
+                width: 10px;
+                height: 24px;
+                background-color: var(--gold);
+                animation: blink 1s infinite;
+                vertical-align: middle;
             }
-            .stRadio > div > label:hover {
+
+            @keyframes blink {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0; }
+            }
+
+            /* --- HUB MODULE CARDS (BALONCUK YERİNE) --- */
+            .hub-card {
+                background: linear-gradient(145deg, rgba(20,20,20,1) 0%, rgba(5,5,5,1) 100%);
+                border: 1px solid var(--glass-border);
+                border-radius: 12px;
+                padding: 40px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.4s ease;
+                height: 250px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            }
+
+            .hub-card:hover {
+                border-color: var(--gold);
+                box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
+                transform: translateY(-5px);
+            }
+
+            .hub-icon {
+                font-size: 40px;
                 color: var(--gold);
-                background: var(--glass-bg);
-                border-color: var(--glass-border);
+                margin-bottom: 20px;
+                text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
             }
-            /* Seçili Olan */
-            .stRadio > div [data-testid="stMarkdownContainer"] > p {
-                font-weight: 600;
-                letter-spacing: 1px;
+
+            .hub-title {
+                font-family: 'Cinzel', serif;
+                font-size: 20px;
+                color: white;
+                letter-spacing: 2px;
+            }
+
+            .hub-desc {
+                font-family: 'Inter', sans-serif;
+                font-size: 12px;
+                color: #666;
+                margin-top: 10px;
+            }
+
+            /* --- SERVICE GRID (İÇERİK) --- */
+            .service-mini-card {
+                background: rgba(255,255,255,0.02);
+                border-left: 2px solid var(--gold);
+                padding: 15px;
+                margin-bottom: 10px;
+                transition: 0.3s;
+            }
+            .service-mini-card:hover {
+                background: rgba(212, 175, 55, 0.05);
+                padding-left: 20px;
             }
 
             /* --- SCROLLBAR --- */
