@@ -4,124 +4,95 @@ import data
 import time
 
 def render_dashboard():
-    if "dashboard_mode" not in st.session_state:
-        st.session_state.dashboard_mode = "finance"
+    # Mod kontrolü
+    if "dashboard_mode" not in st.session_state: st.session_state.dashboard_mode = "finance"
 
-    # --- 1. ÜST BİLGİ ---
+    # --- ÜST BAŞLIK (Daha sade) ---
     c1, c2 = st.columns([3, 1])
     with c1:
-        st.markdown(f"## 👋 Hoşgeldin, {st.session_state.user_data['name']}")
-        st.caption(f"Panel: {st.session_state.user_data['brand']} | 🟢 Sistem Online")
-    
+        st.markdown(f"### 👋 Hoşgeldin, {st.session_state.user_data['name']}")
     with c2:
-        # Quick Actions (Daha kompakt)
-        if st.button("⚡ Hızlı İşlem Menüsü", use_container_width=True):
-            st.toast("Menü açılıyor...", icon="📂")
+        st.markdown(f"<div style='text-align:right; color:#666; font-size:12px; padding-top:10px;'>{st.session_state.user_data['brand']}</div>", unsafe_allow_html=True)
 
     st.markdown("---")
 
-    # --- 2. PROGRESS BAR ---
-    st.progress(65, text="🚀 Hesap Kurulumu: %65")
-    st.markdown("<br>", unsafe_allow_html=True)
+    # --- İKİ KOLONLU YAPI ---
+    col_chat, col_visual = st.columns([1, 1.6], gap="large")
 
-    # --- 3. ANA PANEL ---
-    col_chat, col_visual = st.columns([1, 1.6], gap="medium")
-
-    # === SOL: AI CHAT (GÜNCELLENDİ: EMPTY STATE EKLENDİ) ===
+    # === SOL: AI ASİSTAN (Artık boş değil!) ===
     with col_chat:
-        st.markdown("### 💬 ARTIS Asistan")
+        st.markdown("#### 🤖 Asistan")
         
-        chat_container = st.container(height=450, border=True)
+        chat_box = st.container(height=450)
         
-        # MESAJ YOKSA "HOŞGELDİN" EKRANI GÖSTER
+        # Eğer hiç mesaj yoksa -> KARŞILAMA EKRANI GÖSTER
         if "messages" not in st.session_state: st.session_state.messages = []
         
         if not st.session_state.messages:
-            with chat_container:
-                st.markdown("<br><br>", unsafe_allow_html=True)
-                st.markdown("<h3 style='text-align:center;'>👋 Size nasıl yardım edeyim?</h3>", unsafe_allow_html=True)
-                st.markdown("<p style='text-align:center; color:#666;'>Aşağıdaki konularda analiz yapabilirim:</p>", unsafe_allow_html=True)
+            with chat_box:
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.info("👋 Merhaba! Ben ARTIS. Size nasıl yardımcı olabilirim?")
                 
-                b1, b2 = st.columns(2)
-                if b1.button("📦 Lojistik", use_container_width=True):
-                    st.session_state.messages.append({"role": "user", "content": "Lojistik durumum nedir?"})
+                # Hazır Sorular (Butonlar)
+                b1 = st.button("📦 Lojistik durumum ne?", use_container_width=True)
+                b2 = st.button("💰 Bu ay ne kadar kazandık?", use_container_width=True)
+                b3 = st.button("📋 Stoklarda risk var mı?", use_container_width=True)
+                
+                if b1:
+                    st.session_state.messages.append({"role": "user", "content": "Lojistik durumum ne?"})
                     st.rerun()
-                if b2.button("💰 Finans", use_container_width=True):
-                    st.session_state.messages.append({"role": "user", "content": "Finansal özet ver."})
+                if b2:
+                    st.session_state.messages.append({"role": "user", "content": "Finansal durum?"})
+                    st.rerun()
+                if b3:
+                    st.session_state.messages.append({"role": "user", "content": "Stok durumu?"})
                     st.rerun()
         else:
-            # Mesaj varsa normal akış
-            for msg in st.session_state.messages:
-                chat_container.chat_message(msg["role"]).write(msg["content"])
+            # Mesaj varsa normal sohbeti göster
+            with chat_box:
+                for msg in st.session_state.messages:
+                    with st.chat_message(msg["role"]):
+                        st.write(msg["content"])
 
-        # INPUT ALANI
-        if prompt := st.chat_input("Bir soru sorun..."):
+        # Input Alanı
+        if prompt := st.chat_input("Bir şeyler yazın..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
-            # Mesaj eklendiği için rerun yapıyoruz ki "Boş Ekran" kaybolsun
+            
+            # Mod Değiştirme Mantığı
+            p_low = prompt.lower()
+            if "lojistik" in p_low or "kargo" in p_low: st.session_state.dashboard_mode = "logistics"
+            elif "stok" in p_low or "ürün" in p_low: st.session_state.dashboard_mode = "inventory"
+            elif "finans" in p_low or "ciro" in p_low: st.session_state.dashboard_mode = "finance"
+
+            # AI Cevabı
+            full_response = ""
+            for chunk in brain.get_streaming_response(st.session_state.messages, st.session_state.user_data):
+                full_response += chunk
+            st.session_state.messages.append({"role": "assistant", "content": full_response})
             st.rerun()
 
-        # CEVAP ÜRETME (Son mesaj kullanıcıdansa)
-        if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
-            user_msg = st.session_state.messages[-1]["content"]
-            
-            # Bağlam Yakalama
-            p_low = user_msg.lower()
-            if any(x in p_low for x in ["lojistik", "kargo"]): st.session_state.dashboard_mode = "logistics"
-            elif any(x in p_low for x in ["stok", "ürün"]): st.session_state.dashboard_mode = "inventory"
-            elif any(x in p_low for x in ["finans", "ciro"]): st.session_state.dashboard_mode = "finance"
-
-            with chat_container.chat_message("assistant"):
-                ph = st.empty()
-                full = ""
-                for chunk in brain.get_streaming_response(st.session_state.messages, st.session_state.user_data):
-                    full += chunk
-                    ph.markdown(full + "▌")
-                ph.markdown(full)
-            st.session_state.messages.append({"role": "assistant", "content": full})
-            st.rerun() # Görsel güncellensin diye
-
-    # === SAĞ: AKILLI GÖRSEL (GÜNCELLENDİ: KART GÖRÜNÜMÜ) ===
+    # === SAĞ: İÇERİK ===
     with col_visual:
         mode = st.session_state.dashboard_mode
         
-        # FİNANS
         if mode == "finance":
-            st.markdown("### 📈 Finansal İçgörü")
-            
-            # Metrikleri Kutuya Al (Card UI)
-            with st.container(border=True):
-                c1, c2, c3 = st.columns(3)
-                c1.metric("Ciro", "$42,500", "+12%")
-                c2.metric("Kâr", "%32", "+4%")
-                c3.metric("Büyüme", "Yüksek", "Stabil")
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            
-            with st.container(border=True):
-                st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
-                st.info("💡 **AI Analizi:** Reklam maliyetleri sabit kalırken ciro %12 arttı.")
+            st.markdown("#### 📈 Finansal Özet")
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Ciro", "$42,500", "+12%")
+            c2.metric("Kâr", "%32", "+4%")
+            c3.metric("Büyüme", "Stabil", "Normal")
+            st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
 
-        # LOJİSTİK
         elif mode == "logistics":
-            st.markdown("### 📦 Aktif Sevkiyatlar")
-            with st.container(border=True):
-                c1, c2 = st.columns(2)
-                c1.metric("Takip No", "TR-8821", "Yolda")
-                c2.metric("Varış", "14 Ocak", "Zamanında")
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            with st.container(border=True):
-                st.plotly_chart(brain.get_logistics_map(), use_container_width=True)
-                st.success("✅ **Gümrük:** Belgeler onaylandı.")
+            st.markdown("#### 🚢 Aktif Lojistik")
+            c1, c2 = st.columns(2)
+            c1.metric("Konteyner", "TR-8821", "Yolda")
+            c2.metric("Varış", "2 Gün", "Zamanında")
+            st.plotly_chart(brain.get_logistics_map(), use_container_width=True)
 
-        # ENVANTER
         elif mode == "inventory":
-            st.markdown("### 📋 Stok Sağlığı")
-            with st.container(border=True):
-                c1, c2 = st.columns(2)
-                c1.metric("Toplam Ürün", "8,550", "+150")
-                c2.metric("Riskli Ürün", "Çanta", "Azalıyor", delta_color="inverse")
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            with st.container(border=True):
-                st.plotly_chart(brain.get_inventory_chart(), use_container_width=True)
+            st.markdown("#### 📦 Envanter")
+            c1, c2 = st.columns(2)
+            c1.metric("Toplam Ürün", "8,550", "+150")
+            c2.metric("Kritik", "Çanta", "-50")
+            st.plotly_chart(brain.get_inventory_chart(), use_container_width=True)
