@@ -4,70 +4,63 @@ import data
 import time
 
 def render_dashboard():
-    # --- DURUM YÖNETİMİ ---
     if "dashboard_mode" not in st.session_state:
         st.session_state.dashboard_mode = "finance"
 
-    # =========================================================
-    # 🆕 1. ONBOARDING PROGRESS BAR (OYUNLAŞTIRMA)
-    # =========================================================
-    # Müşteri hesabının ne kadarının tamamlandığını hissettiriyoruz
-    progress_cols = st.columns([0.8, 0.2])
-    with progress_cols[0]:
-        st.markdown("##### 🚀 Hesap Kurulumu")
-        st.progress(65, text="Profiliniz %65 oranında tamamlandı. Lütfen vergi numaranızı girin.")
-    with progress_cols[1]:
-        if st.button("Tamamla ➔", key="complete_profile", help="Profil ayarlarına git"):
-            st.toast("Ayarlar sayfasına yönlendiriliyorsunuz...", icon="⚙️")
+    # --- 1. ÜST BİLGİ & BİLDİRİMLER ---
+    c_title, c_actions = st.columns([2, 1])
+    with c_title:
+        st.markdown(f"## 👋 Hoşgeldin, {st.session_state.user_data['name']}")
+        st.caption(f"Panel: {st.session_state.user_data['brand']} | Server: US-East-1 (Online)")
+    
+    with c_actions:
+        # HIZLI AKSİYONLAR (QUICK ACTIONS) - MÜŞTERİYİ İKNA EDEN KISIM
+        st.markdown("##### ⚡ Hızlı İşlemler")
+        col_q1, col_q2 = st.columns(2)
+        if col_q1.button("📦 Yeni Kargo", use_container_width=True):
+            st.toast("Sevkiyat sihirbazı başlatılıyor...", icon="🚢")
+        if col_q2.button("📄 Fatura Al", use_container_width=True):
+            st.toast("Son ayın ekstresi indiriliyor...", icon="📥")
 
     st.markdown("---")
 
-    # Başlık ve Kullanıcı
-    c_title, c_user = st.columns([3, 1])
-    with c_title:
-        st.markdown(f"## Panel: <span style='color:#1F6FEB'>{st.session_state.user_data['brand']}</span>", unsafe_allow_html=True)
-    with c_user:
-        st.markdown(f"<div style='text-align:right; color:#8B949E; font-size:14px;'>👤 {st.session_state.user_data['name']}<br><span style='color:#238636'>● Online</span></div>", unsafe_allow_html=True)
+    # --- 2. PROGRESS BAR (KURULUM) ---
+    st.progress(65, text="🚀 Hesap Kurulumu: %65 (Vergi numaranızı girerek onay sürecini tamamlayın)")
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    # İki Kolon Yapısı
-    col_chat, col_visual = st.columns([1, 1.5], gap="large")
+    # --- 3. ANA PANEL (CHAT + GÖRSEL) ---
+    col_chat, col_visual = st.columns([1, 1.6], gap="medium")
 
     # --- SOL: AI CHAT ---
     with col_chat:
-        st.subheader("💬 ARTIS Asistan")
+        st.markdown("### 💬 ARTIS Asistan")
+        chat_box = st.container(height=420, border=True)
         
-        # Chat Geçmişi
-        chat_box = st.container(height=450, border=True)
         if "messages" not in st.session_state: st.session_state.messages = []
-        
         for msg in st.session_state.messages:
             chat_box.chat_message(msg["role"]).write(msg["content"])
             
-        # INPUT
-        if prompt := st.chat_input("Talimat verin (Örn: Stok durumu)..."):
+        if prompt := st.chat_input("Soru sor (Örn: Lojistik durumu)..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             chat_box.chat_message("user").write(prompt)
             
-            # BAĞLAM TESPİTİ (Context-Aware)
-            prompt_lower = prompt.lower()
-            if any(x in prompt_lower for x in ["lojistik", "kargo", "konum", "shipment"]):
-                st.session_state.dashboard_mode = "logistics"
-            elif any(x in prompt_lower for x in ["stok", "envanter", "ürün"]):
-                st.session_state.dashboard_mode = "inventory"
-            elif any(x in prompt_lower for x in ["finans", "ciro", "para", "satış"]):
-                st.session_state.dashboard_mode = "finance"
+            # Bağlam Yakalama
+            p_low = prompt.lower()
+            if any(x in p_low for x in ["lojistik", "kargo", "konum"]): st.session_state.dashboard_mode = "logistics"
+            elif any(x in p_low for x in ["stok", "ürün", "envanter"]): st.session_state.dashboard_mode = "inventory"
+            elif any(x in p_low for x in ["finans", "ciro", "para"]): st.session_state.dashboard_mode = "finance"
 
-            # AI Cevabı
+            # Cevap (Asla Hata Vermeyen Mod)
             with chat_box.chat_message("assistant"):
-                placeholder = st.empty()
-                full_resp = ""
-                stream = brain.get_streaming_response(st.session_state.messages, st.session_state.user_data)
-                for chunk in stream:
-                    full_resp += chunk
-                    placeholder.markdown(full_resp + "▌")
-                placeholder.markdown(full_resp)
+                ph = st.empty()
+                full = ""
+                # Artık brain.py hata verse bile çalışır
+                for chunk in brain.get_streaming_response(st.session_state.messages, st.session_state.user_data):
+                    full += chunk
+                    ph.markdown(full + "▌")
+                ph.markdown(full)
             
-            st.session_state.messages.append({"role": "assistant", "content": full_resp})
+            st.session_state.messages.append({"role": "assistant", "content": full})
             time.sleep(0.5)
             st.rerun()
 
@@ -75,33 +68,41 @@ def render_dashboard():
     with col_visual:
         mode = st.session_state.dashboard_mode
         
-        # MOD 1: FİNANS
+        # FİNANS MODU
         if mode == "finance":
-            st.markdown("### 📈 Finansal Özet")
+            st.markdown("### 📈 Finansal İçgörü")
             c1, c2, c3 = st.columns(3)
-            c1.metric("Aylık Ciro", "$42,500", "+12%")
-            c2.metric("Net Kâr", "%32", "+4%")
-            c3.metric("Büyüme", "Stabil", "Normal")
+            c1.metric("Ciro", "$42,500", "+12%")
+            c2.metric("Kâr", "%32", "+4%")
+            c3.metric("Büyüme", "Yüksek", "Stabil")
             
             with st.container(border=True):
                 st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
+                st.info("💡 **Yapay Zeka Yorumu:** Geçen aya göre reklam maliyetleriniz sabit kalırken cironuz arttı. Bu çok sağlıklı bir büyüme.")
 
-        # MOD 2: LOJİSTİK
+        # LOJİSTİK MODU
         elif mode == "logistics":
-            st.markdown("### 📦 Canlı Sevkiyat")
-            st.info("🚢 **TR-8821** numaralı gemi Atlantik rotasında. Tahmini varış: 2 Gün.")
-            st.plotly_chart(brain.get_logistics_map(), use_container_width=True)
+            st.markdown("### 📦 Aktif Sevkiyatlar")
+            c1, c2 = st.columns(2)
+            c1.metric("Takip No", "TR-8821", "Yolda")
+            c2.metric("Tahmini Varış", "14 Ocak", "Zamanında")
             
-            # Hızlı Aksiyon Butonu
-            if st.button("📍 Detaylı Konum Raporu İndir", use_container_width=True):
-                st.toast("Rapor hazırlanıyor...", icon="📄")
+            with st.container(border=True):
+                st.plotly_chart(brain.get_logistics_map(), use_container_width=True)
+            st.success("✅ **Gümrük Onayı:** Belgeleriniz Washington Limanı tarafından ön onay aldı.")
 
-        # MOD 3: ENVANTER
+        # ENVANTER MODU
         elif mode == "inventory":
-            st.markdown("### 📋 Stok Durumu")
+            st.markdown("### 📋 Stok Sağlığı")
             c1, c2 = st.columns(2)
             c1.metric("Toplam Ürün", "8,550", "+150")
-            c2.metric("Kritik Ürün", "Çanta", "-50 Adet", delta_color="inverse")
-            st.plotly_chart(brain.get_inventory_chart(), use_container_width=True)
+            c2.metric("Riskli Ürün", "Çanta", "Azalıyor", delta_color="inverse")
             
-            st.warning("⚠️ **Deri Çanta** stoğu bitmek üzere. Tedarikçi siparişi oluşturulmalı.")
+            with st.container(border=True):
+                st.plotly_chart(brain.get_inventory_chart(), use_container_width=True)
+            
+            col_act1, col_act2 = st.columns(2)
+            if col_act1.button("Tedarikçiyi Ara", use_container_width=True):
+                st.toast("Tedarikçi iletişim bilgileri açılıyor...")
+            if col_act2.button("Otomatik Sipariş", use_container_width=True):
+                st.toast("Sipariş taslağı oluşturuldu.")
