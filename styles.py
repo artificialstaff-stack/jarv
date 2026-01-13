@@ -16,9 +16,14 @@ def load_css():
         }
         .stTextInput input:focus { border-color: #1F6FEB; }
 
-        /* Butonlar */
-        .stButton button { background-color: #238636; color: white; border: none; border-radius: 6px; transition: 0.2s; }
-        .stButton button:hover { background-color: #2EA043; }
+        /* --- BUTONLAR (DÜZELTİLDİ) --- */
+        /* Artık arka plan rengi vermiyoruz, Streamlit kendi rengini (Kırmızı/Gri) kullanacak */
+        .stButton button { 
+            border: none; 
+            border-radius: 6px; 
+            transition: 0.2s; 
+        }
+        /* Hover rengini sildik */
 
         /* Kartlar */
         div[data-testid="metric-container"] { background-color: #21262D; padding: 15px; border-radius: 8px; border: 1px solid #30363D; }
