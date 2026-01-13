@@ -1,20 +1,46 @@
-import streamlit as st
-import sys, os, time
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logic')))
-import data
+# views/login.py İÇİNDEKİ USERS SÖZLÜĞÜNÜ BUNUNLA DEĞİŞTİR:
 
-def render_login_page():
-    c1, c2, c3 = st.columns([1, 1, 1])
-    with c2:
-        st.markdown("<br><br><br><h1 style='text-align:center;'>ARTIS <span style='color:#1F6FEB'>.OS</span></h1>", unsafe_allow_html=True)
-        with st.container(border=True):
-            u = st.text_input("Kullanıcı Adı")
-            p = st.text_input("Şifre", type="password")
-            if st.button("Giriş Yap", use_container_width=True):
-                user = data.verify_user(u, p)
-                if user:
-                    st.session_state.user_data = user
-                    st.session_state.logged_in = True
-                    st.rerun()
-                else:
-                    st.error("Hatalı giriş.")
+USERS = {
+    # SENARYO 1: Kurumsal Lojistik Firması
+    "demo": {
+        "pass": "1234",
+        "name": "Ahmet Yılmaz",
+        "brand": "Anatolia Home",
+        "role": "CEO",
+        "plan": "Enterprise",
+        "avatar": "AY",
+        "config": {
+            "primary_color": "#3B82F6", # Mavi
+            "dashboard_title": "Global Operasyon Merkezi",
+            "show_modules": ["dashboard", "logistics", "inventory", "documents"]
+        }
+    },
+    # SENARYO 2: Teknoloji Şirketi (Tesla Tarzı)
+    "tech": {
+        "pass": "1234",
+        "name": "Elon M.",
+        "brand": "Cyber Systems",
+        "role": "CTO",
+        "plan": "Unlimited",
+        "avatar": "EM",
+        "config": {
+            "primary_color": "#D946EF", # Neon Mor/Pembe
+            "dashboard_title": "Neural Command Interface",
+            "show_modules": ["dashboard", "todo", "plan", "forms"]
+        }
+    },
+    # SENARYO 3: Moda Markası (Gucci Tarzı)
+    "fashion": {
+        "pass": "1234",
+        "name": "Bella H.",
+        "brand": "Lusso Milano",
+        "role": "Creative Dir.",
+        "plan": "Pro",
+        "avatar": "BH",
+        "config": {
+            "primary_color": "#10B981", # Zümrüt Yeşili
+            "dashboard_title": "Atelier Management",
+            "show_modules": ["inventory", "plan", "documents"]
+        }
+    }
+}
