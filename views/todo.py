@@ -1,194 +1,195 @@
 import streamlit as st
+import pandas as pd
 import time
+from datetime import datetime
 
 # ==============================================================================
-# 🎨 1. SAYFAYA ÖZEL CSS (PREMIUM GÖRÜNÜM)
+# 🎨 1. SAYFAYA ÖZEL STİL (LINEAR STYLE)
 # ==============================================================================
-def inject_pricing_css():
+def inject_todo_css():
     st.markdown("""
     <style>
-        /* Genel Kart Yapısı */
-        .pricing-card {
+        /* Görev Kartı */
+        .task-card {
             background-color: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #52525B;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
             display: flex;
-            flex-direction: column;
-            height: 100%;
-            transition: all 0.3s ease;
-            position: relative;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s;
         }
-        .pricing-card:hover {
-            transform: translateY(-8px);
+        .task-card:hover {
             background-color: rgba(255, 255, 255, 0.04);
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+            transform: translateX(4px);
+            border-color: rgba(255, 255, 255, 0.1);
         }
-
-        /* Öne Çıkan Kart (PRO) */
-        .card-highlight {
-            background: linear-gradient(145deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            box-shadow: 0 0 30px rgba(139, 92, 246, 0.1);
-        }
-        .card-highlight:hover {
-            border-color: rgba(139, 92, 246, 0.6);
-            box-shadow: 0 0 50px rgba(139, 92, 246, 0.2);
-        }
-
-        /* Başlıklar ve Fiyat */
-        .plan-name { font-size: 14px; font-weight: 600; color: #A1A1AA; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-        .plan-price { font-size: 42px; font-weight: 800; color: #FFF; margin-bottom: 5px; }
-        .plan-period { font-size: 14px; color: #71717A; font-weight: 400; }
-        .plan-desc { font-size: 14px; color: #A1A1AA; margin: 15px 0 25px 0; line-height: 1.5; }
-
-        /* Özellik Listesi */
-        .feature-list { list-style: none; padding: 0; margin: 0; }
-        .feature-item { 
-            display: flex; align-items: center; gap: 10px; 
-            font-size: 14px; color: #E4E4E7; margin-bottom: 12px; 
-        }
-        .check-icon { color: #10B981; font-weight: bold; }
-        .check-icon-gray { color: #52525B; }
         
-        /* En Popüler Etiketi */
-        .popular-badge {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(90deg, #8B5CF6 0%, #3B82F6 100%);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
+        /* Öncelik Renkleri */
+        .prio-High { border-left-color: #EF4444 !important; }
+        .prio-Medium { border-left-color: #F59E0B !important; }
+        .prio-Low { border-left-color: #3B82F6 !important; }
+
+        /* Tipografi */
+        .task-title { font-weight: 500; font-size: 15px; color: #E4E4E7; }
+        .task-meta { font-size: 12px; color: #A1A1AA; display: flex; gap: 10px; margin-top: 6px; }
+        
+        /* Etiket */
+        .task-tag {
+            background: rgba(255,255,255,0.08);
+            padding: 2px 8px;
+            border-radius: 4px;
             font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+            font-weight: 600;
         }
     </style>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🧩 2. UI KART OLUŞTURUCU
+# 🛠️ 2. GÖREV MANTIĞI & VERİ ONARIMI
 # ==============================================================================
-def render_plan_content(title, price, desc, features, is_highlight=False):
-    """
-    Kartın HTML içeriğini oluşturur (Buton hariç).
-    Buton Streamlit native olmalı ki tıklamayı yakalayalım.
-    """
-    card_class = "pricing-card card-highlight" if is_highlight else "pricing-card"
-    badge_html = '<div class="popular-badge">✨ EN POPÜLER</div>' if is_highlight else ""
+def init_todo_state():
+    # Varsayılan (Modern) Veri Yapısı
+    default_todos = [
+        {"id": 1, "task": "Vergileri öde", "tag": "Finans", "prio": "High", "done": False, "date": "2026-01-15"},
+        {"id": 2, "task": "Washington stok sayımı", "tag": "Operasyon", "prio": "Medium", "done": False, "date": "2026-01-20"},
+        {"id": 3, "task": "Yeni tedarikçi görüşmesi", "tag": "Yönetim", "prio": "Low", "done": True, "date": "2026-01-10"},
+    ]
+
+    # Durum 1: Hiç veri yoksa oluştur
+    if "todos" not in st.session_state:
+        st.session_state.todos = default_todos
     
-    feature_html = ""
-    for feat in features:
-        icon = "✓" if feat['active'] else "•"
-        style_cls = "check-icon" if feat['active'] else "check-icon-gray"
-        text_style = "color: #E4E4E7;" if feat['active'] else "color: #52525B; text-decoration: line-through;"
+    # Durum 2: Eski tip (bozuk) veri varsa ONAR (Hata burada çözülüyor)
+    elif len(st.session_state.todos) > 0:
+        # Eğer listedeki ilk eleman bir "sözlük" değilse (yani eskiyse), sıfırla.
+        if not isinstance(st.session_state.todos[0], dict):
+            st.session_state.todos = default_todos
+            st.rerun() # Sayfayı yenile ki hata vermesin
+
+def add_task(task_name, tag, prio):
+    new_id = int(time.time()) # Benzersiz ID
+    today = datetime.now().strftime("%Y-%m-%d")
+    st.session_state.todos.insert(0, {
+        "id": new_id, 
+        "task": task_name, 
+        "tag": tag, 
+        "prio": prio, 
+        "done": False, 
+        "date": today
+    })
+
+def delete_task(idx):
+    st.session_state.todos.pop(idx)
+
+def toggle_task(idx):
+    st.session_state.todos[idx]['done'] = not st.session_state.todos[idx]['done']
+
+# ==============================================================================
+# 🧩 3. UI BİLEŞENLERİ
+# ==============================================================================
+def render_task_row(task, idx):
+    prio_class = f"prio-{task.get('prio', 'Low')}"
+    opacity = "0.5" if task.get('done', False) else "1.0"
+    strike = "text-decoration: line-through; color: #71717A;" if task.get('done', False) else ""
+    icon = "✅" if task.get('done', False) else "⬜"
+    
+    # Grid: Checkbox | Bilgi | Sil Butonu
+    c_check, c_info, c_del = st.columns([0.5, 4, 0.5])
+    
+    with c_check:
+        if st.button(icon, key=f"chk_{task['id']}"):
+            toggle_task(idx)
+            st.rerun()
+            
+    with c_info:
+        st.markdown(f"""
+        <div class="task-card {prio_class}" style="opacity: {opacity};">
+            <div style="width:100%">
+                <div class="task-title" style="{strike}">{task['task']}</div>
+                <div class="task-meta">
+                    <span class="task-tag">{task['tag']}</span>
+                    <span>📅 {task['date']}</span>
+                    <span style="color: {'#EF4444' if task['prio']=='High' else '#A1A1AA'}">{task['prio']}</span>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
-        feature_html += f"""
-        <li class="feature-item">
-            <span class="{style_cls}">{icon}</span>
-            <span style="{text_style}">{feat['text']}</span>
-        </li>
-        """
-
-    html = f"""
-    <div class="{card_class}">
-        {badge_html}
-        <div class="plan-name">{title}</div>
-        <div class="plan-price">{price}<span class="plan-period">/ay</span></div>
-        <div class="plan-desc">{desc}</div>
-        <hr style="border-color: rgba(255,255,255,0.1); margin-bottom: 20px;">
-        <ul class="feature-list">
-            {feature_html}
-        </ul>
-    </div>
-    """
-    return html
+    with c_del:
+        if st.button("🗑️", key=f"del_{task['id']}"):
+            delete_task(idx)
+            st.rerun()
 
 # ==============================================================================
-# 🚀 3. ANA RENDER FONKSİYONU
+# 🚀 4. ANA RENDER FONKSİYONU
 # ==============================================================================
-def render_plan():
-    inject_pricing_css()
+def render_todo():
+    inject_todo_css()
+    init_todo_state() # Veriyi kontrol et ve onar
     
-    # --- BAŞLIK ---
-    st.markdown("<div style='text-align: center; margin-bottom: 40px;'>", unsafe_allow_html=True)
-    st.title("💎 Planını Seç")
-    st.markdown("<p style='color: #A1A1AA; font-size: 16px;'>İşletmenizin ölçeğine uygun, şeffaf fiyatlandırma.</p>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # --- KARTLAR (3 KOLON) ---
-    # Ortadaki kolon (Pro) biraz daha geniş olsun diye oran veriyoruz
-    c1, c2, c3 = st.columns([1, 1.1, 1], gap="medium")
-
-    # === PLAN 1: BAŞLANGIÇ ===
+    # --- HEADER ---
+    c1, c2 = st.columns([3, 1])
     with c1:
-        st.markdown(render_plan_content(
-            title="BAŞLANGIÇ",
-            price="$0",
-            desc="Küçük işletmeler ve bireysel satıcılar için temel özellikler.",
-            features=[
-                {"text": "Aylık 50 Sevkiyat", "active": True},
-                {"text": "Temel Stok Takibi", "active": True},
-                {"text": "AI Asistan (Sınırlı)", "active": True},
-                {"text": "Gelişmiş Raporlar", "active": False},
-                {"text": "7/24 Canlı Destek", "active": False},
-            ]
-        ), unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True) # Boşluk
-        if st.button("Mevcut Plan", key="btn_free", use_container_width=True, disabled=True):
-            pass
-
-    # === PLAN 2: PRO (HIGHLIGHT) ===
+        st.title("✅ Görev Yönetimi")
+        st.caption("Takım içi görev atamaları ve sprint takibi.")
     with c2:
-        st.markdown(render_plan_content(
-            title="PROFESYONEL",
-            price="$49",
-            desc="Büyüyen e-ticaret operasyonları için tam kapsamlı çözüm.",
-            features=[
-                {"text": "Sınırsız Sevkiyat", "active": True},
-                {"text": "Gelişmiş AI Analizleri", "active": True},
-                {"text": "Çoklu Depo Yönetimi", "active": True},
-                {"text": "Lojistik Rota Optimizasyonu", "active": True},
-                {"text": "Öncelıklı E-posta Desteği", "active": True},
-            ],
-            is_highlight=True
-        ), unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
+        # KPI Hesaplama
+        todos = st.session_state.todos
+        total = len(todos)
+        done = sum(1 for t in todos if t.get('done', False))
+        percent = int((done / total) * 100) if total > 0 else 0
+        st.metric("Tamamlanma", f"%{percent}", f"{total - done} Bekleyen")
         
-        # Parlayan Buton
-        if st.button("🔥 PRO'ya Yükselt", key="btn_pro", type="primary", use_container_width=True):
-            with st.spinner("Ödeme altyapısına bağlanılıyor..."):
-                time.sleep(1.5)
-            st.toast("Tebrikler! Hesabınız PRO seviyesine yükseltildi.", icon="🚀")
-            st.balloons()
+    st.markdown("---")
 
-    # === PLAN 3: ENTERPRISE ===
-    with c3:
-        st.markdown(render_plan_content(
-            title="ENTERPRISE",
-            price="ÖZEL",
-            desc="Global markalar ve büyük hacimli operasyonlar için.",
-            features=[
-                {"text": "Özel Sunucu & API", "active": True},
-                {"text": "Sınırsız Kullanıcı", "active": True},
-                {"text": "Özel AI Model Eğitimi", "active": True},
-                {"text": "SLA & 7/24 Dedike Destek", "active": True},
-                {"text": "Yerinde Kurulum", "active": True},
-            ]
-        ), unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("Satış ile Görüş", key="btn_ent", use_container_width=True):
-            st.info("Kurumsal satış ekibimiz sizinle iletişime geçecektir.")
+    # --- HIZLI EKLEME PANELI ---
+    with st.expander("⚡ Hızlı Görev Ekle", expanded=True):
+        with st.form("new_task_form", clear_on_submit=True):
+            c_input, c_tag, c_prio, c_btn = st.columns([3, 1.2, 1.2, 1])
+            with c_input:
+                new_task = st.text_input("Görev", placeholder="Örn: Q1 Raporlarını hazırla...")
+            with c_tag:
+                new_tag = st.selectbox("Etiket", ["Genel", "Finans", "Lojistik", "Yazılım", "İK"])
+            with c_prio:
+                new_prio = st.selectbox("Öncelik", ["High", "Medium", "Low"])
+            with c_btn:
+                st.markdown("<br>", unsafe_allow_html=True)
+                submitted = st.form_submit_button("Ekle", type="primary", use_container_width=True)
+            
+            if submitted and new_task:
+                add_task(new_task, new_tag, new_prio)
+                st.toast("Görev listeye eklendi.", icon="📌")
+                st.rerun()
+
+    # --- İLERLEME ---
+    if total > 0:
+        st.progress(percent / 100)
     
-    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # --- LİSTELEME ---
+    tab_active, tab_done = st.tabs(["🔥 Yapılacaklar", "✔️ Tamamlananlar"])
     
-    # --- GÜVENLİK ROZETLERİ ---
-    st.markdown("""
-    <div style="text-align: center; color: #52525B; font-size: 12px; margin-top: 20px;">
-        <i class='bx bx-shield-quarter'></i> 256-bit SSL Güvenli Ödeme • İstediğiniz Zaman İptal Edin
-    </div>
-    """, unsafe_allow_html=True)
+    with tab_active:
+        # Sadece yapılmamışları filtrele
+        active_list = [(i, t) for i, t in enumerate(st.session_state.todos) if not t.get('done', False)]
+        
+        if not active_list:
+            st.info("Harika! Tüm görevler tamamlandı.")
+        else:
+            for i, task in active_list:
+                render_task_row(task, i)
+
+    with tab_done:
+        # Sadece yapılmışları filtrele
+        done_list = [(i, t) for i, t in enumerate(st.session_state.todos) if t.get('done', False)]
+        
+        if not done_list:
+            st.caption("Henüz tamamlanan görev yok.")
+        else:
+            for i, task in done_list:
+                render_task_row(task, i)
