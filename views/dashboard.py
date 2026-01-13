@@ -135,48 +135,40 @@ def inject_enterprise_css():
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🧩 2. UI COMPONENTS
+# 🧩 2. UI COMPONENTS (SAFE HTML GENERATION)
 # ==============================================================================
 
 def render_header(user_data: Dict[str, Any]):
     """
-    Renders the ULTRA-PREMIUM header.
+    Renders the ULTRA-PREMIUM header using List Join method to prevent indentation bugs.
     """
     brand_name = user_data.get('brand', 'Anatolia')
     current_date = datetime.now().strftime("%d %B, %A")
     
-    # HTML Header Block
-    st.markdown(f"""
-    <div class="dash-header-container">
-        <div class="header-top">
-            <div>
-                <div class="brand-eyebrow">Operasyon Merkezi</div>
-                <div class="brand-title">{brand_name}</div>
-            </div>
-            <div class="tech-badge-group">
-                <div class="tech-badge">
-                    <i class='bx bx-cpu'></i> GEMINI 2.0 FLASH
-                </div>
-                <div class="tech-badge">
-                    <i class='bx bx-wifi'></i> 24ms LATENCY
-                </div>
-            </div>
-        </div>
+    # HTML parçalarını liste olarak oluşturup birleştiriyoruz.
+    # Bu yöntem indentation (girinti) hatasını %100 engeller.
+    html_parts = [
+        '<div class="dash-header-container">',
+        '<div class="header-top">',
+        '<div>',
+        '<div class="brand-eyebrow">Operasyon Merkezi</div>',
+        f'<div class="brand-title">{brand_name}</div>',
+        '</div>',
+        '<div class="tech-badge-group">',
+        '<div class="tech-badge"><i class="bx bx-cpu"></i> GEMINI 2.0 FLASH</div>',
+        '<div class="tech-badge"><i class="bx bx-wifi"></i> 24ms LATENCY</div>',
+        '</div>',
+        '</div>', # End header-top
         
-        <div class="header-bottom">
-            <div class="status-pill">
-                <div class="live-dot"></div>
-                Sistem Operasyonel
-            </div>
-            <div class="location-pill">
-                <i class='bx bx-map'></i> İstanbul HQ
-            </div>
-            <div style="margin-left: auto; font-size: 13px; color: #52525B; font-family: 'JetBrains Mono', monospace;">
-                {current_date}
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        '<div class="header-bottom">',
+        '<div class="status-pill"><div class="live-dot"></div>Sistem Operasyonel</div>',
+        '<div class="location-pill"><i class="bx bx-map"></i> İstanbul HQ</div>',
+        f'<div style="margin-left: auto; font-size: 13px; color: #52525B; font-family: \'JetBrains Mono\', monospace;">{current_date}</div>',
+        '</div>', # End header-bottom
+        '</div>'
+    ]
+    
+    st.markdown("".join(html_parts), unsafe_allow_html=True)
 
 def render_pro_metric(label, value, delta, icon_class, theme="blue"):
     if "+" in delta:
@@ -186,18 +178,20 @@ def render_pro_metric(label, value, delta, icon_class, theme="blue"):
     else:
         delta_html = f"<span class='metric-badge badge-flat'>{delta}</span>"
 
-    st.markdown(f"""
-    <div class="glass-card metric-container">
-        <div class="metric-icon-wrapper theme-{theme}">
-            <i class='bx {icon_class}'></i>
-        </div>
-        <div class="metric-content">
-            <div class="metric-label">{label}</div>
-            <div class="metric-value">{value}</div>
-            <div>{delta_html}</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    html_parts = [
+        '<div class="glass-card metric-container">',
+        f'<div class="metric-icon-wrapper theme-{theme}">',
+        f'<i class="bx {icon_class}"></i>',
+        '</div>',
+        '<div class="metric-content">',
+        f'<div class="metric-label">{label}</div>',
+        f'<div class="metric-value">{value}</div>',
+        f'<div>{delta_html}</div>',
+        '</div>',
+        '</div>'
+    ]
+    
+    st.markdown("".join(html_parts), unsafe_allow_html=True)
 
 # ==============================================================================
 # 🧠 3. MAIN DASHBOARD
@@ -211,7 +205,7 @@ def render_dashboard():
     
     user = st.session_state.get('user_data', {'brand': 'Demo Brand'})
 
-    # 1. RENDER HEADER (NEW)
+    # 1. RENDER HEADER (FIXED)
     render_header(user)
 
     # 2. MAIN LAYOUT
