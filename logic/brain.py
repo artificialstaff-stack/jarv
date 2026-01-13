@@ -9,42 +9,45 @@ import random
 
 # --- 1. GÜVENLİ İSTEMCİ ---
 def get_client():
+    # API Key varsa al
     api_key = st.secrets.get("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_APT_KEY")
     if not api_key: return None
     return genai.Client(api_key=api_key)
 
-# --- 2. GELİŞMİŞ YEDEK CEVAPLAR (Tekrara Düşmez) ---
+# --- 2. GELİŞMİŞ YEDEK CEVAPLAR (General Chat Özellikli) ---
+# API çalışmazsa devreye giren "Offline Zeka" artık sohbet edebiliyor.
 MOCK_RESPONSES = {
-    # Selamlaşma
-    "greetings": [
-        "Merhaba! Operasyonel süreçlerinizde size nasıl destek olabilirim?",
-        "Selamlar. ARTIS sistemi kullanıma hazır. Rapor ister misiniz?",
-        "Hoş geldiniz. Lojistik, stok veya finans verilerini analiz etmemi ister misiniz?"
+    # Genel Sohbet (Naber, nasılsın vb.)
+    "sohbet": [
+        "Teşekkürler, gayet iyiyim. Sistemlerimiz %100 performansla çalışıyor. Sizin için ne analiz edebilirim?",
+        "Ben bir yapay zeka olduğum için hislerim yok ama işlemcilerim harika çalışıyor! Operasyonlar nasıl gidiyor?",
+        "Her şey yolunda. Washington DC hattındaki verileri izliyorum. Bir isteğiniz var mı?",
+        "Selamlar! Enerjim yerinde, analiz için hazırım."
     ],
-    # Konu: Lojistik
+    # Kimlik (Sen kimsin?)
+    "kimlik": [
+        "Ben ARTIS. Lojistik operasyonlarınızı yönetmek ve optimize etmek için tasarlanmış yeni nesil bir yapay zekayım.",
+        "Adım ARTIS. Size lojistik, stok yönetimi ve finansal planlama konularında asistanlık yapıyorum.",
+        "Sizin dijital operasyon müdürünüzüm diyebiliriz. 7/24 verilerinizi takip ediyorum."
+    ],
+    # İş Konuları
     "lojistik": [
-        "Şu an 1 aktif sevkiyatınız var: TR-8821 numaralı konteyner Atlantik Okyanusu'nda.",
-        "Lojistik ağında gecikme görünmüyor. Tahmini varış süresi: 48 saat.",
-        "Kargo takibi: Gümrük belgeleri onaylandı, gemi rotasında ilerliyor."
+        "Lojistik ağını tarıyorum... Şu an 1 aktif sevkiyatınız var: TR-8821 numaralı konteyner Atlantik Okyanusu'nda.",
+        "Kargo takibi: Gümrük belgeleri onaylandı, gemi rotasında sorunsuz ilerliyor. Tahmini varış 48 saat.",
     ],
-    # Konu: Stok
     "stok": [
-        "Depo doluluk oranı %64. Ancak 'Deri Çanta' stokları kritik seviyede (Son 50 adet).",
-        "Envanter analizi: Tekstil grubu stokları yeterli, aksesuar grubunda azalma var.",
-        "Stoklarımızda 8,550 parça ürün bulunuyor. Riskli ürün: Deri Çanta."
+        "Depo verilerine baktığımda doluluk oranı %64. Ancak 'Deri Çanta' stokları kritik seviyede (Son 50 adet).",
+        "Envanter raporu: Tekstil grubu iyi durumda, aksesuar grubunda azalma var. Sipariş geçmemi ister misiniz?",
     ],
-    # Konu: Finans
     "finans": [
-        "Bu ayki cironuz $42,500. Geçen aya göre %12 artış var.",
-        "Finansal durum pozitif. Kârlılık oranınız %32 seviyesinde.",
-        "Reklam harcamaları sabit kalırken gelirleriniz arttı. Verimli bir ay geçiriyoruz."
+        "Finansal özet: Bu ayki cironuz $42,500. Geçen aya göre %12 artış var. Kârlılık oranınız %32.",
+        "Maliyet analizi: Reklam giderleri sabit kalırken ciro arttı. Bu ay oldukça verimli geçiyor.",
     ],
-    # Bilinmeyen / Saçma Girdi (Random Seçilecek)
-    "unknown": [
-        "Bu komutu tam anlayamadım. 'Lojistik', 'Stok' veya 'Finans' hakkında soru sorabilirsiniz.",
-        "Veri tabanımda bununla ilgili kayıt yok. Kargo durumunu veya ciroyu sormak ister misiniz?",
-        "Sadece operasyonel verilere erişimim var. Lütfen geçerli bir talimat verin.",
-        "Analiz edebilmem için daha net bir soru sorabilir misiniz? (Örn: Ciro ne kadar?)"
+    # Anlamadığı durumlar için daha zeki kaçamak cevaplar
+    "fallback": [
+        "Bu konuda veri tabanımda yeterli bilgi yok ama operasyonel süreçlerinizle ilgili her şeyi sorabilirsiniz.",
+        "Bunu tam olarak simüle edemiyorum ama lojistik veya finansal bir sorun varsa hemen çözebilirim.",
+        "İlginç bir konu. Şimdilik odak noktam operasyonel verileriniz. Kargo durumuna bakmamı ister misiniz?"
     ]
 }
 
@@ -52,10 +55,22 @@ def get_streaming_response(messages_history, user_data):
     client = get_client()
     last_msg = messages_history[-1]["content"].lower() if messages_history else ""
     
-    # --- DURUM A: API VARSA VE ÇALIŞIYORSA ---
+    # --- DURUM A: GERÇEK GEMINI API ---
+    # Eğer API anahtarı doğruysa ve kota varsa burası çalışır (Sınırsız zeka)
     if client:
         try:
-            sys_prompt = f"Sen ARTIS. {user_data.get('brand')} markasının AI asistanısın. Kısa ve profesyonel Türkçe konuş."
+            # Yapay Zeka Kimliği
+            sys_prompt = f"""
+            Sen ARTIS. {user_data.get('brand')} markasının profesyonel Lojistik Operasyon AI asistanısın.
+            
+            Kişiliğin:
+            - Profesyonel ama samimi.
+            - Kısa ve net cevaplar veren.
+            - Lojistik, finans ve stok uzmanı.
+            
+            Kullanıcı ne sorarsa sorsun (havadan sudan bile olsa) kibarca cevap ver ve konuyu işe/operasyona bağla.
+            """
+            
             contents = [types.Content(role="user", parts=[types.Part.from_text(text=sys_prompt)])]
             for msg in messages_history:
                 role = "user" if msg["role"] == "user" else "model"
@@ -67,36 +82,42 @@ def get_streaming_response(messages_history, user_data):
             )
             for chunk in response:
                 if chunk.text: yield chunk.text
-            return # Başarılıysa çık
-        except Exception:
-            pass # Hata olursa aşağıya (Yedek Mod) düş
+            return # Başarılıysa çık, değilse aşağıya düş
+            
+        except Exception as e:
+            # API Hatası durumunda loga yazılabilir ama kullanıcıya çaktırmıyoruz
+            pass 
 
-    # --- DURUM B: YEDEK MOD (SİMÜLASYON) ---
-    time.sleep(0.6) # Düşünme efekti
+    # --- DURUM B: OFFLINE MOD (SİMÜLASYON) ---
+    # API çalışmadığında devreye giren "Akıllı Taklit" modu
+    time.sleep(0.6) 
     
-    # Akıllı Cevap Seçici
-    if any(x in last_msg for x in ["selam", "merhaba", "naber", "günaydın", "hey"]):
-        text = random.choice(MOCK_RESPONSES["greetings"])
+    # Kelime Analizi (Basit NLP)
+    if any(x in last_msg for x in ["naber", "nasılsın", "nasıl gidiyor", "selam", "merhaba", "hey"]):
+        text = random.choice(MOCK_RESPONSES["sohbet"])
         
-    elif any(x in last_msg for x in ["lojistik", "kargo", "konum", "nerede", "gemi", "takip"]):
+    elif any(x in last_msg for x in ["kimsin", "nesin", "adın ne", "görevin ne"]):
+        text = random.choice(MOCK_RESPONSES["kimlik"])
+        
+    elif any(x in last_msg for x in ["lojistik", "kargo", "gemi", "nerede", "takip"]):
         text = random.choice(MOCK_RESPONSES["lojistik"])
         
     elif any(x in last_msg for x in ["stok", "ürün", "envanter", "mal", "depo"]):
         text = random.choice(MOCK_RESPONSES["stok"])
         
-    elif any(x in last_msg for x in ["finans", "para", "ciro", "kar", "kazanç", "gelir"]):
+    elif any(x in last_msg for x in ["finans", "para", "ciro", "kar", "kazanç"]):
         text = random.choice(MOCK_RESPONSES["finans"])
         
     else:
-        # Tanımadığı bir şey yazılırsa (ddd, asd, vb.) rastgele bir "Anlamadım" mesajı seçer
-        text = random.choice(MOCK_RESPONSES["unknown"])
+        # Hiçbir şeye uymuyorsa "Anlamadım" demek yerine daha politik cevap ver
+        text = random.choice(MOCK_RESPONSES["fallback"])
 
     # Kelime kelime yazdır
     for word in text.split(" "):
         yield word + " "
         time.sleep(0.05)
 
-# --- GRAFİK MOTORU (NEON & MODERN) ---
+# --- GRAFİKLER (MODERN GÖRÜNÜM) ---
 
 def get_sales_chart():
     df = pd.DataFrame({'Tarih': pd.date_range('2026-01-01', periods=30), 'Gelir': np.random.normal(30000, 5000, 30)})
