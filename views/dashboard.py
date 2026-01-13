@@ -15,7 +15,7 @@ def inject_enterprise_css():
 
         /* --- DASHBOARD HEADER CONTAINER --- */
         .dash-header-container {
-            padding: 20px 25px;
+            padding: 25px 30px;
             background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 20px;
@@ -23,14 +23,15 @@ def inject_enterprise_css():
             position: relative;
             overflow: hidden;
             backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5);
         }
         
         /* Arka Plan Efekti (Aurora Glow) */
         .dash-header-container::before {
             content: '';
             position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%);
+            top: -50%; left: -20%; width: 150%; height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
             z-index: 0;
             pointer-events: none;
         }
@@ -40,45 +41,53 @@ def inject_enterprise_css():
         .header-top {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
+            align-items: center; /* Hizalamayı ortaladık */
             margin-bottom: 20px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 15px;
+            padding-bottom: 20px;
         }
         
-        /* Sol Taraf: Marka İsmi */
+        /* SOL TARAF: MÜŞTERİ MARKASI */
         .brand-eyebrow {
-            font-size: 10px;
+            font-size: 11px;
             color: #A1A1AA;
             text-transform: uppercase;
             letter-spacing: 2px;
             font-weight: 700;
-            margin-bottom: 6px;
-            display: flex; align-items: center; gap: 6px;
+            margin-bottom: 4px;
+            display: flex; align-items: center; gap: 8px;
         }
         .brand-title {
-            font-size: 42px;
+            font-size: 48px;
             font-weight: 800;
             color: #FFF;
             letter-spacing: -1.5px;
             line-height: 1;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        /* Sağ Taraf: AI Engine Badge */
+        /* SAĞ TARAF: ARTIFICIAL STAFF ENGINE BADGE */
         .ai-badge {
             font-family: 'JetBrains Mono', monospace;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(10, 10, 10, 0.6);
             border: 1px solid rgba(139, 92, 246, 0.3); /* Mor Çerçeve */
-            padding: 8px 12px;
-            border-radius: 8px;
+            padding: 10px 16px;
+            border-radius: 12px;
             display: flex; flex-direction: column; align-items: flex-end;
-            gap: 2px;
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
+            gap: 4px;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+            transition: all 0.3s ease;
         }
-        .ai-label { font-size: 9px; color: #71717A; text-transform: uppercase; letter-spacing: 1px; }
+        .ai-badge:hover {
+            border-color: rgba(139, 92, 246, 0.8);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.25);
+        }
+        
+        .ai-label { font-size: 10px; color: #71717A; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
         .ai-name { 
-            font-size: 13px; color: #C084FC; font-weight: 700; letter-spacing: 0.5px; 
+            font-size: 14px; color: #C084FC; font-weight: 700; letter-spacing: 0.5px; 
             display: flex; align-items: center; gap: 8px;
         }
         
@@ -91,7 +100,7 @@ def inject_enterprise_css():
         
         .status-pill {
             display: inline-flex; align-items: center; gap: 8px;
-            padding: 5px 12px;
+            padding: 6px 14px;
             background: rgba(16, 185, 129, 0.08);
             border: 1px solid rgba(16, 185, 129, 0.15);
             border-radius: 99px;
@@ -101,7 +110,7 @@ def inject_enterprise_css():
         
         .location-pill {
             display: inline-flex; align-items: center; gap: 6px;
-            padding: 5px 12px;
+            padding: 6px 14px;
             background: rgba(59, 130, 246, 0.08);
             border: 1px solid rgba(59, 130, 246, 0.15);
             border-radius: 99px;
@@ -110,7 +119,7 @@ def inject_enterprise_css():
         }
         
         .live-dot {
-            width: 6px; height: 6px;
+            width: 8px; height: 8px;
             background: #10B981;
             border-radius: 50%;
             box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
@@ -129,9 +138,9 @@ def inject_enterprise_css():
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 16px;
             padding: 24px;
-            transition: transform 0.2s;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .glass-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.1); }
+        .glass-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.1); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
         
         .metric-container { display: flex; align-items: center; gap: 16px; }
         .metric-icon-wrapper {
@@ -139,7 +148,7 @@ def inject_enterprise_css():
             display: flex; align-items: center; justify-content: center;
             font-size: 24px; flex-shrink: 0;
         }
-        .metric-value { font-size: 26px; font-weight: 700; color: #FFF; line-height: 1.1; margin: 4px 0;}
+        .metric-value { font-size: 28px; font-weight: 700; color: #FFF; line-height: 1.1; margin: 4px 0;}
         .metric-label { font-size: 12px; font-weight: 600; color: #71717A; text-transform: uppercase; letter-spacing: 0.5px; }
         
         .theme-blue { color: #3B82F6; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); }
@@ -148,7 +157,7 @@ def inject_enterprise_css():
         .theme-orange { color: #F97316; background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.2); }
         
         /* Badge */
-        .metric-badge { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+        .metric-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
         .badge-up { color: #34D399; background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.2); }
         .badge-down { color: #F87171; background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.2); }
         .badge-flat { color: #A1A1AA; background: rgba(148, 163, 184, 0.1); border: 1px solid rgba(148, 163, 184, 0.2); }
@@ -162,35 +171,36 @@ def inject_enterprise_css():
 def render_header(user_data: Dict[str, Any]):
     """
     Renders the DASHBOARD HEADER.
-    - Sol: Kullanıcının Marka İsmi (Dinamik)
-    - Sağ: 'ARTIFICIAL STAFF' (Bizim AI Motorumuz)
+    - Sol (Büyük Başlık): Müşterinin Marka İsmi (Örn: Anatolia Home)
+    - Sağ (Rozet): ARTIFICIAL STAFF (Bizim Motorumuz)
     """
     # 1. Kullanıcının Marka İsmini Dinamik Alıyoruz
+    # Eğer giriş yapılmadıysa default 'Anatolia Home' gelir
     brand_name = user_data.get('brand', 'Anatolia Home')
     
     current_date = datetime.now().strftime("%d %B, %A")
     
-    # HTML Parçaları (Indentation hatasını önlemek için liste birleştirme)
+    # HTML Parçaları (Liste Birleştirme Yöntemi - Hatasız Render)
     html_parts = [
         '<div class="dash-header-container">',
         '<div class="header-content">',
         
-        # --- TOP ROW ---
+        # --- ÜST SATIR ---
         '<div class="header-top">',
-            # SOL: MARKA İSMİ
+            # SOL: MÜŞTERİNİN MARKASI
             '<div>',
                 '<div class="brand-eyebrow"><i class="bx bx-command"></i> OPERASYON MERKEZİ</div>',
-                f'<div class="brand-title">{brand_name}</div>',
+                f'<div class="brand-title">{brand_name}</div>', # DİNAMİK MARKA İSMİ
             '</div>',
             
-            # SAĞ: BİZİM MOTORUMUZ (ARTIFICIAL STAFF)
+            # SAĞ: BİZİM İMZAMIZ (ARTIFICIAL STAFF)
             '<div class="ai-badge">',
                 '<div class="ai-label">POWERED BY</div>',
                 '<div class="ai-name"><i class="bx bx-microchip"></i> ARTIFICIAL STAFF</div>',
             '</div>',
         '</div>',
         
-        # --- BOTTOM ROW ---
+        # --- ALT SATIR (DURUM) ---
         '<div class="header-bottom">',
             '<div class="status-pill"><div class="live-dot"></div>Sistem Operasyonel</div>',
             '<div class="location-pill"><i class="bx bx-globe"></i> İstanbul HQ</div>',
@@ -239,7 +249,7 @@ def render_dashboard():
     # Kullanıcı verisini session'dan çekiyoruz
     user = st.session_state.get('user_data', {'brand': 'Demo Brand'})
 
-    # 1. RENDER HEADER (Artık Dinamik Marka + Artificial Staff Badge)
+    # 1. RENDER HEADER (Düzeltildi: Marka solda, AI sağda)
     render_header(user)
 
     # 2. MAIN LAYOUT
