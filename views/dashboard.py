@@ -140,31 +140,30 @@ def inject_enterprise_css():
 
 def render_header(user_data: Dict[str, Any]):
     """
-    Renders the ULTRA-PREMIUM header using List Join method to prevent indentation bugs.
+    Renders the ULTRA-PREMIUM header with 'Artificial Staff' brand.
     """
-    brand_name = user_data.get('brand', 'Anatolia')
+    # KULLANICI VERİSİ YERİNE SABİT MARKA İSMİ KULLANIYORUZ
+    brand_name = "Artificial Staff"
     current_date = datetime.now().strftime("%d %B, %A")
     
-    # HTML parçalarını liste olarak oluşturup birleştiriyoruz.
-    # Bu yöntem indentation (girinti) hatasını %100 engeller.
     html_parts = [
         '<div class="dash-header-container">',
         '<div class="header-top">',
         '<div>',
         '<div class="brand-eyebrow">Operasyon Merkezi</div>',
-        f'<div class="brand-title">{brand_name}</div>',
+        f'<div class="brand-title">{brand_name}</div>', # Sabitlenen marka ismi burada kullanılıyor
         '</div>',
         '<div class="tech-badge-group">',
         '<div class="tech-badge"><i class="bx bx-cpu"></i> GEMINI 2.0 FLASH</div>',
         '<div class="tech-badge"><i class="bx bx-wifi"></i> 24ms LATENCY</div>',
         '</div>',
-        '</div>', # End header-top
+        '</div>', 
         
         '<div class="header-bottom">',
         '<div class="status-pill"><div class="live-dot"></div>Sistem Operasyonel</div>',
         '<div class="location-pill"><i class="bx bx-map"></i> İstanbul HQ</div>',
         f'<div style="margin-left: auto; font-size: 13px; color: #52525B; font-family: \'JetBrains Mono\', monospace;">{current_date}</div>',
-        '</div>', # End header-bottom
+        '</div>',
         '</div>'
     ]
     
@@ -205,7 +204,7 @@ def render_dashboard():
     
     user = st.session_state.get('user_data', {'brand': 'Demo Brand'})
 
-    # 1. RENDER HEADER (FIXED)
+    # 1. RENDER HEADER (Güncellenmiş)
     render_header(user)
 
     # 2. MAIN LAYOUT
