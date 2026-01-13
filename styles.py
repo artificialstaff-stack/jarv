@@ -1,141 +1,212 @@
 import streamlit as st
 
 def load_css():
-    st.markdown("""
+    """
+    Injects the 'Enterprise-Grade' CSS design system into the Streamlit app.
+    
+    Architecture:
+    1. RESET & VARIABLES: Define color palette (#000000, #09090B, #18181B) and fonts.
+    2. CORE LAYOUT: Override Streamlit's default padding and background logic.
+    3. ATOMIC COMPONENTS: Styles for Buttons, Inputs, and text elements.
+    4. MOLECULES: Complex card designs (Pro Metric, Chat Bubbles).
+    5. ANIMATIONS: Keyframes for pulsing dots and hover states.
+    """
+    
+    # --- 1. CSS VARIABLES & RESET ---
+    base_styles = """
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 
-        /* --- 1. GENEL ATMOSFER (AMBIENT GLOW) --- */
-        html, body, .stApp { 
-            background-color: #050505;
-            background-image: 
-                radial-gradient(circle at 50% 0%, #1a1a1a 0%, transparent 70%),
-                radial-gradient(circle at 80% 10%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
-            color: #E4E4E7; 
-            font-family: 'Inter', sans-serif; 
+        :root {
+            /* Palette: Deep Dark Mode */
+            --bg-app: #000000;
+            --bg-secondary: #09090B;
+            --bg-card: rgba(24, 24, 27, 0.6);
+            
+            /* Text */
+            --text-primary: #FAFAFA;
+            --text-secondary: #A1A1AA;
+            
+            /* Borders & Glass */
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-focus: rgba(255, 255, 255, 0.15);
+            --glass-shine: rgba(255, 255, 255, 0.03);
+            
+            /* Accents (Neon) */
+            --accent-blue: #3B82F6;
+            --accent-purple: #8B5CF6;
+            --accent-green: #10B981;
+            --accent-red: #EF4444;
         }
 
-        /* SIDEBAR (Minimalist) */
-        section[data-testid="stSidebar"] { 
-            background-color: rgba(10, 10, 10, 0.8);
-            border-right: 1px solid #1F1F1F;
-            backdrop-filter: blur(20px);
+        /* Global Reset */
+        html, body, .stApp {
+            background-color: var(--bg-app);
+            font-family: 'Inter', -apple-system, sans-serif;
+            color: var(--text-primary);
         }
         
-        /* --- 2. INPUT ALANLARI (Ultra Modern) --- */
-        .stTextInput input, .stSelectbox div, .stNumberInput input, .stTextArea textarea, .stChatInput textarea {
-            background-color: rgba(255, 255, 255, 0.03) !important; 
-            border: 1px solid #27272A; 
-            color: #FFF; 
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-        .stTextInput input:focus, .stChatInput textarea:focus { 
-            border-color: #3B82F6; 
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-            background-color: rgba(255, 255, 255, 0.05) !important;
-        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-app); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
+    """
 
-        /* --- 3. BUTONLAR (Sessiz Güç) --- */
-        .stButton button { 
-            background: linear-gradient(180deg, #27272A 0%, #18181B 100%);
-            color: #E4E4E7; 
-            border: 1px solid #3F3F46; 
-            border-radius: 8px; 
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            transition: all 0.2s;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    # --- 2. LAYOUT & SIDEBAR ---
+    layout_styles = """
+    <style>
+        /* Sidebar Glassmorphism */
+        section[data-testid="stSidebar"] {
+            background-color: rgba(9, 9, 11, 0.85);
+            border-right: 1px solid var(--border-subtle);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
-        .stButton button:hover { 
-            border-color: #71717A; 
-            color: #FFF;
+        
+        /* Remove Streamlit Header Whitespace */
+        .block-container {
+            padding-top: 2rem !important;
+            padding-bottom: 5rem !important;
+        }
+        header[data-testid="stHeader"] { display: none; }
+        footer { display: none; }
+    </style>
+    """
+
+    # --- 3. INPUTS & BUTTONS (MICRO-INTERACTIONS) ---
+    component_styles = """
+    <style>
+        /* Inputs: Modern React Style */
+        .stTextInput input, .stSelectbox div[data-baseweb="select"], .stNumberInput input, .stTextArea textarea, .stChatInput textarea {
+            background-color: var(--bg-secondary) !important;
+            border: 1px solid var(--border-subtle) !important;
+            color: var(--text-primary) !important;
+            border-radius: 10px !important;
+            font-size: 14px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Input Focus Glow */
+        .stTextInput input:focus, .stChatInput textarea:focus {
+            border-color: var(--accent-blue) !important;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
             transform: translateY(-1px);
         }
-        /* Primary Buton (Çıkış) */
-        .stButton button[kind="primary"] {
-             background: linear-gradient(180deg, #DC2626 0%, #B91C1C 100%);
-             border: 1px solid #991B1B;
-             color: white;
-             box-shadow: 0 0 15px rgba(220, 38, 38, 0.4);
+
+        /* Buttons: Alive & Tactile */
+        .stButton button {
+            background: linear-gradient(180deg, #27272A 0%, #18181B 100%);
+            border: 1px solid var(--border-subtle);
+            color: #E4E4E7;
+            font-weight: 500;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .stButton button:hover {
+            border-color: #52525B;
+            color: #FFF;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
 
-        /* --- 4. NEXT-GEN METRİK KARTLARI (Glassmorphism) --- */
+        /* Primary Action Button */
+        .stButton button[kind="primary"] {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #2563EB 100%);
+            border: none;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+        .stButton button[kind="primary"]:hover {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+        }
+    </style>
+    """
+
+    # --- 4. ADVANCED DASHBOARD COMPONENTS ---
+    dashboard_styles = """
+    <style>
+        /* PRO METRIC CARD 
+           Design: Flexbox layout with glowing icon container and badge system.
+        */
         .pro-metric-card {
-            background: rgba(20, 20, 22, 0.6); /* Yarı saydam */
-            backdrop-filter: blur(12px);       /* Buzlu cam */
-            padding: 24px;
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
             border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 24px;
             display: flex;
             align-items: center;
             gap: 20px;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
         }
+        
+        /* Top Highlight Line */
         .pro-metric-card::before {
             content: "";
             position: absolute;
             top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-        }
-        .pro-metric-card:hover {
-             border-color: rgba(255, 255, 255, 0.15);
-             transform: translateY(-2px);
-             box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
         }
         
-        /* İkon Kutusu (Neon Glow) */
+        .pro-metric-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Icon Container */
         .metric-icon-box {
-            width: 52px;
-            height: 52px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
             font-size: 24px;
             flex-shrink: 0;
-        }
-        /* Renk Temaları */
-        .theme-blue   { background: rgba(59, 130, 246, 0.1); color: #60A5FA; border: 1px solid rgba(59, 130, 246, 0.2); }
-        .theme-green  { background: rgba(34, 197, 94, 0.1);  color: #4ADE80; border: 1px solid rgba(34, 197, 94, 0.2); }
-        .theme-purple { background: rgba(168, 85, 247, 0.1); color: #C084FC; border: 1px solid rgba(168, 85, 247, 0.2); }
-        .theme-orange { background: rgba(249, 115, 22, 0.1); color: #FB923C; border: 1px solid rgba(249, 115, 22, 0.2); }
-        .theme-red    { background: rgba(239, 68, 68, 0.1);  color: #F87171; border: 1px solid rgba(239, 68, 68, 0.2); }
-
-        /* Tipografi */
-        .metric-label { color: #A1A1AA; font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
-        .metric-value { color: #FFF; font-size: 1.8rem; font-weight: 800; margin: 4px 0; letter-spacing: -0.02em; }
-        
-        .metric-delta { font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px;}
-        .delta-up   { background: rgba(34, 197, 94, 0.1); color: #4ADE80; }
-        .delta-down { background: rgba(239, 68, 68, 0.1); color: #F87171; }
-        .delta-flat { background: rgba(161, 161, 170, 0.1); color: #A1A1AA; }
-
-        /* --- 5. CHAT ARAYÜZÜ (Custom Bubbles) --- */
-        div[data-testid="stChatMessage"] {
-            background-color: transparent;
-            padding: 1rem;
-            border-radius: 12px;
-        }
-        div[data-testid="stChatMessage"][data-author="user"] {
-            background-color: rgba(59, 130, 246, 0.08);
-            border: 1px solid rgba(59, 130, 246, 0.1);
+            position: relative;
         }
         
-        /* Grafikler */
-        .js-plotly-plot .plotly .main-svg { background: transparent !important; }
-        div[data-testid="stVerticalBlock"] > div.stPlotlyChart {
-            background: rgba(20, 20, 22, 0.4);
-            border: 1px solid rgba(255,255,255,0.05);
+        /* Themes */
+        .theme-blue { background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); border: 1px solid rgba(59, 130, 246, 0.2); box-shadow: 0 0 15px rgba(59, 130, 246, 0.1); }
+        .theme-green { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.2); box-shadow: 0 0 15px rgba(16, 185, 129, 0.1); }
+        .theme-purple { background: rgba(139, 92, 246, 0.1); color: var(--accent-purple); border: 1px solid rgba(139, 92, 246, 0.2); box-shadow: 0 0 15px rgba(139, 92, 246, 0.1); }
+        .theme-orange { background: rgba(249, 115, 22, 0.1); color: #F97316; border: 1px solid rgba(249, 115, 22, 0.2); box-shadow: 0 0 15px rgba(249, 115, 22, 0.1); }
+        .theme-red { background: rgba(239, 68, 68, 0.1); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.2); box-shadow: 0 0 15px rgba(239, 68, 68, 0.1); }
+
+        /* Typography */
+        .metric-info { display: flex; flex-direction: column; }
+        .metric-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+        .metric-value { font-size: 28px; font-weight: 700; color: #FFF; letter-spacing: -0.02em; line-height: 1.1; }
+        
+        /* Delta Badge (Pill Shape) */
+        .metric-delta {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2px 8px; border-radius: 999px;
+            font-size: 11px; font-weight: 600;
+            margin-top: 6px; width: fit-content;
+        }
+        .delta-up { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .delta-down { background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .delta-flat { background: rgba(161, 161, 170, 0.15); color: #A1A1AA; border: 1px solid rgba(161, 161, 170, 0.2); }
+
+        /* Chart Containers */
+        .stPlotlyChart {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
             border-radius: 16px;
-            padding: 15px;
+            padding: 16px;
+            transition: border-color 0.3s;
         }
-
-        header {visibility: hidden;}
+        .stPlotlyChart:hover { border-color: var(--border-focus); }
     </style>
-    """, unsafe_allow_html=True)
+    """
+    
+    # --- 5. COMBINE & INJECT ---
+    st.markdown(base_styles + layout_styles + component_styles + dashboard_styles, unsafe_allow_html=True)
