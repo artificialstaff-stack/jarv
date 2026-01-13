@@ -1,6 +1,5 @@
 import streamlit as st
 import time
-import textwrap
 
 # ==============================================================================
 # 🎨 1. CSS MOTORU (GLASSMORPHISM & GLOW)
@@ -86,7 +85,7 @@ def inject_pricing_css():
             text-transform: uppercase; letter-spacing: 1px;
             box-shadow: 0 4px 15px rgba(124, 58, 237, 0.5);
             z-index: 10;
-            border: 2px solid #0F172A; /* Kart rengiyle uyumlu border */
+            border: 2px solid #0F172A; 
         }
         
         /* Ayırıcı Çizgi */
@@ -98,17 +97,25 @@ def inject_pricing_css():
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🧩 2. HTML OLUŞTURUCU (DEDENT FIX)
+# 🧩 2. HTML OLUŞTURUCU (GİRİNTİSİZ - KESİN ÇÖZÜM)
 # ==============================================================================
 def render_plan_content(title, price, desc, features, is_highlight=False):
     """
-    Kart içeriğini oluşturur. textwrap.dedent kullanarak girinti hatasını çözer.
+    HTML'i parça parça birleştirerek oluşturur. 
+    Bu yöntem, 'indentation' (girinti) hatalarını %100 engeller.
     """
     card_class = "pricing-card card-highlight" if is_highlight else "pricing-card"
     badge_html = '<div class="popular-badge">✨ EN POPÜLER</div>' if is_highlight else ""
     
-    # Özellik Listesini Oluştur
-    features_html = ""
+    # HTML String'ini satır satır birleştiriyoruz (Hata riskini sıfırlar)
+    html = f'<div class="{card_class}">'
+    html += f'{badge_html}'
+    html += f'<div class="plan-name">{title}</div>'
+    html += f'<div class="plan-price">{price}<span class="plan-period">/ay</span></div>'
+    html += f'<div class="plan-desc">{desc}</div>'
+    html += f'<hr class="divider">'
+    html += f'<ul class="feature-list">'
+    
     for feat in features:
         if feat['active']:
             icon_html = '<div class="icon-box icon-check"><i class="bx bx-check"></i></div>'
@@ -117,28 +124,11 @@ def render_plan_content(title, price, desc, features, is_highlight=False):
             icon_html = '<div class="icon-box icon-cross"><i class="bx bx-x"></i></div>'
             text_style = "color: #64748B; text-decoration: line-through;"
             
-        features_html += f"""
-        <li class="feature-item">
-            {icon_html}
-            <span style="{text_style}">{feat['text']}</span>
-        </li>
-        """
-
-    # HTML Bloğunu Temizle (Dedent)
-    html_block = textwrap.dedent(f"""
-        <div class="{card_class}">
-            {badge_html}
-            <div class="plan-name">{title}</div>
-            <div class="plan-price">{price}<span class="plan-period">/ay</span></div>
-            <div class="plan-desc">{desc}</div>
-            <hr class="divider">
-            <ul class="feature-list">
-                {features_html}
-            </ul>
-        </div>
-    """)
+        html += f'<li class="feature-item">{icon_html}<span style="{text_style}">{feat["text"]}</span></li>'
     
-    return html_block
+    html += '</ul></div>'
+    
+    return html
 
 # ==============================================================================
 # 🚀 3. ANA RENDER FONKSİYONU
@@ -157,7 +147,7 @@ def render_plans():
 
     # === PLAN 1: STARTUP ===
     with c1:
-        st.markdown(render_plan_content(
+        html_content = render_plan_content(
             title="BAŞLANGIÇ",
             price="$0",
             desc="Bireysel satıcılar ve yeni başlayanlar için ideal.",
@@ -168,13 +158,14 @@ def render_plans():
                 {"text": "API Erişimi", "active": False},
                 {"text": "Öncelikli Destek", "active": False},
             ]
-        ), unsafe_allow_html=True)
+        )
+        st.markdown(html_content, unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
         st.button("Ücretsiz Başla", key="p_free", use_container_width=True)
 
     # === PLAN 2: SCALE (HIGHLIGHT) ===
     with c2:
-        st.markdown(render_plan_content(
+        html_content = render_plan_content(
             title="PROFESYONEL",
             price="$49",
             desc="Hızlı büyüyen markalar için tam güç otomasyon.",
@@ -186,7 +177,8 @@ def render_plans():
                 {"text": "E-posta Destek Hattı", "active": True},
             ],
             is_highlight=True
-        ), unsafe_allow_html=True)
+        )
+        st.markdown(html_content, unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("🔥 Pro'ya Geçiş Yap", key="p_pro", type="primary", use_container_width=True):
             with st.spinner("Ödeme paneli hazırlanıyor..."):
@@ -196,7 +188,7 @@ def render_plans():
 
     # === PLAN 3: ENTERPRISE ===
     with c3:
-        st.markdown(render_plan_content(
+        html_content = render_plan_content(
             title="ENTERPRISE",
             price="ÖZEL",
             desc="Global operasyonlar için özelleştirilmiş altyapı.",
@@ -207,7 +199,8 @@ def render_plans():
                 {"text": "SLA Garantisi (%99.9)", "active": True},
                 {"text": "7/24 Dedike Müşteri Temsilcisi", "active": True},
             ]
-        ), unsafe_allow_html=True)
+        )
+        st.markdown(html_content, unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
         st.button("Satış Ekibiyle Görüş", key="p_ent", use_container_width=True)
 
