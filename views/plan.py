@@ -23,9 +23,10 @@ def inject_pricing_css():
             transform: translateY(-8px);
             background-color: rgba(255, 255, 255, 0.04);
             box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* Öne Çıkan Kart (PRO) */
+        /* Öne Çıkan Kart (PRO) - Mor/Mavi Gradyan */
         .card-highlight {
             background: linear-gradient(145deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
             border: 1px solid rgba(139, 92, 246, 0.3);
@@ -40,7 +41,7 @@ def inject_pricing_css():
         .plan-name { font-size: 14px; font-weight: 600; color: #A1A1AA; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
         .plan-price { font-size: 42px; font-weight: 800; color: #FFF; margin-bottom: 5px; }
         .plan-period { font-size: 14px; color: #71717A; font-weight: 400; }
-        .plan-desc { font-size: 14px; color: #A1A1AA; margin: 15px 0 25px 0; line-height: 1.5; }
+        .plan-desc { font-size: 14px; color: #A1A1AA; margin: 15px 0 25px 0; line-height: 1.5; min-height: 40px; }
 
         /* Özellik Listesi */
         .feature-list { list-style: none; padding: 0; margin: 0; }
@@ -48,8 +49,8 @@ def inject_pricing_css():
             display: flex; align-items: center; gap: 10px; 
             font-size: 14px; color: #E4E4E7; margin-bottom: 12px; 
         }
-        .check-icon { color: #10B981; font-weight: bold; }
-        .check-icon-gray { color: #52525B; }
+        .check-icon { color: #10B981; font-weight: bold; font-size: 16px; }
+        .check-icon-gray { color: #52525B; font-size: 16px; }
         
         /* En Popüler Etiketi */
         .popular-badge {
@@ -66,6 +67,7 @@ def inject_pricing_css():
             text-transform: uppercase;
             letter-spacing: 0.5px;
             box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+            z-index: 10;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -75,8 +77,7 @@ def inject_pricing_css():
 # ==============================================================================
 def render_plan_content(title, price, desc, features, is_highlight=False):
     """
-    Kartın HTML içeriğini oluşturur (Buton hariç).
-    Buton Streamlit native olmalı ki tıklamayı yakalayalım.
+    Kartın HTML içeriğini oluşturur.
     """
     card_class = "pricing-card card-highlight" if is_highlight else "pricing-card"
     badge_html = '<div class="popular-badge">✨ EN POPÜLER</div>' if is_highlight else ""
@@ -109,19 +110,18 @@ def render_plan_content(title, price, desc, features, is_highlight=False):
     return html
 
 # ==============================================================================
-# 🚀 3. ANA RENDER FONKSİYONU
+# 🚀 3. ANA RENDER FONKSİYONU (İSMİ DÜZELTİLDİ: render_plans)
 # ==============================================================================
-def render_plan():
+def render_plans():
     inject_pricing_css()
     
     # --- BAŞLIK ---
-    st.markdown("<div style='text-align: center; margin-bottom: 40px;'>", unsafe_allow_html=True)
-    st.title("💎 Planını Seç")
-    st.markdown("<p style='color: #A1A1AA; font-size: 16px;'>İşletmenizin ölçeğine uygun, şeffaf fiyatlandırma.</p>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; margin-bottom: 50px;'>", unsafe_allow_html=True)
+    st.title("💎 İşletmeniz İçin En İyi Plan")
+    st.markdown("<p style='color: #A1A1AA; font-size: 16px;'>Şeffaf fiyatlandırma. Gizli ücret yok. İstediğiniz zaman iptal edin.</p>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
     # --- KARTLAR (3 KOLON) ---
-    # Ortadaki kolon (Pro) biraz daha geniş olsun diye oran veriyoruz
     c1, c2, c3 = st.columns([1, 1.1, 1], gap="medium")
 
     # === PLAN 1: BAŞLANGIÇ ===
@@ -135,12 +135,11 @@ def render_plan():
                 {"text": "Temel Stok Takibi", "active": True},
                 {"text": "AI Asistan (Sınırlı)", "active": True},
                 {"text": "Gelişmiş Raporlar", "active": False},
-                {"text": "7/24 Canlı Destek", "active": False},
+                {"text": "API Erişimi", "active": False},
             ]
         ), unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True) # Boşluk
-        if st.button("Mevcut Plan", key="btn_free", use_container_width=True, disabled=True):
-            pass
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.button("Mevcut Plan", key="btn_free", use_container_width=True, disabled=True)
 
     # === PLAN 2: PRO (HIGHLIGHT) ===
     with c2:
@@ -153,7 +152,7 @@ def render_plan():
                 {"text": "Gelişmiş AI Analizleri", "active": True},
                 {"text": "Çoklu Depo Yönetimi", "active": True},
                 {"text": "Lojistik Rota Optimizasyonu", "active": True},
-                {"text": "Öncelıklı E-posta Desteği", "active": True},
+                {"text": "Öncelikli E-posta Desteği", "active": True},
             ],
             is_highlight=True
         ), unsafe_allow_html=True)
@@ -182,13 +181,15 @@ def render_plan():
         ), unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("Satış ile Görüş", key="btn_ent", use_container_width=True):
-            st.info("Kurumsal satış ekibimiz sizinle iletişime geçecektir.")
+            st.info("Kurumsal satış ekibimiz 24 saat içinde sizinle iletişime geçecektir.")
     
     st.markdown("<br><br>", unsafe_allow_html=True)
     
     # --- GÜVENLİK ROZETLERİ ---
     st.markdown("""
-    <div style="text-align: center; color: #52525B; font-size: 12px; margin-top: 20px;">
-        <i class='bx bx-shield-quarter'></i> 256-bit SSL Güvenli Ödeme • İstediğiniz Zaman İptal Edin
+    <div style="text-align: center; color: #52525B; font-size: 12px; margin-top: 20px; display:flex; justify-content:center; gap:20px;">
+        <span><i class='bx bx-shield-quarter'></i> 256-bit SSL</span>
+        <span><i class='bx bx-check-circle'></i> 14 Gün İade Garantisi</span>
+        <span><i class='bx bx-support'></i> 7/24 Destek</span>
     </div>
     """, unsafe_allow_html=True)
