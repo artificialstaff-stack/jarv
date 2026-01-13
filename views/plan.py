@@ -73,11 +73,12 @@ def inject_pricing_css():
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🧩 2. UI KART OLUŞTURUCU
+# 🧩 2. UI KART OLUŞTURUCU (HTML FIX)
 # ==============================================================================
 def render_plan_content(title, price, desc, features, is_highlight=False):
     """
-    Kartın HTML içeriğini oluşturur.
+    Kartın HTML içeriğini oluşturur. 
+    ÖNEMLİ: HTML string'inin başında boşluk bırakmıyoruz, yoksa code block sanılır.
     """
     card_class = "pricing-card card-highlight" if is_highlight else "pricing-card"
     badge_html = '<div class="popular-badge">✨ EN POPÜLER</div>' if is_highlight else ""
@@ -92,25 +93,25 @@ def render_plan_content(title, price, desc, features, is_highlight=False):
         <li class="feature-item">
             <span class="{style_cls}">{icon}</span>
             <span style="{text_style}">{feat['text']}</span>
-        </li>
-        """
+        </li>"""
 
+    # HTML string'ini girintisiz (dedented) başlatıyoruz
     html = f"""
-    <div class="{card_class}">
-        {badge_html}
-        <div class="plan-name">{title}</div>
-        <div class="plan-price">{price}<span class="plan-period">/ay</span></div>
-        <div class="plan-desc">{desc}</div>
-        <hr style="border-color: rgba(255,255,255,0.1); margin-bottom: 20px;">
-        <ul class="feature-list">
-            {feature_html}
-        </ul>
-    </div>
-    """
+<div class="{card_class}">
+    {badge_html}
+    <div class="plan-name">{title}</div>
+    <div class="plan-price">{price}<span class="plan-period">/ay</span></div>
+    <div class="plan-desc">{desc}</div>
+    <hr style="border-color: rgba(255,255,255,0.1); margin-bottom: 20px;">
+    <ul class="feature-list">
+        {feature_html}
+    </ul>
+</div>
+"""
     return html
 
 # ==============================================================================
-# 🚀 3. ANA RENDER FONKSİYONU (İSMİ DÜZELTİLDİ: render_plans)
+# 🚀 3. ANA RENDER FONKSİYONU (İSİM DÜZELTİLDİ: render_plans)
 # ==============================================================================
 def render_plans():
     inject_pricing_css()
