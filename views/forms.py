@@ -1,7 +1,6 @@
 import streamlit as st
 import time
 import random
-import textwrap
 
 # ==============================================================================
 # 🎨 1. CSS MOTORU
@@ -91,7 +90,7 @@ def inject_forms_css():
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🧩 2. HTML OLUŞTURUCULAR (DÜZ METİN YÖNTEMİ)
+# 🧩 2. HTML OLUŞTURUCULAR (LIST JOIN YÖNTEMİ - KESİN ÇÖZÜM)
 # ==============================================================================
 def render_wizard_html(current_step=1):
     steps = [
@@ -100,53 +99,49 @@ def render_wizard_html(current_step=1):
         {"num": 3, "label": "Onay"}
     ]
     
-    # HTML parçalarını tek tek oluşturuyoruz
-    items = []
+    html_parts = ['<div class="wizard-container">', '<div class="wizard-line"></div>']
+    
     for step in steps:
         active_class = "step-active" if step["num"] <= current_step else ""
         icon = "✓" if step["num"] < current_step else str(step["num"])
         
-        # Tek satırlık HTML stringi (Hata riskini sıfırlar)
-        item_html = f'<div class="step-item {active_class}"><div class="step-circle">{icon}</div><div class="step-label">{step["label"]}</div></div>'
-        items.append(item_html)
+        html_parts.append(f'<div class="step-item {active_class}">')
+        html_parts.append(f'<div class="step-circle">{icon}</div>')
+        html_parts.append(f'<div class="step-label">{step["label"]}</div>')
+        html_parts.append('</div>')
         
-    items_str = "".join(items)
-    
-    # Final HTML
-    html = f"""
-    <div class="wizard-container">
-        <div class="wizard-line"></div>
-        {items_str}
-    </div>
-    """
-    return html
+    html_parts.append('</div>')
+    return "".join(html_parts)
 
 def render_summary_card(cost, count, service, eta):
-    # textwrap.dedent kullanarak gereksiz boşlukları temizliyoruz
-    html = textwrap.dedent(f"""
-        <div class="summary-card">
-            <div class="summary-title">TAHMİNİ MALİYET</div>
-            <div class="summary-total">${cost:,}</div>
-            
-            <div class="summary-row">
-                <span>Koli Adedi</span>
-                <span class="row-val">{count}</span>
-            </div>
-            <div class="summary-row">
-                <span>Servis Tipi</span>
-                <span class="row-val">{service}</span>
-            </div>
-            <div class="summary-row">
-                <span>Sigorta</span>
-                <span class="row-val">Dahil</span>
-            </div>
-            
-            <div style="text-align: center;">
-                <div class="eta-badge">🚀 Tahmini Varış: {eta} Gün</div>
-            </div>
-        </div>
-    """)
-    return html
+    # HTML'i liste elemanları olarak oluşturup birleştiriyoruz. 
+    # Bu yöntem indentation hatasını imkansız kılar.
+    html_parts = [
+        '<div class="summary-card">',
+        '<div class="summary-title">TAHMİNİ MALİYET</div>',
+        f'<div class="summary-total">${cost:,}</div>',
+        
+        '<div class="summary-row">',
+        '<span>Koli Adedi</span>',
+        f'<span class="row-val">{count}</span>',
+        '</div>',
+        
+        '<div class="summary-row">',
+        '<span>Servis Tipi</span>',
+        f'<span class="row-val">{service}</span>',
+        '</div>',
+        
+        '<div class="summary-row">',
+        '<span>Sigorta</span>',
+        '<span class="row-val">Dahil</span>',
+        '</div>',
+        
+        '<div style="text-align: center;">',
+        f'<div class="eta-badge">🚀 Tahmini Varış: {eta} Gün</div>',
+        '</div>',
+        '</div>'
+    ]
+    return "".join(html_parts)
 
 # ==============================================================================
 # 🚀 3. ANA RENDER FONKSİYONU
@@ -242,8 +237,7 @@ def render_forms():
         st.empty()
         st.info("📂 Tüm belgelerinize sol menüdeki **'Dokümanlar'** sayfasından ulaşabilirsiniz.")
         if st.button("Dokümanlara Git"):
-            # Sayfa yönlendirmesi için session state kullanımı
-            st.warning("Menüden 'Dokümanlar' sekmesine tıklayınız.")
+             st.warning("Lütfen sol menüden 'Dokümanlar' sekmesini seçin.")
 
     # === TAB 3: DESTEK ===
     with tab_support:
