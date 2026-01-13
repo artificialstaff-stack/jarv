@@ -9,14 +9,6 @@ import textwrap
 def inject_forms_css():
     st.markdown("""
     <style>
-        /* Form Konteynerı */
-        .form-box {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 24px;
-        }
-
         /* Wizard (Adım) Göstergesi */
         .wizard-container {
             display: flex;
@@ -30,10 +22,7 @@ def inject_forms_css():
         /* Çizgi */
         .wizard-line {
             position: absolute;
-            top: 15px;
-            left: 0;
-            right: 0;
-            height: 2px;
+            top: 15px; left: 0; right: 0; height: 2px;
             background: #27272A;
             z-index: 0;
         }
@@ -41,12 +30,9 @@ def inject_forms_css():
         /* Adım Kutuları */
         .step-item {
             z-index: 1;
-            background: #000000; /* Arka plan rengiyle aynı olmalı */
+            background: #000000;
             padding: 0 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
         }
         .step-circle {
             width: 32px; height: 32px;
@@ -105,7 +91,7 @@ def inject_forms_css():
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🧩 2. HTML OLUŞTURUCULAR (DEDENT KULLANILARAK)
+# 🧩 2. HTML OLUŞTURUCULAR (DÜZ METİN YÖNTEMİ)
 # ==============================================================================
 def render_wizard_html(current_step=1):
     steps = [
@@ -114,29 +100,29 @@ def render_wizard_html(current_step=1):
         {"num": 3, "label": "Onay"}
     ]
     
-    items_html = ""
+    # HTML parçalarını tek tek oluşturuyoruz
+    items = []
     for step in steps:
         active_class = "step-active" if step["num"] <= current_step else ""
-        # Tamamlanan adımlar için Tik işareti, değilse numara
         icon = "✓" if step["num"] < current_step else str(step["num"])
         
-        items_html += f"""
-        <div class="step-item {active_class}">
-            <div class="step-circle">{icon}</div>
-            <div class="step-label">{step["label"]}</div>
-        </div>
-        """
+        # Tek satırlık HTML stringi (Hata riskini sıfırlar)
+        item_html = f'<div class="step-item {active_class}"><div class="step-circle">{icon}</div><div class="step-label">{step["label"]}</div></div>'
+        items.append(item_html)
         
-    # Temiz HTML Bloğu
-    html = textwrap.dedent(f"""
-        <div class="wizard-container">
-            <div class="wizard-line"></div>
-            {items_html}
-        </div>
-    """)
+    items_str = "".join(items)
+    
+    # Final HTML
+    html = f"""
+    <div class="wizard-container">
+        <div class="wizard-line"></div>
+        {items_str}
+    </div>
+    """
     return html
 
 def render_summary_card(cost, count, service, eta):
+    # textwrap.dedent kullanarak gereksiz boşlukları temizliyoruz
     html = textwrap.dedent(f"""
         <div class="summary-card">
             <div class="summary-title">TAHMİNİ MALİYET</div>
@@ -233,7 +219,7 @@ def render_forms():
                 
             total_cost = box_count * base_rate
             
-            # HTML Kartı Bas (Raw HTML yerine Dedented HTML)
+            # HTML Kartı Bas
             st.markdown(render_summary_card(total_cost, box_count, priority.split('(')[0], days), unsafe_allow_html=True)
             
             st.info("💡 **İpucu:** 100 koli üzeri gönderimlerde %15 indirim otomatik uygulanır.")
@@ -256,7 +242,8 @@ def render_forms():
         st.empty()
         st.info("📂 Tüm belgelerinize sol menüdeki **'Dokümanlar'** sayfasından ulaşabilirsiniz.")
         if st.button("Dokümanlara Git"):
-            st.switch_page("views/documents.py") # Streamlit page switch (Opsiyonel, çalışmazsa kaldırılabilir)
+            # Sayfa yönlendirmesi için session state kullanımı
+            st.warning("Menüden 'Dokümanlar' sekmesine tıklayınız.")
 
     # === TAB 3: DESTEK ===
     with tab_support:
