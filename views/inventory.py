@@ -1,81 +1,151 @@
-**Role:** You are a Principal Frontend Architect & UI/UX Lead at a top-tier Silicon Valley SaaS company. You are tasked with building the "Inventory Management" module of a high-performance ERP system using Python and Streamlit.
-
-**Objective:** Refactor and redesign the provided `views/inventory.py` code to match the "Enterprise-Grade" aesthetic established in the Dashboard and Logistics modules. The current code is too basic; it needs to look like a billion-dollar Warehouse Management System (WMS).
-
-**Design Philosophy (The "Visual Language"):**
-1.  **Deep Dark Theme:** Use `#050505` as the base.
-2.  **Semantic Colors:** Use color meaningfully for stock levels:
-    * **Green (#10B981):** Healthy Stock (> 1000)
-    * **Amber (#F59E0B):** Low Stock Warning (< 500)
-    * **Red (#EF4444):** Critical/Out of Stock (< 100)
-3.  **Glassmorphism:** Use translucent backgrounds for the Toolbar and KPI cards.
-4.  **Interactive Data Table:** The main inventory table must be visually rich, using images (emojis or icons), progress bars, and status badges.
-
-**Specific Tasks for the Code:**
-
-1.  **KPI Cards (The "Heads-Up" Display):**
-    * Replace standard `st.metric` with custom HTML cards similar to the Dashboard's "Pro Metrics".
-    * Show: Total SKUs, Total Value (formatted as currency), and Low Stock Alerts (Red color if > 0).
-
-2.  **The "Command Bar" (Advanced Toolbar):**
-    * Create a dedicated container for actions.
-    * Include a Search Bar (Text Input) and a "Category Filter" (Selectbox) side-by-side.
-    * Add a "Add Product" button that toggles a sleek form (use `st.expander` or session state to show/hide).
-
-3.  **The "Smart Grid" (Inventory Table):**
-    * Use `st.dataframe` with `column_config`.
-    * **Visual Column:** Show product avatars/icons.
-    * **Stock Level:** Use a `ProgressColumn` that visualizes the stock quantity relative to a max capacity.
-    * **Status Column:** Instead of text, use a color-coded Badge logic (if possible via pandas styling or clever emoji use like 🟢, 🔴).
-    * **Price Column:** Format as Currency ($).
-
-4.  **Mock Data Generator:**
-    * Create a helper function to generate 15-20 rows of realistic mock data (Apparel, Electronics, Accessories) so the table looks full and professional.
-
-5.  **Custom CSS:**
-    * Inject CSS to style the dataframe headers (make them uppercase and grey) and remove the default Streamlit padding to make it look like a native app.
-
-**The Source Code to Upgrade:**
-```python
 import streamlit as st
 import pandas as pd
+import random
 
+# ==============================================================================
+# 🎨 1. SAYFAYA ÖZEL STİL (ENVANTER İÇİN)
+# ==============================================================================
+def inject_inventory_css():
+    st.markdown("""
+    <style>
+        /* KPI Kartları için Özel Tasarım */
+        .inv-kpi-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .inv-kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .kpi-label { color: #A1A1AA; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
+        .kpi-value { color: #FFF; font-size: 24px; font-weight: 700; }
+        .kpi-badge { 
+            align-self: flex-start;
+            font-size: 11px; 
+            padding: 3px 8px; 
+            border-radius: 20px; 
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-green { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge-red { background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .badge-blue { background: rgba(59, 130, 246, 0.15); color: #60A5FA; border: 1px solid rgba(59, 130, 246, 0.2); }
+
+        /* Filtre Alanı */
+        .toolbar-container {
+            background-color: #0E0E10;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #1F1F23;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+# ==============================================================================
+# 🛠️ 2. YARDIMCI FONKSİYONLAR
+# ==============================================================================
+def render_kpi(label, value, badge_text, badge_type="green", icon="bx-stats"):
+    st.markdown(f"""
+    <div class="inv-kpi-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="kpi-label">{label}</div>
+            <i class='bx {icon}' style="color:#52525B; font-size:18px;"></i>
+        </div>
+        <div class="kpi-value">{value}</div>
+        <span class="kpi-badge badge-{badge_type}">{badge_text}</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+def get_inventory_data():
+    """Gerçekçi envanter verisi üretir."""
+    products = [
+        {"icon": "🧥", "name": "Kaşmir Palto", "sku": "TR-881", "cat": "Giyim", "stock": 120, "price": 4500, "status": "✅ Yüksek"},
+        {"icon": "👜", "name": "Deri Çanta", "sku": "TR-902", "cat": "Aksesuar", "stock": 45, "price": 2800, "status": "⚠️ Kritik"},
+        {"icon": "🧣", "name": "İpek Şal", "sku": "TR-334", "cat": "Aksesuar", "stock": 850, "price": 1200, "status": "⚡ Normal"},
+        {"icon": "👞", "name": "Oxford Ayakkabı", "sku": "TR-112", "cat": "Ayakkabı", "stock": 320, "price": 3500, "status": "⚡ Normal"},
+        {"icon": "⌚", "name": "Akıllı Saat", "sku": "EL-551", "cat": "Elektronik", "stock": 15, "price": 8900, "status": "🚨 Tükeniyor"},
+        {"icon": "🎧", "name": "Kablosuz Kulaklık", "sku": "EL-229", "cat": "Elektronik", "stock": 210, "price": 1500, "status": "⚡ Normal"},
+        {"icon": "🧢", "name": "Logolu Şapka", "sku": "TR-005", "cat": "Aksesuar", "stock": 1500, "price": 450, "status": "✅ Yüksek"},
+        {"icon": "🧴", "name": "Organik Losyon", "sku": "KZ-101", "cat": "Kozmetik", "stock": 2000, "price": 320, "status": "✅ Yüksek"},
+        {"icon": "🕶️", "name": "Güneş Gözlüğü", "sku": "TR-404", "cat": "Aksesuar", "stock": 90, "price": 1850, "status": "⚠️ Kritik"},
+    ]
+    return pd.DataFrame(products)
+
+# ==============================================================================
+# 🚀 3. ANA RENDER FONKSİYONU
+# ==============================================================================
 def render_inventory():
-    st.title("📋 Envanter Yönetimi")
+    inject_inventory_css()
     
-    # Üst Özet
-    kpi1, kpi2, kpi3 = st.columns(3)
-    kpi1.metric("Toplam SKU", "48", "+2")
-    kpi2.metric("Toplam Değer", "$142,000", "+$12k")
-    kpi3.metric("Stok Sağlığı", "%92", "Mükemmel")
-    
+    # --- HEADER ---
+    c1, c2 = st.columns([3, 1])
+    with c1:
+        st.title("📦 Envanter Yönetimi")
+        st.caption("Depo stok durumu, ürün değerlemeleri ve kritik seviye takibi.")
+    with c2:
+         # Butonu sağa yaslamak için boşluk
+         st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+         if st.button("➕ Yeni Ürün Ekle", type="primary", use_container_width=True):
+             st.toast("Ekleme modülü açılıyor...", icon="⚡")
+
     st.markdown("---")
+
+    # --- KPI GRİD (4 SÜTUN) ---
+    k1, k2, k3, k4 = st.columns(4)
+    with k1: render_kpi("Toplam SKU", "1,240", "+12 Yeni", "blue", "bx-package")
+    with k2: render_kpi("Depo Değeri", "₺4.2M", "+%5.4", "green", "bx-money")
+    with k3: render_kpi("Kritik Stok", "24 Ürün", "⚠️ Aksiyon Al", "red", "bx-error-circle")
+    with k4: render_kpi("Stok Devir", "4.8", "🚀 Yüksek", "green", "bx-refresh")
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # --- GELİŞMİŞ FİLTRE & TABLO ALANI ---
+    # Toolbar
+    col_search, col_filter, col_sort = st.columns([2, 1, 1])
+    with col_search:
+        search_term = st.text_input("🔍 Ürün Ara", placeholder="SKU, İsim veya Barkod...", label_visibility="collapsed")
+    with col_filter:
+        cat_filter = st.selectbox("Kategori", ["Tümü", "Giyim", "Aksesuar", "Elektronik", "Kozmetik"], label_visibility="collapsed")
+    with col_sort:
+        sort_by = st.selectbox("Sıralama", ["Stok (Azalan)", "Stok (Artan)", "Fiyat (Yüksek)"], label_visibility="collapsed")
+
+    # Veriyi Hazırla
+    df = get_inventory_data()
     
-    # Filtreleme Alanı
-    c_filter, c_add = st.columns([3, 1])
-    with c_filter:
-        st.text_input("🔍 Ürün Ara...", placeholder="SKU veya Ürün Adı girin")
-    with c_add:
-        st.markdown("<br>", unsafe_allow_html=True) # Hizalama boşluğu
-        if st.button("➕ Yeni Ürün", use_container_width=True):
-            st.toast("Ürün ekleme paneli açılıyor...", icon="📦")
-    
-    # Gelişmiş Tablo
-    data = {
-        "Görsel": ["👕", "🧣", "👜", "🧢", "🧴"],
-        "SKU": ["TR-101", "TR-102", "TR-103", "TR-104", "TR-105"],
-        "Ürün Adı": ["Pamuklu T-Shirt", "İpek Eşarp", "Deri Çanta", "Logolu Şapka", "Organik Losyon"],
-        "Stok": [1200, 4500, 45, 800, 2000],
-        "Lokasyon": ["Raf A1", "Raf B3", "Raf C1", "Raf A2", "Raf D4"],
-        "Durum": ["✅ Müsait", "✅ Müsait", "⚠️ Kritik", "✅ Müsait", "✅ Müsait"]
-    }
-    df = pd.DataFrame(data)
-    
+    # Filtreleme Mantığı
+    if search_term:
+        df = df[df['name'].str.contains(search_term, case=False) | df['sku'].str.contains(search_term, case=False)]
+    if cat_filter != "Tümü":
+        df = df[df['cat'] == cat_filter]
+
+    # --- AKILLI TABLO (SMART TABLE) ---
     st.dataframe(
-        df, 
-        use_container_width=True, 
+        df,
         column_config={
-            "Stok": st.column_config.ProgressColumn("Stok Seviyesi", min_value=0, max_value=5000, format="%d Adet"),
+            "icon": st.column_config.TextColumn("Görsel", width="small"),
+            "name": st.column_config.TextColumn("Ürün Adı", width="medium"),
+            "sku": st.column_config.TextColumn("SKU", help="Stok Kodu"),
+            "cat": st.column_config.TextColumn("Kategori"),
+            "price": st.column_config.NumberColumn("Birim Fiyat", format="₺%d"),
+            "stock": st.column_config.ProgressColumn(
+                "Stok Seviyesi",
+                format="%d Adet",
+                min_value=0,
+                max_value=2000,
+            ),
+            "status": st.column_config.TextColumn("Durum")
         },
-        hide_index=True
+        use_container_width=True,
+        hide_index=True,
+        height=500
     )
