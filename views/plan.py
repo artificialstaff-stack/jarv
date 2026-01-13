@@ -1,196 +1,222 @@
 import streamlit as st
 import time
+import textwrap
 
 # ==============================================================================
-# 🎨 1. SAYFAYA ÖZEL CSS (PREMIUM GÖRÜNÜM)
+# 🎨 1. CSS MOTORU (GLASSMORPHISM & GLOW)
 # ==============================================================================
 def inject_pricing_css():
     st.markdown("""
     <style>
-        /* Genel Kart Yapısı */
+        /* Kartın Kendisi */
         .pricing-card {
-            background-color: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-radius: 24px;
             padding: 30px;
             display: flex;
             flex-direction: column;
             height: 100%;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
+            overflow: visible;
         }
+        
         .pricing-card:hover {
-            transform: translateY(-8px);
-            background-color: rgba(255, 255, 255, 0.04);
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.05);
             border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.6);
         }
 
-        /* Öne Çıkan Kart (PRO) - Mor/Mavi Gradyan */
+        /* PRO Kart Özelleştirmesi (Neon Glow) */
         .card-highlight {
-            background: linear-gradient(145deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            box-shadow: 0 0 30px rgba(139, 92, 246, 0.1);
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.15);
         }
         .card-highlight:hover {
-            border-color: rgba(139, 92, 246, 0.6);
-            box-shadow: 0 0 50px rgba(139, 92, 246, 0.2);
+            border-color: #8B5CF6;
+            box-shadow: 0 0 60px rgba(139, 92, 246, 0.3);
         }
 
-        /* Başlıklar ve Fiyat */
-        .plan-name { font-size: 14px; font-weight: 600; color: #A1A1AA; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-        .plan-price { font-size: 42px; font-weight: 800; color: #FFF; margin-bottom: 5px; }
-        .plan-period { font-size: 14px; color: #71717A; font-weight: 400; }
-        .plan-desc { font-size: 14px; color: #A1A1AA; margin: 15px 0 25px 0; line-height: 1.5; min-height: 40px; }
+        /* Tipografi */
+        .plan-name { 
+            font-size: 13px; font-weight: 700; color: #94A3B8; 
+            text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; 
+        }
+        .plan-price { 
+            font-size: 48px; font-weight: 800; color: #F8FAFC; 
+            letter-spacing: -1px; margin-bottom: 5px; line-height: 1;
+        }
+        .plan-period { font-size: 16px; color: #64748B; font-weight: 500; margin-left: 2px; }
+        .plan-desc { 
+            font-size: 15px; color: #CBD5E1; margin: 20px 0 30px 0; 
+            line-height: 1.6; min-height: 50px; font-weight: 400;
+        }
 
-        /* Özellik Listesi */
+        /* Liste Elemanları */
         .feature-list { list-style: none; padding: 0; margin: 0; }
         .feature-item { 
-            display: flex; align-items: center; gap: 10px; 
-            font-size: 14px; color: #E4E4E7; margin-bottom: 12px; 
+            display: flex; align-items: center; gap: 12px; 
+            font-size: 14px; color: #E2E8F0; margin-bottom: 16px; 
         }
-        .check-icon { color: #10B981; font-weight: bold; font-size: 16px; }
-        .check-icon-gray { color: #52525B; font-size: 16px; }
         
-        /* En Popüler Etiketi */
+        /* İkonlar */
+        .icon-box {
+            width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+        }
+        .icon-check { background: rgba(16, 185, 129, 0.2); color: #34D399; }
+        .icon-cross { background: rgba(255, 255, 255, 0.05); color: #64748B; }
+
+        /* Badge (En Popüler) */
         .popular-badge {
             position: absolute;
-            top: -12px;
-            left: 50%;
+            top: -14px; left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(90deg, #8B5CF6 0%, #3B82F6 100%);
-            color: white;
-            padding: 4px 12px;
+            background: linear-gradient(90deg, #7C3AED 0%, #2563EB 100%);
+            color: #FFF;
+            padding: 6px 16px;
             border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+            font-size: 11px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.5);
             z-index: 10;
+            border: 2px solid #0F172A; /* Kart rengiyle uyumlu border */
+        }
+        
+        /* Ayırıcı Çizgi */
+        .divider {
+            height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+            border: none; margin-bottom: 25px;
         }
     </style>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🧩 2. UI KART OLUŞTURUCU (HTML FIX)
+# 🧩 2. HTML OLUŞTURUCU (DEDENT FIX)
 # ==============================================================================
 def render_plan_content(title, price, desc, features, is_highlight=False):
     """
-    Kartın HTML içeriğini oluşturur. 
-    ÖNEMLİ: HTML string'inin başında boşluk bırakmıyoruz, yoksa code block sanılır.
+    Kart içeriğini oluşturur. textwrap.dedent kullanarak girinti hatasını çözer.
     """
     card_class = "pricing-card card-highlight" if is_highlight else "pricing-card"
     badge_html = '<div class="popular-badge">✨ EN POPÜLER</div>' if is_highlight else ""
     
-    feature_html = ""
+    # Özellik Listesini Oluştur
+    features_html = ""
     for feat in features:
-        icon = "✓" if feat['active'] else "•"
-        style_cls = "check-icon" if feat['active'] else "check-icon-gray"
-        text_style = "color: #E4E4E7;" if feat['active'] else "color: #52525B; text-decoration: line-through;"
-        
-        feature_html += f"""
+        if feat['active']:
+            icon_html = '<div class="icon-box icon-check"><i class="bx bx-check"></i></div>'
+            text_style = "color: #E2E8F0;"
+        else:
+            icon_html = '<div class="icon-box icon-cross"><i class="bx bx-x"></i></div>'
+            text_style = "color: #64748B; text-decoration: line-through;"
+            
+        features_html += f"""
         <li class="feature-item">
-            <span class="{style_cls}">{icon}</span>
+            {icon_html}
             <span style="{text_style}">{feat['text']}</span>
-        </li>"""
+        </li>
+        """
 
-    # HTML string'ini girintisiz (dedented) başlatıyoruz
-    html = f"""
-<div class="{card_class}">
-    {badge_html}
-    <div class="plan-name">{title}</div>
-    <div class="plan-price">{price}<span class="plan-period">/ay</span></div>
-    <div class="plan-desc">{desc}</div>
-    <hr style="border-color: rgba(255,255,255,0.1); margin-bottom: 20px;">
-    <ul class="feature-list">
-        {feature_html}
-    </ul>
-</div>
-"""
-    return html
+    # HTML Bloğunu Temizle (Dedent)
+    html_block = textwrap.dedent(f"""
+        <div class="{card_class}">
+            {badge_html}
+            <div class="plan-name">{title}</div>
+            <div class="plan-price">{price}<span class="plan-period">/ay</span></div>
+            <div class="plan-desc">{desc}</div>
+            <hr class="divider">
+            <ul class="feature-list">
+                {features_html}
+            </ul>
+        </div>
+    """)
+    
+    return html_block
 
 # ==============================================================================
-# 🚀 3. ANA RENDER FONKSİYONU (İSİM DÜZELTİLDİ: render_plans)
+# 🚀 3. ANA RENDER FONKSİYONU
 # ==============================================================================
 def render_plans():
     inject_pricing_css()
     
     # --- BAŞLIK ---
-    st.markdown("<div style='text-align: center; margin-bottom: 50px;'>", unsafe_allow_html=True)
-    st.title("💎 İşletmeniz İçin En İyi Plan")
-    st.markdown("<p style='color: #A1A1AA; font-size: 16px;'>Şeffaf fiyatlandırma. Gizli ücret yok. İstediğiniz zaman iptal edin.</p>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; margin-bottom: 60px;'>", unsafe_allow_html=True)
+    st.title("💎 Ölçeklenebilir Fiyatlandırma")
+    st.markdown("<p style='color: #94A3B8; font-size: 18px; max-width: 600px; margin: 0 auto;'>İşletmeniz büyüdükçe sizinle birlikte büyüyen, şeffaf ve esnek planlar.</p>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- KARTLAR (3 KOLON) ---
+    # --- KARTLAR ---
     c1, c2, c3 = st.columns([1, 1.1, 1], gap="medium")
 
-    # === PLAN 1: BAŞLANGIÇ ===
+    # === PLAN 1: STARTUP ===
     with c1:
         st.markdown(render_plan_content(
             title="BAŞLANGIÇ",
             price="$0",
-            desc="Küçük işletmeler ve bireysel satıcılar için temel özellikler.",
+            desc="Bireysel satıcılar ve yeni başlayanlar için ideal.",
             features=[
                 {"text": "Aylık 50 Sevkiyat", "active": True},
                 {"text": "Temel Stok Takibi", "active": True},
-                {"text": "AI Asistan (Sınırlı)", "active": True},
-                {"text": "Gelişmiş Raporlar", "active": False},
+                {"text": "AI Chatbot (Limitli)", "active": True},
                 {"text": "API Erişimi", "active": False},
+                {"text": "Öncelikli Destek", "active": False},
             ]
         ), unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
-        st.button("Mevcut Plan", key="btn_free", use_container_width=True, disabled=True)
+        st.button("Ücretsiz Başla", key="p_free", use_container_width=True)
 
-    # === PLAN 2: PRO (HIGHLIGHT) ===
+    # === PLAN 2: SCALE (HIGHLIGHT) ===
     with c2:
         st.markdown(render_plan_content(
             title="PROFESYONEL",
             price="$49",
-            desc="Büyüyen e-ticaret operasyonları için tam kapsamlı çözüm.",
+            desc="Hızlı büyüyen markalar için tam güç otomasyon.",
             features=[
                 {"text": "Sınırsız Sevkiyat", "active": True},
                 {"text": "Gelişmiş AI Analizleri", "active": True},
-                {"text": "Çoklu Depo Yönetimi", "active": True},
                 {"text": "Lojistik Rota Optimizasyonu", "active": True},
-                {"text": "Öncelikli E-posta Desteği", "active": True},
+                {"text": "Çoklu Depo Yönetimi", "active": True},
+                {"text": "E-posta Destek Hattı", "active": True},
             ],
             is_highlight=True
         ), unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
-        
-        # Parlayan Buton
-        if st.button("🔥 PRO'ya Yükselt", key="btn_pro", type="primary", use_container_width=True):
-            with st.spinner("Ödeme altyapısına bağlanılıyor..."):
-                time.sleep(1.5)
-            st.toast("Tebrikler! Hesabınız PRO seviyesine yükseltildi.", icon="🚀")
+        if st.button("🔥 Pro'ya Geçiş Yap", key="p_pro", type="primary", use_container_width=True):
+            with st.spinner("Ödeme paneli hazırlanıyor..."):
+                time.sleep(1)
             st.balloons()
+            st.success("Yönlendiriliyorsunuz!")
 
     # === PLAN 3: ENTERPRISE ===
     with c3:
         st.markdown(render_plan_content(
             title="ENTERPRISE",
             price="ÖZEL",
-            desc="Global markalar ve büyük hacimli operasyonlar için.",
+            desc="Global operasyonlar için özelleştirilmiş altyapı.",
             features=[
-                {"text": "Özel Sunucu & API", "active": True},
+                {"text": "Size Özel Sunucu", "active": True},
                 {"text": "Sınırsız Kullanıcı", "active": True},
                 {"text": "Özel AI Model Eğitimi", "active": True},
-                {"text": "SLA & 7/24 Dedike Destek", "active": True},
-                {"text": "Yerinde Kurulum", "active": True},
+                {"text": "SLA Garantisi (%99.9)", "active": True},
+                {"text": "7/24 Dedike Müşteri Temsilcisi", "active": True},
             ]
         ), unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("Satış ile Görüş", key="btn_ent", use_container_width=True):
-            st.info("Kurumsal satış ekibimiz 24 saat içinde sizinle iletişime geçecektir.")
-    
+        st.button("Satış Ekibiyle Görüş", key="p_ent", use_container_width=True)
+
+    # --- ALT BİLGİ ---
     st.markdown("<br><br>", unsafe_allow_html=True)
-    
-    # --- GÜVENLİK ROZETLERİ ---
     st.markdown("""
-    <div style="text-align: center; color: #52525B; font-size: 12px; margin-top: 20px; display:flex; justify-content:center; gap:20px;">
-        <span><i class='bx bx-shield-quarter'></i> 256-bit SSL</span>
-        <span><i class='bx bx-check-circle'></i> 14 Gün İade Garantisi</span>
-        <span><i class='bx bx-support'></i> 7/24 Destek</span>
+    <div style="text-align: center; color: #52525B; font-size: 13px; display: flex; justify-content: center; gap: 30px;">
+        <span><i class='bx bx-check-shield'></i> 30 Gün Para İade Garantisi</span>
+        <span><i class='bx bx-credit-card'></i> Gizli Ücret Yok</span>
+        <span><i class='bx bx-support'></i> Kurulum Desteği</span>
     </div>
     """, unsafe_allow_html=True)
