@@ -1,131 +1,154 @@
 import streamlit as st
 import sys
 import os
-import textwrap
+import time
 
-# 1. AYARLAR & PATH
-current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(current_dir)
-sys.path.append(os.path.join(current_dir, 'views'))
-sys.path.append(os.path.join(current_dir, 'logic'))
+# ==============================================================================
+# 🔧 1. SYSTEM CONFIGURATION & PATH SETUP
+# ==============================================================================
+# Add module paths relative to the current file
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'views')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'logic')))
 
+# Page Configuration (Must be the very first Streamlit command)
 st.set_page_config(
-    page_title="ARTIS OS",
+    page_title="ARTIS | Intelligent Operations",
     page_icon="⚡",
     layout="wide",
-    initial_sidebar_state="expanded"  # <-- ÖNEMLİ: Menü açık başlasın
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': 'https://www.anatoliacapital.com',
+        'Report a bug': "mailto:support@anatolia.com",
+        'About': "# ARTIS Operating System v4.2"
+    }
 )
 
-# 2. CSS FIX (KAYIP BUTON SORUNU ÇÖZÜMÜ)
-st.markdown("""
-<style>
-    /* Header Şeffaf */
-    header[data-testid="stHeader"] {
-        background: transparent !important;
-        pointer-events: none !important;
-    }
-    
-    /* MENÜ AÇMA BUTONU (MAVİ KUTU) */
-    [data-testid="stSidebarCollapsedControl"] {
-        display: flex !important;
-        visibility: visible !important;
-        align-items: center !important;
-        justify-content: center !important;
-        
-        background-color: #2563EB !important; /* Mavi */
-        color: white !important;
-        width: 44px !important;
-        height: 44px !important;
-        border-radius: 8px !important;
-        border: 1px solid rgba(255,255,255,0.2) !important;
-        
-        position: fixed !important;
-        top: 20px !important;
-        left: 20px !important;
-        z-index: 9999999 !important; /* En üstte */
-        pointer-events: auto !important;
-        cursor: pointer !important;
-    }
-    
-    /* İkon Rengi */
-    [data-testid="stSidebarCollapsedControl"] svg {
-        fill: white !important;
-        stroke: white !important;
-    }
-
-    /* Sidebar Arka Planı */
-    section[data-testid="stSidebar"] {
-        background-color: #050505 !important;
-        border-right: 1px solid rgba(255,255,255,0.1);
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# 3. YÜKLEME
+# ==============================================================================
+# 📦 2. MODULE IMPORTS (LAZY LOADING SAFEGUARDS)
+# ==============================================================================
 try:
     import styles
-    from views import login, dashboard, logistics, inventory, plan, documents, todo, forms
+    import login
+    import dashboard
+    import logistics
+    import inventory
+    import plan
+    import documents
+    import todo
+    import forms
 except ImportError as e:
-    st.error(f"⚠️ Başlatma Hatası: {e}")
+    st.error(f"⚠️ System Module Error: {e}")
     st.stop()
 
+# ==============================================================================
+# 🎨 3. UI INJECTION & STATE MANAGEMENT
+# ==============================================================================
+
+# Load Enterprise CSS System
 styles.load_css()
 
-# 4. STATE YÖNETİMİ
+# Initialize Session State
 if "logged_in" not in st.session_state: st.session_state.logged_in = False
 if "user_data" not in st.session_state: st.session_state.user_data = {}
-if "nav_selection" not in st.session_state: st.session_state.nav_selection = "Dashboard"
+if "active_tab" not in st.session_state: st.session_state.active_tab = "Dashboard"
 
-# 5. SIDEBAR
+# ==============================================================================
+# 🧭 4. SIDEBAR NAVIGATION COMPONENT
+# ==============================================================================
 def render_sidebar():
     with st.sidebar:
-        user = st.session_state.user_data
-        st.markdown(f"### ⚡ {user.get('brand', 'ARTIS')}")
-        
-        # Menü Seçenekleri
-        pages = {
-            "Dashboard": "📊 Dashboard", "Lojistik": "📦 Lojistik",
-            "Envanter": "📋 Envanter", "Formlar": "📝 Formlar",
-            "Dokümanlar": "📂 Dokümanlar", "Yapılacaklar": "✅ Yapılacaklar",
-            "Planlar": "💎 Planlar"
+        # A. Brand Header
+        st.markdown("""
+        <div style="margin-bottom: 30px; padding-left: 10px;">
+            <div style="font-weight: 800; font-size: 20px; color: #FFF; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px;">
+                <span style="background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%); width: 24px; height: 24px; border-radius: 6px; display: inline-block;"></span>
+                Anatolia Home
+            </div>
+            <div style="font-size: 11px; color: #71717A; font-weight: 500; margin-left: 34px;">Enterprise Edition</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # B. Navigation Menu (Custom Styled Radio)
+        # İkonları label'ın içine gömüyoruz çünkü st.radio native ikon desteklemez
+        menu_options = {
+            "Dashboard": "📊  Dashboard",
+            "Lojistik": "📦  Lojistik",
+            "Envanter": "📋  Envanter",
+            "Formlar": "📝  Formlar",
+            "Dokümanlar": "📂  Dokümanlar",
+            "Yapılacaklar": "✅  Yapılacaklar",
+            "Planlar": "💎  Planlar"
         }
         
-        selection = st.radio("Navigasyon", list(pages.keys()), format_func=lambda x: pages[x], label_visibility="collapsed")
+        selected = st.radio(
+            "NAVİGASYON",
+            list(menu_options.keys()),
+            format_func=lambda x: menu_options[x],
+            label_visibility="collapsed",
+            key="nav_radio"
+        )
         
-        if selection != st.session_state.nav_selection:
-            st.session_state.nav_selection = selection
-            st.rerun()
-            
-        st.divider()
-        if st.button("Çıkış Yap"):
+        # C. Spacer
+        st.markdown("<div style='flex-grow: 1;'></div>", unsafe_allow_html=True)
+        st.markdown("<br>" * 5, unsafe_allow_html=True) # Bottom spacer
+
+        # D. User Profile Card (Bottom Sticky)
+        user_name = st.session_state.user_data.get('brand', 'Kullanıcı')
+        st.markdown(f"""
+        <div style="
+            background: rgba(255,255,255,0.03); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            padding: 12px; 
+            border-radius: 12px; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+            margin-top: auto;">
+            <div style="width: 36px; height: 36px; background: linear-gradient(45deg, #3B82F6, #8B5CF6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white;">
+                {user_name[0]}
+            </div>
+            <div style="flex-grow: 1;">
+                <div style="font-size: 13px; font-weight: 600; color: #E4E4E7;">{user_name}</div>
+                <div style="font-size: 11px; color: #34D399;">● Çevrimiçi</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        if st.button("Çıkış Yap", use_container_width=True):
+            with st.spinner("Oturum kapatılıyor..."):
+                time.sleep(0.5)
             st.session_state.logged_in = False
             st.rerun()
+            
+        return selected
 
-# 6. ANA AKIŞ
+# ==============================================================================
+# 🚀 5. MAIN APP ROUTER
+# ==============================================================================
 def main():
     if not st.session_state.logged_in:
         login.render_login_page()
     else:
-        render_sidebar()
-        page = st.session_state.nav_selection
+        # Render Sidebar & Get Selection
+        selection = render_sidebar()
         
-        # ACİL DURUM MENÜSÜ (Eğer yine buton kaybolursa buradan geçiş yap)
-        if page != "Dashboard":
-            with st.expander("🚀 Hızlı Menü (Yedek)", expanded=False):
-                c1,c2,c3,c4 = st.columns(4)
-                if c1.button("📊 Dash"): st.session_state.nav_selection="Dashboard"; st.rerun()
-                if c2.button("📦 Lojistik"): st.session_state.nav_selection="Lojistik"; st.rerun()
-                if c3.button("📋 Envanter"): st.session_state.nav_selection="Envanter"; st.rerun()
-                if c4.button("🚪 Çıkış"): st.session_state.logged_in=False; st.rerun()
-
-        # Sayfaları Render Et
-        if page == "Dashboard": dashboard.render_dashboard()
-        elif page == "Lojistik": logistics.render_logistics()
-        elif page == "Envanter": inventory.render_inventory()
-        elif page == "Formlar": forms.render_forms()
-        elif page == "Dokümanlar": documents.render_documents()
-        elif page == "Yapılacaklar": todo.render_todo()
-        elif page == "Planlar": plan.render_plans()
+        # Route Logic
+        if selection == "Dashboard":
+            dashboard.render_dashboard()
+        elif selection == "Lojistik":
+            logistics.render_logistics()
+        elif selection == "Envanter":
+            inventory.render_inventory()
+        elif selection == "Formlar":
+            forms.render_forms()
+        elif selection == "Dokümanlar":
+            documents.render_documents()
+        elif selection == "Yapılacaklar":
+            todo.render_todo()
+        elif selection == "Planlar":
+            plan.render_plans()
 
 if __name__ == "__main__":
     main()
