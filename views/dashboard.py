@@ -2,6 +2,7 @@ import streamlit as st
 import brain
 from datetime import datetime
 from typing import Dict, Any
+import time
 
 # ==============================================================================
 # 🎨 DASHBOARD ÖZEL STİLİ (Global Header'a Dokunmaz)
@@ -28,7 +29,8 @@ def inject_dashboard_css():
         .ai-badge {
             background: rgba(0,0,0,0.4); border: 1px solid #8B5CF6; 
             padding: 8px 12px; border-radius: 8px; color: #C084FC; 
-            font-family: monospace; font-size: 12px; font-weight: bold;
+            font-family: 'Courier New', monospace; font-size: 11px; font-weight: bold; letter-spacing: 0.5px;
+            display: flex; align-items: center; gap: 6px;
         }
 
         /* Kartlar */
@@ -40,7 +42,7 @@ def inject_dashboard_css():
         
         /* Metrikler */
         .metric-val { font-size: 28px; font-weight: 700; color: #FFF; }
-        .metric-lbl { font-size: 12px; color: #A1A1AA; text-transform: uppercase; font-weight: 600; }
+        .metric-lbl { font-size: 11px; color: #A1A1AA; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -53,19 +55,19 @@ def render_header(user_data: Dict[str, Any]):
     
     st.markdown(f"""
     <div class="dash-header-container">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
             <div>
-                <div style="color:#71717A; font-size:11px; letter-spacing:1px; font-weight:700; margin-bottom:5px;">OPERASYON MERKEZİ</div>
+                <div style="color:#71717A; font-size:10px; letter-spacing:2px; font-weight:700; margin-bottom:8px; text-transform:uppercase;">Operasyon Merkezi</div>
                 <div class="brand-title">{brand_name}</div>
             </div>
             <div class="ai-badge">
-                <i class='bx bx-microchip'></i> POWERED BY ARTIFICIAL STAFF
+                <span>⚡</span> POWERED BY ARTIFICIAL STAFF
             </div>
         </div>
-        <div style="margin-top:20px; display:flex; gap:15px; align-items:center;">
-            <span style="background:rgba(16,185,129,0.1); color:#34D399; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600;">● Sistem Operasyonel</span>
-            <span style="background:rgba(59,130,246,0.1); color:#60A5FA; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600;">İstanbul HQ</span>
-            <div style="margin-left:auto; color:#52525B; font-size:12px; font-family:monospace;">{date_str}</div>
+        <div style="margin-top:25px; display:flex; gap:12px; align-items:center;">
+            <span style="background:rgba(16,185,129,0.15); color:#34D399; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:600; border:1px solid rgba(16,185,129,0.2);">● Sistem Operasyonel</span>
+            <span style="background:rgba(59,130,246,0.15); color:#60A5FA; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:600; border:1px solid rgba(59,130,246,0.2);">Istanbul HQ</span>
+            <div style="margin-left:auto; color:#71717A; font-size:12px; font-family:monospace;">{date_str}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -79,7 +81,7 @@ def render_metric(label, value, delta, icon, color="#3B82F6"):
         <div>
             <div class="metric-lbl">{label}</div>
             <div class="metric-val">{value}</div>
-            <div style="font-size:11px; color:{color}; font-weight:600;">{delta}</div>
+            <div style="font-size:11px; color:{color}; font-weight:600; margin-top:2px;">{delta}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -100,33 +102,41 @@ def render_dashboard():
     # SOL: CHAT
     with col1:
         st.markdown("##### 🤖 Operasyon Asistanı")
-        chat_cont = st.container(height=450)
+        chat_cont = st.container(height=480)
         
-        # Chat Logic (Basitleştirilmiş)
         if "messages" not in st.session_state: st.session_state.messages = []
-        if not st.session_state.messages:
-            chat_cont.info("👋 Merhaba! Size nasıl yardımcı olabilirim?")
         
-        for msg in st.session_state.messages:
-            with chat_cont.chat_message(msg["role"]):
-                st.write(msg["content"])
+        with chat_cont:
+            if not st.session_state.messages:
+                st.info("👋 Merhaba! Finans, Stok veya Lojistik verilerinizi analiz edebilirim.")
+            
+            for msg in st.session_state.messages:
+                with st.chat_message(msg["role"]):
+                    st.write(msg["content"])
 
-        if prompt := st.chat_input("Talimat verin..."):
+        if prompt := st.chat_input("Talimat verin (Örn: Ciro analizi)..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             
-            # Basit Yönlendirme Mantığı
-            if "lojistik" in prompt.lower(): st.session_state.dashboard_mode = "logistics"
-            elif "stok" in prompt.lower(): st.session_state.dashboard_mode = "inventory"
+            # Yönlendirme
+            p_low = prompt.lower()
+            if "lojistik" in p_low: st.session_state.dashboard_mode = "logistics"
+            elif "stok" in p_low: st.session_state.dashboard_mode = "inventory"
             else: st.session_state.dashboard_mode = "finance"
             
-            response_chunks = brain.get_streaming_response(st.session_state.messages, user)
+            # Streaming Response
             full_res = ""
-            # Stream simülasyonu
-            placeholder = chat_cont.empty()
-            for chunk in response_chunks:
-                full_res += chunk
-                placeholder.markdown(full_res + "▌")
-            placeholder.markdown(full_res)
+            with chat_cont:
+                with st.chat_message("user"):
+                    st.write(prompt)
+                
+                with st.chat_message("assistant"):
+                    message_placeholder = st.empty()
+                    # Brain'den veri çekiyoruz
+                    for chunk in brain.get_streaming_response(prompt):
+                        full_res += chunk
+                        message_placeholder.markdown(full_res + "▌")
+                        time.sleep(0.01)
+                    message_placeholder.markdown(full_res)
             
             st.session_state.messages.append({"role": "assistant", "content": full_res})
             st.rerun()
@@ -141,6 +151,7 @@ def render_dashboard():
             with c1: render_metric("Aylık Ciro", "$42,500", "▲ %12.5", "bx-dollar-circle", "#3B82F6")
             with c2: render_metric("Net Kâr", "%32", "▲ %4.2", "bx-trending-up", "#10B981")
             st.markdown("<br>", unsafe_allow_html=True)
+            # Grafik Brain'den geliyor
             st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
 
         elif mode == "logistics":
