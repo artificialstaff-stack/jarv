@@ -4,80 +4,95 @@ import os
 import time
 import textwrap
 
-# 1. AYARLAR
+# ==============================================================================
+# 🔧 1. SİSTEM KONFİGÜRASYONU
+# ==============================================================================
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'views')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'logic')))
 
 st.set_page_config(
-    page_title="ARTIS OS",
+    page_title="ARTIS | Intelligent Operations",
     page_icon="⚡",
     layout="wide",
-    initial_sidebar_state="expanded" # Sidebar varsayılan olarak açık başlar
+    initial_sidebar_state="expanded",
+    menu_items={'About': "# ARTIS OS v4.2\nPowered by Artificial Staff"}
 )
 
-# 2. KRİTİK CSS YAMASI (BUTON İÇİN)
+# ==============================================================================
+# 🛠️ 2. CSS "ZORLA GÖRÜNÜR YAPMA" YAMASI
+# ==============================================================================
 st.markdown("""
 <style>
-    /* 1. Header'ı GİZLEME, Sadece Şeffaf Yap (Butonun yaşaması için) */
+    /* 1. Header'ı Tamamen Tıklanamaz Yap (Arka plana düşsün) */
     header[data-testid="stHeader"] {
-        background-color: transparent !important;
-        pointer-events: none !important; /* Tıklamaları alta geçir */
+        background: transparent !important;
+        pointer-events: none !important;
+        height: 0 !important; /* Yüksekliği sıfırla ki yer kaplamasın */
     }
 
-    /* 2. Sidebar Açma Butonunu ( > ) Yakala ve Yeniden Tasarla */
-    [data-testid="stSidebarCollapsedControl"] {
-        display: block !important;
-        position: fixed !important; /* Ekrana Sabitle */
+    /* 2. Sidebar AÇMA Butonunu (Ok İşareti) Zorla Yakala ve En Üste Çivile */
+    button[data-testid="stSidebarCollapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        
+        /* KONUMLANDIRMA: Sayfanın Sol Üstüne Çiviliyoruz */
+        position: fixed !important;
         top: 20px !important;
         left: 20px !important;
-        z-index: 999999 !important;
+        z-index: 9999999 !important; /* Diğer her şeyin en üstünde olsun */
         
-        /* Görünürlük */
-        background-color: #3B82F6 !important; /* Parlak Mavi */
-        color: white !important;
-        border-radius: 8px !important;
-        padding: 8px !important;
-        width: 40px !important;
-        height: 40px !important;
-        box-shadow: 0 0 20px rgba(59, 130, 246, 0.5) !important;
+        /* GÖRÜNÜM: Parlak Mavi Kutu */
+        background-color: #3B82F6 !important; 
+        width: 45px !important;
+        height: 45px !important;
+        border-radius: 10px !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
         
-        /* Etkileşim */
-        pointer-events: auto !important;
+        /* ETKİLEŞİM */
+        pointer-events: auto !important; /* Tıklanabilir olsun */
         cursor: pointer !important;
-        transition: all 0.3s ease !important;
+        transition: transform 0.2s ease !important;
     }
 
-    /* Buton Hover Efekti */
-    [data-testid="stSidebarCollapsedControl"]:hover {
-        transform: scale(1.1) !important;
-        background-color: #2563EB !important;
-        box-shadow: 0 0 30px rgba(59, 130, 246, 0.8) !important;
-    }
-
-    /* 3. İkon Rengini Beyaz Yap */
-    [data-testid="stSidebarCollapsedControl"] svg {
+    /* İkon Rengini Beyaz Yap */
+    button[data-testid="stSidebarCollapsedControl"] svg {
         fill: white !important;
         stroke: white !important;
+        width: 24px !important;
+        height: 24px !important;
     }
 
-    /* 4. Sidebar Açıkken Kapatma Butonu (X) */
-    button[kind="header"] {
-        color: white !important; 
+    /* Hover (Üzerine Gelince) */
+    button[data-testid="stSidebarCollapsedControl"]:hover {
+        transform: scale(1.1) !important;
+        background-color: #2563EB !important;
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.8) !important;
+    }
+
+    /* 3. Streamlit Toolbar (Sağ Üstteki 3 Nokta) */
+    div[data-testid="stToolbar"] {
+        top: 20px !important;
+        right: 20px !important;
         pointer-events: auto !important;
+        z-index: 9999998 !important;
     }
 
-    /* 5. Dekorasyon Çizgisini Kaldır */
-    div[data-testid="stDecoration"] { display: none; }
+    /* 4. Sidebar Kapalıyken Çıkan Çizgiyi Yok Et */
+    div[data-testid="stDecoration"] { display: none !important; }
     
-    /* 6. Sidebar Stili */
+    /* 5. Sidebar Görünümü */
     section[data-testid="stSidebar"] {
         background-color: #050505 !important;
-        border-right: 1px solid rgba(255,255,255,0.1);
+        border-right: 1px solid rgba(255,255,255,0.08);
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. MODÜLLERİ YÜKLE
+# ==============================================================================
+# 📦 3. MODÜL YÜKLEME
+# ==============================================================================
 try:
     import styles
     import login
@@ -92,7 +107,9 @@ except ImportError as e:
     st.error(f"Sistem Hatası: {e}")
     st.stop()
 
-# 4. APP MANTIĞI
+# ==============================================================================
+# 🚀 4. UYGULAMA MANTIĞI
+# ==============================================================================
 styles.load_css()
 
 if "logged_in" not in st.session_state: st.session_state.logged_in = False
@@ -100,12 +117,12 @@ if "user_data" not in st.session_state: st.session_state.user_data = {}
 
 def render_sidebar():
     with st.sidebar:
+        # MARKA HEADER
         user = st.session_state.user_data
         
-        # Marka Header
         st.markdown(textwrap.dedent(f"""
-            <div style="padding:15px; margin-bottom:20px; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
-                <div style="display:flex; align-items:center; gap:12px;">
+            <div style="margin-top:20px; margin-bottom:20px; padding:12px; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex; gap:10px; align-items:center;">
                     <div style="width:36px; height:36px; background:linear-gradient(135deg, #8B5CF6, #3B82F6); border-radius:8px; display:flex; justify-content:center; align-items:center;">
                         <i class='bx bxs-command' style="color:white; font-size:20px;"></i>
                     </div>
@@ -117,7 +134,7 @@ def render_sidebar():
             </div>
         """), unsafe_allow_html=True)
 
-        # Navigasyon
+        # NAVIGASYON
         opts = {
             "Dashboard": "📊 Dashboard", "Lojistik": "📦 Lojistik", 
             "Envanter": "📋 Envanter", "Formlar": "📝 Formlar", 
@@ -126,7 +143,7 @@ def render_sidebar():
         }
         sel = st.radio("NAV", list(opts.keys()), format_func=lambda x: opts[x], label_visibility="collapsed")
         
-        # Profil
+        # PROFIL
         st.markdown("<div style='flex-grow:1; min-height:150px;'></div>", unsafe_allow_html=True)
         st.markdown(textwrap.dedent(f"""
             <div style="padding:15px; border-top:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; gap:10px;">
@@ -147,14 +164,14 @@ def main():
     if not st.session_state.logged_in:
         login.render_login_page()
     else:
-        selection = render_sidebar()
-        if selection == "Dashboard": dashboard.render_dashboard()
-        elif selection == "Lojistik": logistics.render_logistics()
-        elif selection == "Envanter": inventory.render_inventory()
-        elif selection == "Formlar": forms.render_forms()
-        elif selection == "Dokümanlar": documents.render_documents()
-        elif selection == "Yapılacaklar": todo.render_todo()
-        elif selection == "Planlar": plan.render_plans()
+        sel = render_sidebar()
+        if sel == "Dashboard": dashboard.render_dashboard()
+        elif sel == "Lojistik": logistics.render_logistics()
+        elif sel == "Envanter": inventory.render_inventory()
+        elif sel == "Formlar": forms.render_forms()
+        elif sel == "Dokümanlar": documents.render_documents()
+        elif sel == "Yapılacaklar": todo.render_todo()
+        elif sel == "Planlar": plan.render_plans()
 
 if __name__ == "__main__":
     main()
