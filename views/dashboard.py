@@ -5,121 +5,142 @@ from datetime import datetime
 from typing import Optional, Dict, Any
 
 # ==============================================================================
-# 🎨 1. ENTERPRISE CSS & STYLING ENGINE
+# 🎨 1. ENTERPRISE CSS & STYLING ENGINE (ULTRA PREMIUM)
 # ==============================================================================
 def inject_enterprise_css():
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
-        /* --- DASHBOARD HEADER ÖZEL STİLİ --- */
+        /* --- DASHBOARD HEADER CONTAINER --- */
         .dash-header-container {
-            padding: 10px 0 30px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            margin-bottom: 30px;
+            padding: 20px 25px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            margin-bottom: 35px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
         }
+        
+        /* Arka Plan Efekti (Aurora Glow) */
+        .dash-header-container::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .header-content { position: relative; z-index: 1; }
         
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 15px;
         }
         
-        /* Marka Başlığı */
+        /* Sol Taraf: Marka İsmi */
         .brand-eyebrow {
-            font-size: 11px;
-            color: #71717A;
+            font-size: 10px;
+            color: #A1A1AA;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 600;
-            margin-bottom: 4px;
+            letter-spacing: 2px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            display: flex; align-items: center; gap: 6px;
         }
         .brand-title {
-            font-size: 38px;
+            font-size: 42px;
             font-weight: 800;
             color: #FFF;
-            letter-spacing: -1.2px;
+            letter-spacing: -1.5px;
             line-height: 1;
-            background: linear-gradient(to right, #FFFFFF 0%, #A1A1AA 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
-        /* Teknik Rozetler (Sağ Üst) */
-        .tech-badge-group { display: flex; gap: 10px; }
-        .tech-badge {
+        /* Sağ Taraf: AI Engine Badge */
+        .ai-badge {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            color: #71717A;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 6px 10px;
-            border-radius: 6px;
-            display: flex; align-items: center; gap: 6px;
-            transition: all 0.2s;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(139, 92, 246, 0.3); /* Mor Çerçeve */
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: flex; flex-direction: column; align-items: flex-end;
+            gap: 2px;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
         }
-        .tech-badge:hover { border-color: rgba(255,255,255,0.2); color: #E4E4E7; }
+        .ai-label { font-size: 9px; color: #71717A; text-transform: uppercase; letter-spacing: 1px; }
+        .ai-name { 
+            font-size: 13px; color: #C084FC; font-weight: 700; letter-spacing: 0.5px; 
+            display: flex; align-items: center; gap: 8px;
+        }
         
         /* Alt Statü Satırı */
         .header-bottom {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
         
         .status-pill {
             display: inline-flex; align-items: center; gap: 8px;
-            padding: 6px 12px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            border-radius: 20px;
+            padding: 5px 12px;
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            border-radius: 99px;
             color: #34D399;
-            font-size: 12px; font-weight: 600;
+            font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
         }
         
         .location-pill {
             display: inline-flex; align-items: center; gap: 6px;
-            padding: 6px 12px;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 20px;
+            padding: 5px 12px;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            border-radius: 99px;
             color: #60A5FA;
-            font-size: 12px; font-weight: 600;
+            font-size: 11px; font-weight: 600;
         }
         
         .live-dot {
             width: 6px; height: 6px;
             background: #10B981;
             border-radius: 50%;
-            box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
             animation: pulse-dot 2s infinite;
         }
         
         @keyframes pulse-dot {
             0% { opacity: 0.6; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-            70% { opacity: 1; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            50% { opacity: 1; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
             100% { opacity: 0.6; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
 
-        /* --- KARTLAR & GENEL --- */
+        /* --- KARTLAR & METRİKLER --- */
         .glass-card {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 16px;
             padding: 24px;
+            transition: transform 0.2s;
         }
+        .glass-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.1); }
         
-        /* Metric Cards */
         .metric-container { display: flex; align-items: center; gap: 16px; }
         .metric-icon-wrapper {
             width: 52px; height: 52px; border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
             font-size: 24px; flex-shrink: 0;
         }
-        .metric-value { font-size: 26px; font-weight: 700; color: #FFF; line-height: 1.1; }
-        .metric-label { font-size: 13px; font-weight: 500; color: #A1A1AA; text-transform: uppercase; }
+        .metric-value { font-size: 26px; font-weight: 700; color: #FFF; line-height: 1.1; margin: 4px 0;}
+        .metric-label { font-size: 12px; font-weight: 600; color: #71717A; text-transform: uppercase; letter-spacing: 0.5px; }
         
         .theme-blue { color: #3B82F6; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); }
         .theme-green { color: #10B981; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); }
@@ -127,44 +148,57 @@ def inject_enterprise_css():
         .theme-orange { color: #F97316; background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.2); }
         
         /* Badge */
-        .metric-badge { padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
-        .badge-up { color: #34D399; background: rgba(52, 211, 153, 0.1); }
-        .badge-down { color: #F87171; background: rgba(248, 113, 113, 0.1); }
-        .badge-flat { color: #94A3B8; background: rgba(148, 163, 184, 0.1); }
+        .metric-badge { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-up { color: #34D399; background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.2); }
+        .badge-down { color: #F87171; background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.2); }
+        .badge-flat { color: #A1A1AA; background: rgba(148, 163, 184, 0.1); border: 1px solid rgba(148, 163, 184, 0.2); }
     </style>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🧩 2. UI COMPONENTS (SAFE HTML GENERATION)
+# 🧩 2. UI COMPONENTS (SAFE HTML LIST-JOIN)
 # ==============================================================================
 
 def render_header(user_data: Dict[str, Any]):
     """
-    Renders the ULTRA-PREMIUM header with 'Artificial Staff' brand.
+    Renders the DASHBOARD HEADER.
+    - Sol: Kullanıcının Marka İsmi (Dinamik)
+    - Sağ: 'ARTIFICIAL STAFF' (Bizim AI Motorumuz)
     """
-    # KULLANICI VERİSİ YERİNE SABİT MARKA İSMİ KULLANIYORUZ
-    brand_name = "Artificial Staff"
+    # 1. Kullanıcının Marka İsmini Dinamik Alıyoruz
+    brand_name = user_data.get('brand', 'Anatolia Home')
+    
     current_date = datetime.now().strftime("%d %B, %A")
     
+    # HTML Parçaları (Indentation hatasını önlemek için liste birleştirme)
     html_parts = [
         '<div class="dash-header-container">',
-        '<div class="header-top">',
-        '<div>',
-        '<div class="brand-eyebrow">Operasyon Merkezi</div>',
-        f'<div class="brand-title">{brand_name}</div>', # Sabitlenen marka ismi burada kullanılıyor
-        '</div>',
-        '<div class="tech-badge-group">',
-        '<div class="tech-badge"><i class="bx bx-cpu"></i> GEMINI 2.0 FLASH</div>',
-        '<div class="tech-badge"><i class="bx bx-wifi"></i> 24ms LATENCY</div>',
-        '</div>',
-        '</div>', 
+        '<div class="header-content">',
         
-        '<div class="header-bottom">',
-        '<div class="status-pill"><div class="live-dot"></div>Sistem Operasyonel</div>',
-        '<div class="location-pill"><i class="bx bx-map"></i> İstanbul HQ</div>',
-        f'<div style="margin-left: auto; font-size: 13px; color: #52525B; font-family: \'JetBrains Mono\', monospace;">{current_date}</div>',
+        # --- TOP ROW ---
+        '<div class="header-top">',
+            # SOL: MARKA İSMİ
+            '<div>',
+                '<div class="brand-eyebrow"><i class="bx bx-command"></i> OPERASYON MERKEZİ</div>',
+                f'<div class="brand-title">{brand_name}</div>',
+            '</div>',
+            
+            # SAĞ: BİZİM MOTORUMUZ (ARTIFICIAL STAFF)
+            '<div class="ai-badge">',
+                '<div class="ai-label">POWERED BY</div>',
+                '<div class="ai-name"><i class="bx bx-microchip"></i> ARTIFICIAL STAFF</div>',
+            '</div>',
         '</div>',
-        '</div>'
+        
+        # --- BOTTOM ROW ---
+        '<div class="header-bottom">',
+            '<div class="status-pill"><div class="live-dot"></div>Sistem Operasyonel</div>',
+            '<div class="location-pill"><i class="bx bx-globe"></i> İstanbul HQ</div>',
+            f'<div style="margin-left: auto; font-size: 12px; color: #52525B; font-family: \'JetBrains Mono\';">{current_date}</div>',
+        '</div>',
+        
+        '</div>', # End header-content
+        '</div>'  # End container
     ]
     
     st.markdown("".join(html_parts), unsafe_allow_html=True)
@@ -193,7 +227,7 @@ def render_pro_metric(label, value, delta, icon_class, theme="blue"):
     st.markdown("".join(html_parts), unsafe_allow_html=True)
 
 # ==============================================================================
-# 🧠 3. MAIN DASHBOARD
+# 🧠 3. MAIN DASHBOARD LOGIC
 # ==============================================================================
 
 def render_dashboard():
@@ -202,9 +236,10 @@ def render_dashboard():
     if "dashboard_mode" not in st.session_state: 
         st.session_state.dashboard_mode = "finance"
     
+    # Kullanıcı verisini session'dan çekiyoruz
     user = st.session_state.get('user_data', {'brand': 'Demo Brand'})
 
-    # 1. RENDER HEADER (Güncellenmiş)
+    # 1. RENDER HEADER (Artık Dinamik Marka + Artificial Staff Badge)
     render_header(user)
 
     # 2. MAIN LAYOUT
@@ -267,7 +302,7 @@ def render_dashboard():
             with c3: render_pro_metric("Büyüme", "Yüksek", "Stabil", "bx-rocket", "purple")
             st.markdown("<br>", unsafe_allow_html=True)
             st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
-            st.caption("💡 **AI Notu:** Reklam harcamaları optimize edildi.")
+            st.caption("💡 **Artificial Staff Notu:** Reklam harcamaları optimize edildi.")
 
         elif mode == "logistics":
             st.markdown("##### 🌍 Lojistik Ağı")
