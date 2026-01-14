@@ -66,12 +66,7 @@ def render_dashboard():
     inject_dashboard_css()
     
     # 1. KULLANICI BİLGİSİ
-   # views/dashboard.py dosyasındaki ilgili satırı şu şekilde güncelle:
-
-# HATALI OLAN:
-# for chunk in brain.get_streaming_response(st.session_state.messages):
-
-# DOĞRU OLAN (FİX):
+   
 user = st.session_state.get('user_data', {}) # Kullanıcı verisini çek
 for chunk in brain.get_streaming_response(st.session_state.messages, user):
     full_resp += chunk
