@@ -62,14 +62,11 @@ def render_metric(label, value, delta, icon="bx-stats", color_override=None):
 # ==============================================================================
 # 🚀 ANA DASHBOARD FONKSİYONU
 # ==============================================================================
-# views/dashboard.py içindeki render_dashboard fonksiyonunun başlangıcı
 def render_dashboard():
-    # Session State kontrollerini garantiye al
-    if 'user_data' not in st.session_state:
-        st.session_state.user_data = {'brand': 'Anatolia Home', 'name': 'Ahmet Yılmaz'}
+    inject_dashboard_css()
     
-    # Değişkeni güvenli şekilde çek
-    user = st.session_state.user_data
+    # 1. KULLANICI BİLGİSİ
+    user = st.session_state.get('user_data', {'brand': 'Demo Brand', 'name': 'User'})
     
     # 2. HEADER
     render_header(user)
