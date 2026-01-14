@@ -9,82 +9,87 @@ sys.path.append(os.path.join(current_dir, 'views'))
 sys.path.append(os.path.join(current_dir, 'logic'))
 
 st.set_page_config(
-    page_title="ARTIS | Kurtarma Modu",
-    page_icon="🚑",
+    page_title="ARTIS OS",
     layout="wide",
-    initial_sidebar_state="expanded" # Bunu 'expanded' yaptık ama tarayıcı inat ederse alttaki CSS butonu getirecek
+    # Başlangıçta KAPALI (collapsed) yapıyorum ki o özel butonu hemen gör.
+    initial_sidebar_state="collapsed" 
 )
 
-# --- 2. CSS: KAYIP BUTONU GERİ GETİR ---
+# --- 2. CSS: BUTONU SAĞA ALMA VE YAZI EKLEME ---
 st.markdown("""
 <style>
-    /* 1. Header'ı Şeffaf Yap (Yok etme!) */
+    /* Header'ı şeffaf yap */
     header[data-testid="stHeader"] {
         background: transparent !important;
         pointer-events: none !important;
     }
 
-    /* 2. MENÜ AÇMA BUTONUNU ZORLA GÖSTER (EN ÖNEMLİ KISIM) */
-    /* Tarayıcı menüyü kapalı tutsa bile, bu kod açma butonunu görünür kılar */
+    /* --- ÖZEL BUTON TASARIMI --- */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
-        opacity: 1 !important;
-        
-        position: fixed !important;
-        top: 20px !important;
-        left: 20px !important;
-        z-index: 9999999 !important; /* Her şeyin üstüne çıkar */
-        
-        background-color: #2563EB !important; /* Mavi Renk */
-        color: white !important;
-        width: 50px !important;
-        height: 50px !important;
-        border-radius: 10px !important;
-        border: 2px solid white !important;
-        box-shadow: 0 0 20px rgba(37, 99, 235, 0.8) !important;
-        
         align-items: center !important;
-        justify-content: center !important;
+        
+        /* KONUMU: Soldan 50px boşluk bıraktık (Biraz sağa kaydı) */
+        position: fixed !important;
+        top: 25px !important;
+        left: 50px !important; 
+        z-index: 9999999 !important;
+        
+        /* GÖRÜNÜM: Geniş Mavi Buton */
+        background-color: #2563EB !important;
+        color: white !important;
+        border-radius: 8px !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+        
+        /* Boyut ayarları - Yazı sığsın diye genişlettim */
+        width: auto !important; 
+        height: 45px !important;
+        padding-left: 10px !important;
+        padding-right: 20px !important;
+        
         pointer-events: auto !important;
         cursor: pointer !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+        transition: transform 0.2s !important;
     }
-    
-    /* İkonun Rengi */
+
+    /* --- YAZI EKLEME BÖLÜMÜ --- */
+    /* Butonun içine sanal bir yazı ekliyoruz */
+    [data-testid="stSidebarCollapsedControl"]::after {
+        content: "Sayfaları Görüntüle" !important; /* İSTEDİĞİN YAZI BURADA */
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        margin-left: 8px !important; /* Ok işareti ile yazı arası boşluk */
+        color: white !important;
+        white-space: nowrap !important;
+    }
+
+    /* İkon Rengi (Ok İşareti) */
     [data-testid="stSidebarCollapsedControl"] svg {
         fill: white !important;
         stroke: white !important;
-        width: 30px !important;
-        height: 30px !important;
-    }
-
-    /* 3. Sidebar Görünümü */
-    [data-testid="stSidebar"] {
-        background-color: #050505 !important;
-        border-right: 1px solid rgba(255,255,255,0.1);
-        min-width: 280px !important;
     }
     
-    /* 4. Sayfa İçeriğini Biraz Aşağı İt */
-    .block-container {
-        padding-top: 80px !important;
+    /* Hover Efekti */
+    [data-testid="stSidebarCollapsedControl"]:hover {
+        background-color: #1D4ED8 !important;
+        transform: scale(1.02) !important;
+    }
+
+    /* Sidebar Arka Planı */
+    section[data-testid="stSidebar"] {
+        background-color: #050505 !important;
+        border-right: 1px solid #333;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. MODÜLLERİ YÜKLE ---
+# --- 3. MODÜLLER ---
 try:
-    import styles
-    import login
-    import dashboard
-    import logistics
-    import inventory
-    import plan
-    import documents
-    import todo
-    import forms
-except ImportError as e:
-    st.error(f"Modül Hatası: {e}")
+    import styles, login, dashboard, logistics, inventory, plan, documents, todo, forms
+except ImportError:
+    st.error("Modüller bulunamadı.")
     st.stop()
 
 styles.load_css()
@@ -98,31 +103,26 @@ def render_sidebar():
         user_brand = st.session_state.user_data.get('brand', 'ARTIS AI')
         
         st.markdown(f"### ⚡ {user_brand}")
-        st.info("👈 Menü kapandığında sol üstteki MAVİ BUTONA basarak geri açabilirsin.")
+        st.markdown("---")
         
-        menu_options = {
+        # Sayfalar
+        menu = {
             "Dashboard": "📊 Dashboard",
             "Lojistik": "📦 Lojistik",
             "Envanter": "📋 Envanter",
             "Formlar": "📝 Formlar",
             "Dokümanlar": "📂 Dokümanlar",
-            "Yapılacaklar": "✅ Yapılacaklar",
             "Planlar": "💎 Planlar"
         }
         
-        selection = st.radio(
-            "MENÜ",
-            list(menu_options.keys()),
-            format_func=lambda x: menu_options[x],
-            label_visibility="collapsed"
-        )
+        sel = st.radio("MENÜ", list(menu.keys()), format_func=lambda x: menu[x], label_visibility="collapsed")
         
         st.markdown("<br><br>", unsafe_allow_html=True)
         if st.button("Çıkış Yap"):
             st.session_state.logged_in = False
             st.rerun()
             
-        return selection
+        return sel
 
 # --- 5. ANA UYGULAMA ---
 def main():
@@ -136,7 +136,6 @@ def main():
         elif page == "Envanter": inventory.render_inventory()
         elif page == "Formlar": forms.render_forms()
         elif page == "Dokümanlar": documents.render_documents()
-        elif page == "Yapılacaklar": todo.render_todo()
         elif page == "Planlar": plan.render_plans()
 
 if __name__ == "__main__":
