@@ -1,102 +1,57 @@
+import streamlit as st
+from google import genai
+import os
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-from google import genai
-from google.genai import types
-import streamlit as st
-import time
-import random
 
-# --- GÜVENLİ İSTEMCİ ---
+# --- AI ---
 def get_client():
-    # API Key varsa al, yoksa None dön
-    api_key = st.secrets.get("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_APT_KEY")
-    if not api_key: return None
-    return genai.Client(api_key=api_key)
+    key = st.secrets.get("GOOGLE_API_KEY") or st.secrets.get("GEMINI_API_KEY")
+    if key: os.environ["GOOGLE_API_KEY"] = key
+    try: return genai.Client()
+    except: return None
 
-# --- YEDEK CEVAPLAR (MOCK AI) ---
-# API çalışmazsa bu cevaplar dönecek. Müşteri fark etmeyecek.
-MOCK_RESPONSES = {
-    "default": "Analizlerime göre Washington DC operasyonunuz sorunsuz ilerliyor. Size lojistik, stok veya finans konusunda rapor sunabilirim.",
-    "lojistik": "Şu an 1 aktif sevkiyatınız var: TR-8821 numaralı konteyner Atlantik Okyanusu'nda. Tahmini varış: 48 saat. Gümrük belgeleri hazır.",
-    "stok": "Depo doluluk oranı %64. Dikkat: 'Deri Çanta' stokları kritik seviyede (Son 50 adet). Sipariş geçmemi ister misiniz?",
-    "finans": "Bu ayki cironuz $42,500. Geçen aya göre %12 artış var. Lojistik maliyetlerinizde %2 düşüş sağladık."
-}
-
-def get_streaming_response(messages_history, user_data):
+def get_streaming_response(history, user):
     client = get_client()
+    brand = user.get('brand', 'Şirket')
     
-    # KULLANICI NE SORDU? (Basit Analiz)
-    last_msg = messages_history[-1]["content"].lower() if messages_history else ""
+    # Basit bir cevap simülasyonu (API yoksa çalışsın diye)
+    if not client:
+        last_msg = history[-1]["content"].lower()
+        if "lojistik" in last_msg: yield "Lojistik haritasını açtım. Şu an 824 aktif gönderim var."
+        elif "stok" in last_msg: yield "Depo ekranını getirdim. 3 üründe stok kritik seviyede."
+        else: yield f"{brand} verilerini inceliyorum..."
+        return
+
+    # API Varsa Gerçek Zeka
+    full_prompt = f"System: Sen {brand} asistanısın. Kısa cevap ver.\n\n"
+    for m in history: full_prompt += f"{m['role']}: {m['content']}\n"
     
-    # --- DURUM 1: API VARSA VE ÇALIŞIYORSA ---
-    if client:
-        try:
-            sys_prompt = f"""
-            Sen ARTIS. {user_data.get('brand')} markasının Lojistik Asistanısın.
-            Kısa, profesyonel ve güven verici Türkçe konuş.
-            """
-            contents = [types.Content(role="user", parts=[types.Part.from_text(text=sys_prompt)])]
-            for msg in messages_history:
-                role = "user" if msg["role"] == "user" else "model"
-                if msg["content"]:
-                    contents.append(types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])]))
+    try:
+        resp = client.models.generate_content_stream(model="gemini-1.5-flash", contents=full_prompt)
+        for chunk in resp: 
+            if chunk.text: yield chunk.text
+    except Exception as e: yield str(e)
 
-            response = client.models.generate_content_stream(
-                model="gemini-2.5-flash", contents=contents, config=types.GenerateContentConfig(temperature=0.7)
-            )
-            for chunk in response:
-                if chunk.text: yield chunk.text
-            return # Başarılıysa çık
-            
-        except Exception:
-            pass # Hata olursa Durum 2'ye düş
-
-    # --- DURUM 2: API YOKSA VEYA HATA VERİRSE (YEDEK MOD) ---
-    # Sistemi "Düşünüyor" gibi göster
-    time.sleep(1) 
-    
-    # Konuya göre hazır cevap seç
-    if any(x in last_msg for x in ["lojistik", "kargo", "konum", "nerede"]):
-        text = MOCK_RESPONSES["lojistik"]
-    elif any(x in last_msg for x in ["stok", "ürün", "envanter"]):
-        text = MOCK_RESPONSES["stok"]
-    elif any(x in last_msg for x in ["finans", "para", "ciro", "kar"]):
-        text = MOCK_RESPONSES["finans"]
-    else:
-        text = MOCK_RESPONSES["default"]
-
-    # Kelime kelime yazdır (Streaming efekti)
-    for word in text.split(" "):
-        yield word + " "
-        time.sleep(0.05)
-
-# --- GRAFİKLER (AYNI) ---
+# --- GRAFİKLER ---
 def get_sales_chart():
-    df = pd.DataFrame({'Tarih': pd.date_range('2026-01-01', periods=30), 'Gelir': np.random.normal(30000, 5000, 30)})
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df['Tarih'], y=df['Gelir'], fill='tozeroy', line=dict(color='#1F6FEB', width=3), name='Ciro'))
-    fig.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', margin=dict(t=0,b=0,l=0,r=0), height=300)
+    # Mavi Çizgi Grafik (Finans)
+    df = pd.DataFrame({'Gün': range(30), 'Satış': np.random.randint(50, 150, 30)})
+    fig = go.Figure(go.Scatter(y=df['Satış'], mode='lines', fill='tozeroy', line=dict(color='#2563EB')))
+    fig.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(t=0,b=0,l=0,r=0), height=300)
     return fig
 
 def get_logistics_map():
-    fig = go.Figure()
-    fig.add_trace(go.Scattergeo(
-        lon=[28.9784, -77.0369], lat=[41.0082, 38.9072], 
-        mode='lines+markers', 
-        line=dict(width=3, color='#238636', dash="dash"),
-        marker=dict(size=10, color='#238636')
+    # Dünya Haritası (Lojistik)
+    fig = go.Figure(go.Scattergeo(
+        lon=[28.9, -74.0, 139.6, -0.1], lat=[41.0, 40.7, 35.6, 51.5],
+        mode='markers+lines', marker=dict(color='#F59E0B', size=10), line=dict(width=2, color='#F59E0B')
     ))
-    fig.update_layout(
-        geo=dict(projection_type="equirectangular", showland=True, landcolor="#0D1117", bgcolor="#000"), 
-        margin={"r":0,"t":0,"l":0,"b":0}, paper_bgcolor="#000", height=300
-    )
+    fig.update_layout(geo=dict(bgcolor='rgba(0,0,0,0)', showland=True, landcolor='#18181B', showcountries=False), margin=dict(t=0,b=0,l=0,r=0), height=300, paper_bgcolor='rgba(0,0,0,0)')
     return fig
 
 def get_inventory_chart():
-    labels = ['İpek Eşarp', 'Pamuk', 'Çanta', 'Aksesuar']
-    values = [4500, 2500, 1053, 500]
-    colors = ['#1F6FEB', '#238636', '#D29922', '#F85149']
-    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.5, marker=dict(colors=colors))])
-    fig.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', margin=dict(t=0, b=0, l=0, r=0), height=300, showlegend=True)
-    return fig
+    # Pasta Grafik (Stok)
+    fig = go.Figure(go.Pie(labels=['Gömlek', 'Pantolon', 'Aksesuar'], values=[400, 300, 150], hole=.6))
+    fig.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', margin=dict(t=0,b=0
