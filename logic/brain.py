@@ -6,7 +6,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 # MODEL AYARI
-MODEL_NAME = "gemini-3-flash-preview"  # Veya "gemini-3-flash-preview"
+MODEL_NAME = "gemini-2.5-flash"  # Veya "gemini-3-flash-preview"
 
 # --- 1. CLIENT ---
 def get_client():
