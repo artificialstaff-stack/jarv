@@ -1,20 +1,19 @@
 import streamlit as st
-import brain
-from datetime import datetime
-from typing import Dict, Any
+import brain  # Yapay zeka beyni
 import time
+from datetime import datetime
 
 # ==============================================================================
-# 🎨 DASHBOARD CSS
+# 🎨 DASHBOARD TASARIMI
 # ==============================================================================
 def inject_dashboard_css():
     st.markdown("""
     <style>
-        .dash-header-container {
-            padding: 25px;
-            background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
+        .dash-header {
+            padding: 20px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
             margin-bottom: 25px;
         }
         .metric-card {
@@ -22,126 +21,104 @@ def inject_dashboard_css():
             border: 1px solid rgba(255,255,255,0.05);
             border-radius: 12px;
             padding: 20px;
-            transition: all 0.3s ease;
+            transition: transform 0.2s;
         }
         .metric-card:hover {
             transform: translateY(-5px);
-            border-color: rgba(59, 130, 246, 0.5);
+            border-color: #3B82F6;
         }
     </style>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🧩 BİLEŞENLER
+# 🧩 YARDIMCI FONKSİYONLAR
 # ==============================================================================
-def render_header(user_data):
-    brand = user_data.get('brand', 'Anatolia Home')
+def render_header(user):
     st.markdown(f"""
-    <div class="dash-header-container">
-        <h1 style="margin:0; font-size: 2.5rem; background: -webkit-linear-gradient(#eee, #333); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{brand}</h1>
-        <div style="color: #34D399; font-size: 0.9rem; margin-top: 5px; font-weight: bold;">● SYSTEM ONLINE</div>
+    <div class="dash-header">
+        <h1 style="margin:0; font-size:2.2rem;">{user.get('brand', 'Anatolia Home')}</h1>
+        <div style="color:#34D399; font-size:0.9rem; font-weight:bold; margin-top:5px;">
+            ● SYSTEM ONLINE <span style="color:#71717A; margin-left:10px;">| Istanbul HQ</span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
 def render_metric(label, value, delta, color="#3B82F6"):
     st.markdown(f"""
     <div class="metric-card">
-        <div style="color: #A1A1AA; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">{label}</div>
-        <div style="font-size: 2rem; font-weight: 800; color: white; margin: 5px 0;">{value}</div>
-        <div style="color: {color}; font-size: 0.8rem; font-weight: 600;">{delta}</div>
+        <div style="color:#A1A1AA; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">{label}</div>
+        <div style="font-size:2rem; font-weight:800; color:white; margin:5px 0;">{value}</div>
+        <div style="color:{color}; font-size:0.8rem; font-weight:bold;">{delta}</div>
     </div>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🚀 ANA RENDER FONKSİYONU (AI BURADA)
+# 🚀 ANA DASHBOARD FONKSİYONU
 # ==============================================================================
 def render_dashboard():
     inject_dashboard_css()
+    user = st.session_state.get('user_data', {'brand': 'Demo'})
     
-    if "dashboard_mode" not in st.session_state: st.session_state.dashboard_mode = "finance"
-    user = st.session_state.get('user_data', {'brand': 'Demo Brand'})
-    
+    # 1. Header
     render_header(user)
     
+    # 2. Ana Düzen
     col1, col2 = st.columns([1.2, 2], gap="medium")
     
-    # --- SOL: AI CHAT ---
+    # --- SOL: OPERASYON ASİSTANI (AI) ---
     with col1:
-        st.markdown("### 🧠 Operasyon Asistanı")
-        chat_container = st.container(height=500)
+        st.subheader("🧠 Operasyon Asistanı")
+        chat_container = st.container(height=450)
         
+        # Mesaj Geçmişi
         if "messages" not in st.session_state: st.session_state.messages = []
         
-        # Geçmiş mesajları yazdır
         with chat_container:
             if not st.session_state.messages:
-                st.info("👋 Merhaba! Verilerinizi analiz etmeye hazırım.")
+                st.info("👋 Merhaba! Finans, Stok veya Lojistik verilerinizi analiz edebilirim.")
             
             for msg in st.session_state.messages:
                 st.chat_message(msg["role"]).write(msg["content"])
         
-        # Yeni mesaj girişi
+        # Yeni Mesaj
         if prompt := st.chat_input("Talimat verin (Örn: Ciro analizi)..."):
+            # Kullanıcı mesajını ekle
             st.session_state.messages.append({"role": "user", "content": prompt})
             with chat_container:
                 st.chat_message("user").write(prompt)
                 
-                # AI DÜŞÜNÜYOR...
+                # AI Cevabı
                 with st.chat_message("assistant"):
-                    message_placeholder = st.empty()
+                    msg_placeholder = st.empty()
                     full_response = ""
                     
-                    # Brain.py'den veri çekiliyor (MOCK DEĞİL GERÇEK ÇAĞRI)
                     try:
-                        # Modu ayarla
-                        if "lojistik" in prompt.lower(): st.session_state.dashboard_mode = "logistics"
-                        elif "stok" in prompt.lower(): st.session_state.dashboard_mode = "inventory"
-                        else: st.session_state.dashboard_mode = "finance"
-
-                        # Stream Cevap
+                        # Brain modülünden yanıt al (Zeka burada!)
                         for chunk in brain.get_streaming_response(prompt):
                             full_response += chunk
-                            message_placeholder.markdown(full_response + "▌")
+                            msg_placeholder.markdown(full_response + "▌")
                             time.sleep(0.02)
-                        message_placeholder.markdown(full_response)
+                        msg_placeholder.markdown(full_response)
+                        
                     except Exception as e:
-                        st.error(f"Brain Bağlantı Hatası: {e}")
-                        full_response = "Bağlantı hatası."
+                        st.error(f"Brain Hatası: {e}")
+                        full_response = "Sistem bağlantısında sorun oluştu."
             
             st.session_state.messages.append({"role": "assistant", "content": full_response})
-            st.rerun()
 
-    # --- SAĞ: GRAFİKLER ---
+    # --- SAĞ: GRAFİKLER VE METRİKLER ---
     with col2:
-        mode = st.session_state.dashboard_mode
+        st.subheader("📊 Finansal Özet")
         
-        if mode == "finance":
-            st.markdown("### 📈 Finansal Özet")
-            c1, c2 = st.columns(2)
-            with c1: render_metric("Aylık Ciro", "$42,500", "▲ %12.5")
-            with c2: render_metric("Net Kâr", "%32", "▲ %4.2", "#10B981")
-            st.markdown("<br>", unsafe_allow_html=True)
-            try:
-                st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
-            except:
-                st.warning("Grafik yüklenemedi.")
-
-        elif mode == "logistics":
-            st.markdown("### 🌍 Lojistik Ağı")
-            c1, c2 = st.columns(2)
-            with c1: render_metric("Aktif Kargo", "142", "Global Dağıtım", "#F59E0B")
-            with c2: render_metric("Teslimat Süresi", "12 Gün", "▼ 2 Gün İyileşme")
-            st.markdown("<br>", unsafe_allow_html=True)
-            try:
-                st.plotly_chart(brain.get_logistics_map(), use_container_width=True)
-            except:
-                st.warning("Harita yüklenemedi.")
+        # Metrikler
+        c1, c2 = st.columns(2)
+        with c1: render_metric("Aylık Ciro", "$42,500", "▲ %12.5")
+        with c2: render_metric("Net Kâr", "%32", "▲ %4.2", "#10B981")
         
-        elif mode == "inventory":
-            st.markdown("### 📦 Depo Durumu")
-            render_metric("Kritik Stok", "3 Ürün", "⚠️ Acil Sipariş", "#EF4444")
-            st.markdown("<br>", unsafe_allow_html=True)
-            try:
-                st.plotly_chart(brain.get_inventory_chart(), use_container_width=True)
-            except:
-                st.warning("Stok grafiği yüklenemedi.")
+        st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+        
+        # Grafikler (Brain'den geliyor)
+        try:
+            st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
+        except Exception as e:
+            st.warning(f"Grafik yüklenemedi: {e}")
