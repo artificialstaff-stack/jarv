@@ -3,7 +3,7 @@ import sys
 import os
 import textwrap
 
-# 1. AYARLAR
+# 1. AYARLAR & PATH
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 sys.path.append(os.path.join(current_dir, 'views'))
@@ -13,10 +13,10 @@ st.set_page_config(
     page_title="ARTIS OS",
     page_icon="⚡",
     layout="wide",
-    initial_sidebar_state="expanded" # <-- MENÜYÜ AÇIK BAŞLATIYORUZ
+    initial_sidebar_state="expanded"  # <-- ÖNEMLİ: Menü açık başlasın
 )
 
-# 2. CSS FIX
+# 2. CSS FIX (KAYIP BUTON SORUNU ÇÖZÜMÜ)
 st.markdown("""
 <style>
     /* Header Şeffaf */
@@ -25,22 +25,35 @@ st.markdown("""
         pointer-events: none !important;
     }
     
-    /* Butonu Zorla Göster ve Mavi Yap */
+    /* MENÜ AÇMA BUTONU (MAVİ KUTU) */
     [data-testid="stSidebarCollapsedControl"] {
-        display: block !important;
+        display: flex !important;
         visibility: visible !important;
+        align-items: center !important;
+        justify-content: center !important;
+        
+        background-color: #2563EB !important; /* Mavi */
         color: white !important;
-        background-color: #2563EB !important;
-        width: 40px !important;
-        height: 40px !important;
-        padding: 5px !important;
+        width: 44px !important;
+        height: 44px !important;
         border-radius: 8px !important;
         border: 1px solid rgba(255,255,255,0.2) !important;
-        z-index: 9999999 !important;
+        
+        position: fixed !important;
+        top: 20px !important;
+        left: 20px !important;
+        z-index: 9999999 !important; /* En üstte */
         pointer-events: auto !important;
+        cursor: pointer !important;
     }
     
-    /* Yan Menü Arka Planı */
+    /* İkon Rengi */
+    [data-testid="stSidebarCollapsedControl"] svg {
+        fill: white !important;
+        stroke: white !important;
+    }
+
+    /* Sidebar Arka Planı */
     section[data-testid="stSidebar"] {
         background-color: #050505 !important;
         border-right: 1px solid rgba(255,255,255,0.1);
@@ -53,12 +66,12 @@ try:
     import styles
     from views import login, dashboard, logistics, inventory, plan, documents, todo, forms
 except ImportError as e:
-    st.error(f"Sistem Hatası: {e}")
+    st.error(f"⚠️ Başlatma Hatası: {e}")
     st.stop()
 
 styles.load_css()
 
-# 4. DURUM YÖNETİMİ
+# 4. STATE YÖNETİMİ
 if "logged_in" not in st.session_state: st.session_state.logged_in = False
 if "user_data" not in st.session_state: st.session_state.user_data = {}
 if "nav_selection" not in st.session_state: st.session_state.nav_selection = "Dashboard"
@@ -69,6 +82,7 @@ def render_sidebar():
         user = st.session_state.user_data
         st.markdown(f"### ⚡ {user.get('brand', 'ARTIS')}")
         
+        # Menü Seçenekleri
         pages = {
             "Dashboard": "📊 Dashboard", "Lojistik": "📦 Lojistik",
             "Envanter": "📋 Envanter", "Formlar": "📝 Formlar",
@@ -76,7 +90,7 @@ def render_sidebar():
             "Planlar": "💎 Planlar"
         }
         
-        selection = st.radio("Menü", list(pages.keys()), format_func=lambda x: pages[x], label_visibility="collapsed")
+        selection = st.radio("Navigasyon", list(pages.keys()), format_func=lambda x: pages[x], label_visibility="collapsed")
         
         if selection != st.session_state.nav_selection:
             st.session_state.nav_selection = selection
@@ -95,16 +109,16 @@ def main():
         render_sidebar()
         page = st.session_state.nav_selection
         
-        # ACİL DURUM MENÜSÜ (Eğer sidebar kaybolursa buradan geçiş yap)
+        # ACİL DURUM MENÜSÜ (Eğer yine buton kaybolursa buradan geçiş yap)
         if page != "Dashboard":
-            with st.expander("🚀 Hızlı Menü", expanded=False):
+            with st.expander("🚀 Hızlı Menü (Yedek)", expanded=False):
                 c1,c2,c3,c4 = st.columns(4)
                 if c1.button("📊 Dash"): st.session_state.nav_selection="Dashboard"; st.rerun()
                 if c2.button("📦 Lojistik"): st.session_state.nav_selection="Lojistik"; st.rerun()
                 if c3.button("📋 Envanter"): st.session_state.nav_selection="Envanter"; st.rerun()
                 if c4.button("🚪 Çıkış"): st.session_state.logged_in=False; st.rerun()
 
-        # Sayfa Render
+        # Sayfaları Render Et
         if page == "Dashboard": dashboard.render_dashboard()
         elif page == "Lojistik": logistics.render_logistics()
         elif page == "Envanter": inventory.render_inventory()
