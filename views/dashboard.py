@@ -1,339 +1,158 @@
 import streamlit as st
 import brain
-import time
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 
 # ==============================================================================
-# 🎨 1. ENTERPRISE CSS & STYLING ENGINE (ULTRA PREMIUM)
+# 🎨 DASHBOARD ÖZEL STİLİ (Global Header'a Dokunmaz)
 # ==============================================================================
-def inject_enterprise_css():
+def inject_dashboard_css():
     st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
-
-        /* --- DASHBOARD HEADER CONTAINER --- */
+        /* Sadece Dashboard Container'ı etkiler */
         .dash-header-container {
             padding: 25px 30px;
             background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 20px;
-            margin-bottom: 35px;
-            position: relative;
-            overflow: hidden;
+            margin-bottom: 30px;
             backdrop-filter: blur(10px);
-            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5);
+            position: relative;
         }
         
-        /* Arka Plan Efekti (Aurora Glow) */
-        .dash-header-container::before {
-            content: '';
-            position: absolute;
-            top: -50%; left: -20%; width: 150%; height: 200%;
-            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
-            z-index: 0;
-            pointer-events: none;
-        }
-        
-        .header-content { position: relative; z-index: 1; }
-        
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center; /* Hizalamayı ortaladık */
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 20px;
-        }
-        
-        /* SOL TARAF: MÜŞTERİ MARKASI */
-        .brand-eyebrow {
-            font-size: 11px;
-            color: #A1A1AA;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 700;
-            margin-bottom: 4px;
-            display: flex; align-items: center; gap: 8px;
-        }
         .brand-title {
-            font-size: 48px;
-            font-weight: 800;
-            color: #FFF;
-            letter-spacing: -1.5px;
-            line-height: 1;
-            background: linear-gradient(to right, #fff, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 42px; font-weight: 800; color: #FFF; letter-spacing: -1px; margin: 0;
+            background: linear-gradient(to right, #ffffff, #a1a1aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-
-        /* SAĞ TARAF: ARTIFICIAL STAFF ENGINE BADGE */
+        
         .ai-badge {
-            font-family: 'JetBrains Mono', monospace;
-            background: rgba(10, 10, 10, 0.6);
-            border: 1px solid rgba(139, 92, 246, 0.3); /* Mor Çerçeve */
-            padding: 10px 16px;
-            border-radius: 12px;
-            display: flex; flex-direction: column; align-items: flex-end;
-            gap: 4px;
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
-            transition: all 0.3s ease;
-        }
-        .ai-badge:hover {
-            border-color: rgba(139, 92, 246, 0.8);
-            box-shadow: 0 0 30px rgba(139, 92, 246, 0.25);
-        }
-        
-        .ai-label { font-size: 10px; color: #71717A; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
-        .ai-name { 
-            font-size: 14px; color: #C084FC; font-weight: 700; letter-spacing: 0.5px; 
-            display: flex; align-items: center; gap: 8px;
-        }
-        
-        /* Alt Statü Satırı */
-        .header-bottom {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .status-pill {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 6px 14px;
-            background: rgba(16, 185, 129, 0.08);
-            border: 1px solid rgba(16, 185, 129, 0.15);
-            border-radius: 99px;
-            color: #34D399;
-            font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
-        }
-        
-        .location-pill {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 6px 14px;
-            background: rgba(59, 130, 246, 0.08);
-            border: 1px solid rgba(59, 130, 246, 0.15);
-            border-radius: 99px;
-            color: #60A5FA;
-            font-size: 11px; font-weight: 600;
-        }
-        
-        .live-dot {
-            width: 8px; height: 8px;
-            background: #10B981;
-            border-radius: 50%;
-            box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
-            animation: pulse-dot 2s infinite;
-        }
-        
-        @keyframes pulse-dot {
-            0% { opacity: 0.6; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-            50% { opacity: 1; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-            100% { opacity: 0.6; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            background: rgba(0,0,0,0.4); border: 1px solid #8B5CF6; 
+            padding: 8px 12px; border-radius: 8px; color: #C084FC; 
+            font-family: monospace; font-size: 12px; font-weight: bold;
         }
 
-        /* --- KARTLAR & METRİKLER --- */
+        /* Kartlar */
         .glass-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 16px;
-            padding: 24px;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px; padding: 20px; transition: transform 0.2s;
         }
-        .glass-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.1); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+        .glass-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); }
         
-        .metric-container { display: flex; align-items: center; gap: 16px; }
-        .metric-icon-wrapper {
-            width: 52px; height: 52px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px; flex-shrink: 0;
-        }
-        .metric-value { font-size: 28px; font-weight: 700; color: #FFF; line-height: 1.1; margin: 4px 0;}
-        .metric-label { font-size: 12px; font-weight: 600; color: #71717A; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .theme-blue { color: #3B82F6; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); }
-        .theme-green { color: #10B981; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); }
-        .theme-purple { color: #8B5CF6; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); }
-        .theme-orange { color: #F97316; background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.2); }
-        
-        /* Badge */
-        .metric-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
-        .badge-up { color: #34D399; background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.2); }
-        .badge-down { color: #F87171; background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.2); }
-        .badge-flat { color: #A1A1AA; background: rgba(148, 163, 184, 0.1); border: 1px solid rgba(148, 163, 184, 0.2); }
+        /* Metrikler */
+        .metric-val { font-size: 28px; font-weight: 700; color: #FFF; }
+        .metric-lbl { font-size: 12px; color: #A1A1AA; text-transform: uppercase; font-weight: 600; }
     </style>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🧩 2. UI COMPONENTS (SAFE HTML LIST-JOIN)
+# 🧩 UI BİLEŞENLERİ
 # ==============================================================================
-
 def render_header(user_data: Dict[str, Any]):
-    """
-    Renders the DASHBOARD HEADER.
-    - Sol (Büyük Başlık): Müşterinin Marka İsmi (Örn: Anatolia Home)
-    - Sağ (Rozet): ARTIFICIAL STAFF (Bizim Motorumuz)
-    """
-    # 1. Kullanıcının Marka İsmini Dinamik Alıyoruz
-    # Eğer giriş yapılmadıysa default 'Anatolia Home' gelir
     brand_name = user_data.get('brand', 'Anatolia Home')
+    date_str = datetime.now().strftime("%d %B, %A")
     
-    current_date = datetime.now().strftime("%d %B, %A")
-    
-    # HTML Parçaları (Liste Birleştirme Yöntemi - Hatasız Render)
-    html_parts = [
-        '<div class="dash-header-container">',
-        '<div class="header-content">',
-        
-        # --- ÜST SATIR ---
-        '<div class="header-top">',
-            # SOL: MÜŞTERİNİN MARKASI
-            '<div>',
-                '<div class="brand-eyebrow"><i class="bx bx-command"></i> OPERASYON MERKEZİ</div>',
-                f'<div class="brand-title">{brand_name}</div>', # DİNAMİK MARKA İSMİ
-            '</div>',
-            
-            # SAĞ: BİZİM İMZAMIZ (ARTIFICIAL STAFF)
-            '<div class="ai-badge">',
-                '<div class="ai-label">POWERED BY</div>',
-                '<div class="ai-name"><i class="bx bx-microchip"></i> ARTIFICIAL STAFF</div>',
-            '</div>',
-        '</div>',
-        
-        # --- ALT SATIR (DURUM) ---
-        '<div class="header-bottom">',
-            '<div class="status-pill"><div class="live-dot"></div>Sistem Operasyonel</div>',
-            '<div class="location-pill"><i class="bx bx-globe"></i> İstanbul HQ</div>',
-            f'<div style="margin-left: auto; font-size: 12px; color: #52525B; font-family: \'JetBrains Mono\';">{current_date}</div>',
-        '</div>',
-        
-        '</div>', # End header-content
-        '</div>'  # End container
-    ]
-    
-    st.markdown("".join(html_parts), unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="dash-header-container">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div style="color:#71717A; font-size:11px; letter-spacing:1px; font-weight:700; margin-bottom:5px;">OPERASYON MERKEZİ</div>
+                <div class="brand-title">{brand_name}</div>
+            </div>
+            <div class="ai-badge">
+                <i class='bx bx-microchip'></i> POWERED BY ARTIFICIAL STAFF
+            </div>
+        </div>
+        <div style="margin-top:20px; display:flex; gap:15px; align-items:center;">
+            <span style="background:rgba(16,185,129,0.1); color:#34D399; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600;">● Sistem Operasyonel</span>
+            <span style="background:rgba(59,130,246,0.1); color:#60A5FA; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600;">İstanbul HQ</span>
+            <div style="margin-left:auto; color:#52525B; font-size:12px; font-family:monospace;">{date_str}</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-def render_pro_metric(label, value, delta, icon_class, theme="blue"):
-    if "+" in delta:
-        delta_html = f"<span class='metric-badge badge-up'><i class='bx bx-trending-up'></i> {delta}</span>"
-    elif "-" in delta:
-        delta_html = f"<span class='metric-badge badge-down'><i class='bx bx-trending-down'></i> {delta}</span>"
-    else:
-        delta_html = f"<span class='metric-badge badge-flat'>{delta}</span>"
-
-    html_parts = [
-        '<div class="glass-card metric-container">',
-        f'<div class="metric-icon-wrapper theme-{theme}">',
-        f'<i class="bx {icon_class}"></i>',
-        '</div>',
-        '<div class="metric-content">',
-        f'<div class="metric-label">{label}</div>',
-        f'<div class="metric-value">{value}</div>',
-        f'<div>{delta_html}</div>',
-        '</div>',
-        '</div>'
-    ]
-    
-    st.markdown("".join(html_parts), unsafe_allow_html=True)
+def render_metric(label, value, delta, icon, color="#3B82F6"):
+    st.markdown(f"""
+    <div class="glass-card" style="display:flex; gap:15px; align-items:center;">
+        <div style="width:48px; height:48px; background:{color}20; border-radius:12px; display:flex; align-items:center; justify-content:center; color:{color}; font-size:24px;">
+            <i class='bx {icon}'></i>
+        </div>
+        <div>
+            <div class="metric-lbl">{label}</div>
+            <div class="metric-val">{value}</div>
+            <div style="font-size:11px; color:{color}; font-weight:600;">{delta}</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🧠 3. MAIN DASHBOARD LOGIC
+# 🧠 DASHBOARD MAIN
 # ==============================================================================
-
 def render_dashboard():
-    inject_enterprise_css()
+    inject_dashboard_css()
     
-    if "dashboard_mode" not in st.session_state: 
-        st.session_state.dashboard_mode = "finance"
-    
-    # Kullanıcı verisini session'dan çekiyoruz
+    if "dashboard_mode" not in st.session_state: st.session_state.dashboard_mode = "finance"
     user = st.session_state.get('user_data', {'brand': 'Demo Brand'})
 
-    # 1. RENDER HEADER (Düzeltildi: Marka solda, AI sağda)
     render_header(user)
 
-    # 2. MAIN LAYOUT
-    col_chat, col_visual = st.columns([1.1, 1.9], gap="large")
+    col1, col2 = st.columns([1.2, 2], gap="large")
 
-    # === LEFT: AI COPILOT ===
-    with col_chat:
-        st.markdown("##### <i class='bx bx-bot' style='color:#8B5CF6'></i> Operasyon Asistanı", unsafe_allow_html=True)
-        chat_box = st.container(height=520)
+    # SOL: CHAT
+    with col1:
+        st.markdown("##### 🤖 Operasyon Asistanı")
+        chat_cont = st.container(height=450)
         
+        # Chat Logic (Basitleştirilmiş)
         if "messages" not in st.session_state: st.session_state.messages = []
-
         if not st.session_state.messages:
-            with chat_box:
-                st.markdown("<br>", unsafe_allow_html=True)
-                st.info("👋 Merhaba! Ben ARTIS. Bugün hangi operasyonu yönetmek istersiniz?")
-                c1, c2 = st.columns(2)
-                if c1.button("📦 Kargo Durumu", use_container_width=True):
-                    st.session_state.messages.append({"role": "user", "content": "Kargo durumum ne?"})
-                    st.rerun()
-                if c2.button("💰 Finans Özeti", use_container_width=True):
-                    st.session_state.messages.append({"role": "user", "content": "Finansal özet ver."})
-                    st.rerun()
-        else:
-            with chat_box:
-                for msg in st.session_state.messages:
-                    avatar = "👤" if msg["role"] == "user" else "✨"
-                    with st.chat_message(msg["role"], avatar=avatar):
-                        st.markdown(msg["content"])
+            chat_cont.info("👋 Merhaba! Size nasıl yardımcı olabilirim?")
+        
+        for msg in st.session_state.messages:
+            with chat_cont.chat_message(msg["role"]):
+                st.write(msg["content"])
 
-        if prompt := st.chat_input("Bir talimat verin (Örn: Stok analizi)..."):
+        if prompt := st.chat_input("Talimat verin..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             
-            # Mode Switching
-            p_low = prompt.lower()
-            if any(x in p_low for x in ["lojistik", "kargo", "gemi"]): st.session_state.dashboard_mode = "logistics"
-            elif any(x in p_low for x in ["stok", "envanter", "mal"]): st.session_state.dashboard_mode = "inventory"
-            elif any(x in p_low for x in ["finans", "ciro", "para"]): st.session_state.dashboard_mode = "finance"
+            # Basit Yönlendirme Mantığı
+            if "lojistik" in prompt.lower(): st.session_state.dashboard_mode = "logistics"
+            elif "stok" in prompt.lower(): st.session_state.dashboard_mode = "inventory"
+            else: st.session_state.dashboard_mode = "finance"
             
-            # AI Response
-            full_response = ""
-            try:
-                for chunk in brain.get_streaming_response(st.session_state.messages, user):
-                    full_response += chunk
-            except Exception as e:
-                full_response = "⚠️ Bağlantı hatası."
+            response_chunks = brain.get_streaming_response(st.session_state.messages, user)
+            full_res = ""
+            # Stream simülasyonu
+            placeholder = chat_cont.empty()
+            for chunk in response_chunks:
+                full_res += chunk
+                placeholder.markdown(full_res + "▌")
+            placeholder.markdown(full_res)
             
-            st.session_state.messages.append({"role": "assistant", "content": full_response})
+            st.session_state.messages.append({"role": "assistant", "content": full_res})
             st.rerun()
 
-    # === RIGHT: DATA CENTER ===
-    with col_visual:
+    # SAĞ: GRAFİKLER
+    with col2:
         mode = st.session_state.dashboard_mode
         
         if mode == "finance":
-            st.markdown("##### 📈 Finansal Performans")
-            c1, c2, c3 = st.columns(3)
-            with c1: render_pro_metric("Aylık Ciro", "$42,500", "+12.5%", "bx-dollar-circle", "blue")
-            with c2: render_pro_metric("Net Kâr", "%32", "+4.2%", "bx-line-chart", "green")
-            with c3: render_pro_metric("Büyüme", "Yüksek", "Stabil", "bx-rocket", "purple")
+            st.markdown("##### 📈 Finansal Özet")
+            c1, c2 = st.columns(2)
+            with c1: render_metric("Aylık Ciro", "$42,500", "▲ %12.5", "bx-dollar-circle", "#3B82F6")
+            with c2: render_metric("Net Kâr", "%32", "▲ %4.2", "bx-trending-up", "#10B981")
             st.markdown("<br>", unsafe_allow_html=True)
             st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
-            st.caption("💡 **Artificial Staff Notu:** Reklam harcamaları optimize edildi.")
 
         elif mode == "logistics":
-            st.markdown("##### 🌍 Lojistik Ağı")
+            st.markdown("##### 🌍 Lojistik Durumu")
             c1, c2 = st.columns(2)
-            with c1: render_pro_metric("Aktif Sevkiyat", "TR-8821", "Atlantik", "bx-map-pin", "orange")
-            with c2: render_pro_metric("Tahmini Varış", "14 Ocak", "2 Gün", "bx-time-five", "blue")
+            with c1: render_metric("Aktif Kargo", "142", "Global", "bx-map-pin", "#F59E0B")
+            with c2: render_metric("Ort. Teslimat", "12 Gün", "▼ 2 Gün", "bx-time", "#3B82F6")
             st.markdown("<br>", unsafe_allow_html=True)
             st.plotly_chart(brain.get_logistics_map(), use_container_width=True)
 
         elif mode == "inventory":
-            st.markdown("##### 📦 Depo Durumu")
-            c1, c2 = st.columns(2)
-            with c1: render_pro_metric("Toplam SKU", "8,550", "+120", "bx-package", "purple")
-            with c2: render_pro_metric("Riskli Stok", "Çanta", "Kritik", "bx-error-circle", "orange")
+            st.markdown("##### 📦 Depo Analizi")
+            render_metric("Kritik Stok", "3 Ürün", "⚠️ Acil Sipariş", "bx-error", "#EF4444")
             st.markdown("<br>", unsafe_allow_html=True)
-            c_chart, c_det = st.columns([1.5, 1])
-            with c_chart: st.plotly_chart(brain.get_inventory_chart(), use_container_width=True)
-            with c_det:
-                st.markdown("""
-                <div class='glass-card'>
-                    <div style='font-size:12px; color:#A1A1AA; margin-bottom:10px;'>KRİTİK ÜRÜNLER</div>
-                    <div style='color:#F87171; font-weight:600; margin-bottom:5px;'>• Deri Çanta (50)</div>
-                    <div style='color:#FBBF24; font-weight:600;'>• İpek Şal (120)</div>
-                </div>""", unsafe_allow_html=True)
+            st.plotly_chart(brain.get_inventory_chart(), use_container_width=True)
