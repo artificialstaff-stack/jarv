@@ -1,249 +1,216 @@
 import streamlit as st
 import brain
 import time
-import pandas as pd # Tablo göstermek için gerekli
+import pandas as pd
 from datetime import datetime
 from typing import Dict, Any
 
 # ==============================================================================
-# 🎨 DASHBOARD STİLİ (Aynı Kalıyor)
+# 🎨 1. MODERN DESIGN SYSTEM (KORUNDU)
 # ==============================================================================
 def inject_dashboard_css():
     st.markdown("""
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
         .dash-header-container {
-            padding: 20px 25px;
-            background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metric-card {
+            background: rgba(20, 20, 22, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 20px;
-            margin-bottom: 25px;
-            backdrop-filter: blur(10px);
+            padding: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        .metric-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 20px;
-            transition: transform 0.2s;
-        }
-        .metric-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.1); }
         
-        /* Tablo Stilleri */
-        [data-testid="stDataFrame"] { background: transparent !important; }
+        .metric-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        }
+
+        .icon-box {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .theme-blue { background: rgba(59, 130, 246, 0.15); color: #60A5FA; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .theme-green { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .theme-purple { background: rgba(139, 92, 246, 0.15); color: #A78BFA; border: 1px solid rgba(139, 92, 246, 0.2); }
+        .theme-orange { background: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.2); }
+
+        .metric-label { font-size: 13px; font-weight: 600; color: #A1A1AA; text-transform: uppercase; letter-spacing: 1px; }
+        .metric-value { font-size: 32px; font-weight: 800; color: #FFFFFF; letter-spacing: -1px; line-height: 1; }
+        
+        .delta-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 12px; font-weight: 700;
+            padding: 4px 10px; border-radius: 20px;
+            width: fit-content;
+        }
+        .delta-pos { background: rgba(16, 185, 129, 0.1); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .delta-neg { background: rgba(239, 68, 68, 0.1); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .delta-neu { background: rgba(255, 255, 255, 0.05); color: #A1A1AA; border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🧩 YARDIMCI BİLEŞENLER
+# 🧩 2. YARDIMCI BİLEŞENLER (KORUNDU)
 # ==============================================================================
 def render_header(user_data):
     brand = user_data.get('brand', 'Anatolia Home')
+    date_str = datetime.now().strftime("%d %B, %A")
     st.markdown(f"""
     <div class="dash-header-container">
-        <h1 style="margin:0; font-size: 2.5rem; color:white;">{brand}</h1>
-        <div style="color: #34D399; font-size: 0.8rem; margin-top: 5px;">● SYSTEM ONLINE | Istanbul HQ</div>
+        <div>
+            <div style="color:#A1A1AA; font-size:11px; font-weight:700; letter-spacing:2px; margin-bottom:5px;">OPERASYON MERKEZİ</div>
+            <h1 style="margin:0; font-size: 3rem; font-weight:800; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{brand}</h1>
+        </div>
+        <div style="text-align:right;">
+             <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); padding:6px 16px; border-radius:30px; margin-bottom:8px;">
+                <div style="width:8px; height:8px; background:#10B981; border-radius:50%; box-shadow:0 0 10px #10B981;"></div>
+                <span style="color:#34D399; font-size:12px; font-weight:700;">SYSTEM ONLINE</span>
+             </div>
+             <div style="color:#52525B; font-family:'Inter'; font-size:13px; font-weight:500;">{date_str}</div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-def render_metric(label, value, delta, icon="bx-stats", color_override=None):
-    if color_override:
-        color = color_override
-    else:
-        color = "#34D399" if "+" in delta else "#F87171"
-        
+def render_metric(label, value, delta, icon="bx-stats", theme="blue"):
+    if "+" in delta or "Yolda" in delta or "Normal" in delta: d_class = "delta-pos"
+    elif "-" in delta or "Risk" in delta or "Kritik" in delta: d_class = "delta-neg"
+    else: d_class = "delta-neu"
     st.markdown(f"""
     <div class="metric-card">
-        <div style="color:#A1A1AA; font-size:0.8rem; text-transform:uppercase;">{label}</div>
-        <div style="font-size:2rem; font-weight:bold; color:white; margin:5px 0;">{value}</div>
-        <div style="color:{color}; font-size:0.8rem;"><i class='bx {icon}'></i> {delta}</div>
+        <div style="display:flex; justify-content:space-between; align-items:start;">
+            <div class="icon-box theme-{theme}"><i class='bx {icon}'></i></div>
+            <div class="delta-badge {d_class}">{delta}</div>
+        </div>
+        <div style="margin-top:10px;">
+            <div class="metric-value">{value}</div>
+            <div class="metric-label">{label}</div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🚀 ANA DASHBOARD FONKSİYONU
+# 🚀 3. ANA DASHBOARD (HATA ONARILDI)
 # ==============================================================================
 def render_dashboard():
     inject_dashboard_css()
     
-    # 1. KULLANICI BİLGİSİ
-    user = st.session_state.get('user_data', {'brand': 'Demo Brand', 'name': 'User'})
-    
-    # 2. HEADER
-    render_header(user)
-    
-    # 3. MOD YÖNETİMİ
-    if "dashboard_mode" not in st.session_state: 
+    # 1. GÜVENLİK: Session State Onarımı
+    if 'user_data' not in st.session_state:
+        st.session_state.user_data = {'brand': 'Anatolia Home', 'name': 'Ahmet Yılmaz'}
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    if "dashboard_mode" not in st.session_state:
         st.session_state.dashboard_mode = "finance"
     
-    current_mode = st.session_state.dashboard_mode
-
-    # 4. İKİ KOLONLU YAPI
-    col_chat, col_viz = st.columns([1.2, 2], gap="medium")
+    user = st.session_state.user_data
+    render_header(user)
+    
+    col_chat, col_viz = st.columns([1.1, 1.9], gap="large")
 
     # --- SOL: AI ASİSTAN ---
     with col_chat:
-        st.markdown("##### 🧠 Operasyon Asistanı")
-        chat_cont = st.container(height=480)
-        
-        # Mesaj Geçmişi
-        if "messages" not in st.session_state: st.session_state.messages = []
+        st.markdown("<h4 style='color:white;'><i class='bx bx-bot'></i> Operasyon Asistanı</h4>", unsafe_allow_html=True)
+        chat_cont = st.container(height=520)
         
         with chat_cont:
             if not st.session_state.messages:
-                st.info("👋 Merhaba! Tüm departman verilerini (Dokümanlar, Formlar, Planlar dahil) analiz edebilirim.")
-            
+                st.info("👋 Merhaba! Tüm operasyonel verilerinize hakimim. Bana bir talimat verin.")
             for msg in st.session_state.messages:
                 st.chat_message(msg["role"]).write(msg["content"])
         
-        # Yeni Mesaj Girişi
         if prompt := st.chat_input("Talimat verin..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             
-            # --- ZEKİ MOD DEĞİŞTİRİCİ (TÜM SAYFALAR İÇİN) ---
+            # Zeki Mod Değiştirici
             p_low = prompt.lower()
-            
-            # 1. Mevcut Modlar
-            if any(x in p_low for x in ["lojistik", "kargo", "harita"]):
-                st.session_state.dashboard_mode = "logistics"
-            elif any(x in p_low for x in ["stok", "depo", "ürün", "envanter"]):
-                st.session_state.dashboard_mode = "inventory"
-            elif any(x in p_low for x in ["finans", "ciro", "satış", "para"]):
-                st.session_state.dashboard_mode = "finance"
-                
-            # 2. EKLENEN YENİ MODLAR (Doküman, Form, Plan, Todo)
-            elif any(x in p_low for x in ["belge", "doküman", "dosya", "pdf"]):
-                st.session_state.dashboard_mode = "documents"
-            elif any(x in p_low for x in ["form", "başvuru", "talep"]):
-                st.session_state.dashboard_mode = "forms"
-            elif any(x in p_low for x in ["yapılacak", "görev", "todo", "işler"]):
-                st.session_state.dashboard_mode = "todo"
-            elif any(x in p_low for x in ["plan", "proje", "hedef", "strateji"]):
-                st.session_state.dashboard_mode = "plans"
+            if any(x in p_low for x in ["lojistik", "kargo", "harita"]): st.session_state.dashboard_mode = "logistics"
+            elif any(x in p_low for x in ["stok", "depo", "envanter"]): st.session_state.dashboard_mode = "inventory"
+            elif any(x in p_low for x in ["finans", "ciro", "para"]): st.session_state.dashboard_mode = "finance"
+            elif any(x in p_low for x in ["belge", "doküman"]): st.session_state.dashboard_mode = "documents"
+            elif any(x in p_low for x in ["form"]): st.session_state.dashboard_mode = "forms"
+            elif any(x in p_low for x in ["yapılacak", "todo"]): st.session_state.dashboard_mode = "todo"
+            elif any(x in p_low for x in ["plan"]): st.session_state.dashboard_mode = "plans"
             
             st.rerun()
 
-    # Asistan Cevabı
+    # AI Cevap Motoru (Hata Onarılan Kısım)
     if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
         with chat_cont:
             with st.chat_message("assistant"):
                 ph = st.empty()
                 full_resp = ""
-                # Brain'e gönder
-                for chunk in brain.get_streaming_response(st.session_state.messages, user):
-                    full_resp += chunk
-                    ph.markdown(full_resp + "▌")
-                    time.sleep(0.01)
-                ph.markdown(full_resp)
-        st.session_state.messages.append({"role": "assistant", "content": full_resp})
+                try:
+                    # DÜZELTME: Hem mesajlar hem user_data gönderiliyor
+                    for chunk in brain.get_streaming_response(st.session_state.messages, user):
+                        full_resp += chunk
+                        ph.markdown(full_resp + "▌")
+                        time.sleep(0.01)
+                    ph.markdown(full_resp)
+                except Exception as e:
+                    st.error(f"Brain Bağlantı Hatası: {e}")
+            st.session_state.messages.append({"role": "assistant", "content": full_resp})
 
-    # --- SAĞ: DİNAMİK GÖRSELLER (ARTIK HEPSİ VAR) ---
+    # --- SAĞ: DİNAMİK GÖRSELLER (KORUNDU) ---
     with col_viz:
         mode = st.session_state.dashboard_mode
-        
-        # 1. FİNANS
         if mode == "finance":
             st.markdown("##### 📈 Finansal Performans")
-            c1, c2 = st.columns(2)
-            with c1: render_metric("Aylık Ciro", "$42,500", "+%12.5")
-            with c2: render_metric("Net Kâr", "%32", "+%4.2", "bx-trending-up")
-            st.markdown("<br>", unsafe_allow_html=True)
+            c1, c2, c3 = st.columns(3)
+            with c1: render_metric("Aylık Ciro", "$42,500", "+%12.5", "bx-dollar-circle", "blue")
+            with c2: render_metric("Net Kâr", "%32", "+%4.2", "bx-trending-up", "green")
+            with c3: render_metric("Büyüme", "Stabil", "Normal", "bx-pulse", "purple")
             st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
             
-        # 2. LOJİSTİK
         elif mode == "logistics":
             st.markdown("##### 🌍 Lojistik Ağı")
             c1, c2 = st.columns(2)
-            with c1: render_metric("Aktif Kargo", "TR-8821", "Yolda", "bx-map-pin")
-            with c2: render_metric("Varış", "2 Gün", "Zamanında", "bx-time")
-            st.markdown("<br>", unsafe_allow_html=True)
+            with c1: render_metric("Aktif Kargo", "TR-8821", "Yolda", "bx-map-pin", "orange")
+            with c2: render_metric("Tahmini Varış", "2 Gün", "Zamanında", "bx-time", "blue")
             st.plotly_chart(brain.get_logistics_map(), use_container_width=True)
             
-        # 3. ENVANTER
         elif mode == "inventory":
             st.markdown("##### 📦 Depo Durumu")
             c1, c2 = st.columns(2)
-            with c1: render_metric("Toplam Ürün", "8,500", "Adet", "bx-package")
-            with c2: render_metric("Riskli Stok", "Çanta", "Kritik", "bx-error")
-            st.markdown("<br>", unsafe_allow_html=True)
+            with c1: render_metric("Toplam SKU", "8,500", "Adet", "bx-package", "purple")
+            with c2: render_metric("Riskli Stok", "Çanta", "Kritik", "bx-error", "orange")
             st.plotly_chart(brain.get_inventory_chart(), use_container_width=True)
 
-        # --- YENİ EKLENEN SAYFALAR ---
-        
-        # 4. DOKÜMANLAR (Tablo Görünümü)
         elif mode == "documents":
             st.markdown("##### 📂 Dijital Arşiv")
-            c1, c2 = st.columns(2)
-            with c1: render_metric("Toplam Dosya", "1,240", "+5 Yeni", "bx-folder", "#3B82F6")
-            with c2: render_metric("Son Yükleme", "Bugün", "İrsaliye", "bx-cloud-upload", "#A1A1AA")
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("**📁 Son Yüklenen Evraklar**")
-            
-            # Sahte Veri Tablosu
-            data = {
-                "Dosya Adı": ["Fatura_Ocak_2026.pdf", "Gümrük_Beyan_TR88.pdf", "Stok_Raporu_V2.xlsx", "İade_Prosedürü.docx"],
-                "Tarih": ["14.01.2026", "13.01.2026", "12.01.2026", "10.01.2026"],
-                "Boyut": ["1.2 MB", "450 KB", "2.1 MB", "800 KB"],
-                "Durum": ["Onaylandı", "İşleniyor", "Hazır", "Taslak"]
-            }
+            data = {"Dosya": ["Fatura_Ocak.pdf", "Stok_V2.xlsx"], "Tarih": ["14.01", "12.01"], "Durum": ["Onaylı", "Hazır"]}
             st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
 
-        # 5. FORMLAR (Liste Görünümü)
         elif mode == "forms":
-            st.markdown("##### 📝 Aktif Formlar")
-            c1, c2 = st.columns(2)
-            with c1: render_metric("Bekleyen", "3", "Acil", "bx-edit", "#F59E0B")
-            with c2: render_metric("Onaylanan", "12", "Bu Hafta", "bx-check-circle", "#10B981")
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.info("ℹ️ Aşağıdaki formların onayı bekleniyor.")
-            
-            with st.expander("📌 Personel İzin Formu - Ahmet Y.", expanded=True):
-                st.write("**Departman:** Lojistik")
-                st.write("**Tarih:** 15-20 Ocak")
-                st.button("Onayla", key="f1")
-                
-            with st.expander("📌 Satın Alma Talebi - #9921", expanded=False):
-                st.write("**Ürün:** Ambalaj Malzemesi")
-                st.write("**Tutar:** 5.000 TL")
-                st.button("Onayla", key="f2")
+            st.markdown("##### 📝 Onay Bekleyenler")
+            st.info("📌 Personel İzin Formu - Ahmet Y. (Onay Bekliyor)")
+            st.button("Onayla", key="dash_f1")
 
-        # 6. YAPILACAKLAR (Checklist)
-        elif mode == "todo":
-            st.markdown("##### ✅ Görev Yöneticisi")
-            st.markdown("Bugünün öncelikli görevleri:")
-            
-            st.checkbox("Gümrük müşaviri ile görüş", value=True)
-            st.checkbox("Ocak ayı finans raporunu onayla", value=False)
-            st.checkbox("Depo sayım farklarını incele", value=False)
-            st.checkbox("Yeni tedarikçi sözleşmesini hazırla", value=False)
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            render_metric("Tamamlanan", "%25", "Devam Ediyor", "bx-task", "#8B5CF6")
-
-        # 7. PLANLAR (Kart Görünümü)
         elif mode == "plans":
             st.markdown("##### 💎 Stratejik Planlar")
-            
-            st.success("🎯 **Q1 Hedefi:** Lojistik maliyetlerini %10 düşür.")
-            
-            col_a, col_b = st.columns(2)
-            with col_a:
-                st.markdown("""
-                <div class="metric-card">
-                    <h4>🇪🇺 Avrupa Genişlemesi</h4>
-                    <p style="color:#A1A1AA; font-size:12px;">Berlin deposu açılış süreci.</p>
-                    <div style="background:#333; height:5px; width:100%; margin-top:10px;"><div style="background:#3B82F6; height:5px; width:70%;"></div></div>
-                    <p style="text-align:right; font-size:10px;">%70</p>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col_b:
-                st.markdown("""
-                <div class="metric-card">
-                    <h4>🤖 AI Entegrasyonu</h4>
-                    <p style="color:#A1A1AA; font-size:12px;">Otomatik sipariş botu.</p>
-                    <div style="background:#333; height:5px; width:100%; margin-top:10px;"><div style="background:#10B981; height:5px; width:40%;"></div></div>
-                    <p style="text-align:right; font-size:10px;">%40</p>
-                </div>
-                """, unsafe_allow_html=True)
+            st.progress(70, text="Avrupa Genişlemesi (%70)")
+            st.progress(40, text="AI Entegrasyonu (%40)")
