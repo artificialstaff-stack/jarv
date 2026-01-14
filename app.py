@@ -5,66 +5,88 @@ import time
 import textwrap
 
 # ==============================================================================
-# 🔧 1. SİSTEM AYARLARI
+# 🔧 1. DOSYA YOLLARI (HATA ALMAMAN İÇİN)
 # ==============================================================================
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 sys.path.append(os.path.join(current_dir, 'views'))
 sys.path.append(os.path.join(current_dir, 'logic'))
 
+# Sayfa Ayarları
 st.set_page_config(
     page_title="ARTIS | Intelligent Operations",
     page_icon="⚡",
     layout="wide",
-    initial_sidebar_state="expanded", # Başlangıçta menü açık olsun
+    initial_sidebar_state="collapsed", # Başlangıçta KAPALI olsun ki butonu test edebil
     menu_items={'About': "Powered by Artificial Staff"}
 )
 
 # ==============================================================================
-# 🛠️ 2. CSS: MENÜ BUTONUNU ZORLA GERİ GETİRME
+# 🛠️ 2. CSS: "KAMUFLAJ STRATEJİSİ"
 # ==============================================================================
 st.markdown("""
 <style>
-    /* 1. Header'ı GİZLEME, Sadece Arka Planını Sil */
+    /* 1. Header'ı YOK ETME, Sadece Arka Planını Siyah Yap (Kamuflaj) */
     header[data-testid="stHeader"] {
-        background: transparent !important;
-        /* pointer-events: none;  <-- BU SATIRI KALDIRDIM, TIKLAMAYI ENGELLİYORDU */
+        background-color: #000000 !important; /* Arka planla aynı renk */
+        height: 60px !important; /* Butonun sığacağı kadar alan bırak */
+        z-index: 999 !important;
     }
 
-    /* 2. Sidebar AÇMA Butonunu (Ok İşareti) Canlandır */
-    [data-testid="stSidebarCollapsedControl"] {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        color: white !important;
-        background-color: #2563EB !important; /* Mavi Arka Plan */
+    /* 2. Renkli Çizgiyi Kaldır (Header'ın üstündeki çizgi) */
+    div[data-testid="stDecoration"] {
+        display: none !important;
+    }
+
+    /* 3. SIDEBAR AÇMA BUTONUNU (OK İŞARETİ) ÖZELLEŞTİR */
+    button[data-testid="stSidebarCollapsedControl"] {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         
-        /* Butonu Biraz Büyüt ve Konumlandır */
-        transform: scale(1.2);
-        margin-top: 10px;
-        margin-left: 10px;
-        border-radius: 8px;
-        padding: 5px;
-        border: 1px solid rgba(255,255,255,0.2);
-        z-index: 9999999 !important; /* En üstte dur */
+        /* Rengi ve Görünümü */
+        color: #FFFFFF !important;
+        background-color: #2563EB !important; /* Mavi Buton */
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        border-radius: 8px !important;
+        
+        /* Boyut */
+        width: 40px !important;
+        height: 40px !important;
+        margin-top: 5px !important;
+        
+        /* Efektler */
+        box-shadow: 0 0 10px rgba(37, 99, 235, 0.8) !important;
+        transition: transform 0.2s !important;
     }
 
-    /* Butonun içindeki ok işaretini belirginleştir */
-    [data-testid="stSidebarCollapsedControl"] svg {
-        fill: white !important;
-        stroke: white !important;
-        stroke-width: 2px !important;
+    /* Butonun üzerine gelince büyüteç etkisi */
+    button[data-testid="stSidebarCollapsedControl"]:hover {
+        transform: scale(1.15) !important;
+        background-color: #3B82F6 !important;
     }
-    
-    /* 3. Menü Arka Planı */
+
+    /* 4. EKSTRA GÜVENLİK: Sol Kenara Görünmez Tetikleyici */
+    /* Sol kenardaki 20 piksellik alana fare gelirse buton parlasın */
+    div[data-testid="stSidebarCollapsedControl"]::before {
+        content: "";
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 15px; 
+        z-index: 998;
+    }
+
+    /* 5. Sidebar Görünümü */
     section[data-testid="stSidebar"] {
         background-color: #050505 !important;
         border-right: 1px solid rgba(255,255,255,0.1);
     }
     
-    /* 4. Sayfa İçeriğini Biraz Aşağı İt (Header altında kalmasın) */
+    /* 6. Ana İçeriği Biraz Aşağı İt (Header altında kalmasın) */
     .block-container {
-        padding-top: 60px !important;
+        padding-top: 80px !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -76,7 +98,7 @@ try:
     import styles
     from views import login, dashboard, logistics, inventory, plan, documents, todo, forms
 except ImportError as e:
-    st.error(f"⚠️ Modül Hatası: {e}")
+    st.error(f"⚠️ HATA: Dosyalar bulunamadı ({e}). Lütfen dosya yapısını kontrol et.")
     st.stop()
 
 # ==============================================================================
@@ -88,27 +110,9 @@ if "logged_in" not in st.session_state: st.session_state.logged_in = False
 if "user_data" not in st.session_state: st.session_state.user_data = {}
 if "nav_selection" not in st.session_state: st.session_state.nav_selection = "Dashboard"
 
-def navigate_to(page):
-    st.session_state.nav_selection = page
-    st.rerun()
-
-def render_fallback_nav():
-    """
-    Eğer sidebar bozulursa diye sayfanın en üstüne acil durum menüsü koyar.
-    """
-    st.markdown("#### 🚀 Hızlı Menü (Yedek)")
-    col1, col2, col3, col4, col5 = st.columns(5)
-    
-    if col1.button("📊 Dashboard", use_container_width=True): navigate_to("Dashboard")
-    if col2.button("📦 Lojistik", use_container_width=True): navigate_to("Lojistik")
-    if col3.button("📋 Envanter", use_container_width=True): navigate_to("Envanter")
-    if col4.button("📝 Formlar", use_container_width=True): navigate_to("Formlar")
-    if col5.button("💎 Planlar", use_container_width=True): navigate_to("Planlar")
-    st.divider()
-
 def render_sidebar():
     with st.sidebar:
-        # Marka
+        # MARKA
         user = st.session_state.user_data
         st.markdown(textwrap.dedent(f"""
             <div style="padding:15px; margin-bottom:20px; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.05); display:flex; gap:10px; align-items:center;">
@@ -117,7 +121,7 @@ def render_sidebar():
             </div>
         """), unsafe_allow_html=True)
 
-        # Menü Butonları (Radio yerine Button kullanarak daha sağlam yapı)
+        # MENÜ
         opts = {
             "Dashboard": "📊 Dashboard", "Lojistik": "📦 Lojistik", 
             "Envanter": "📋 Envanter", "Formlar": "📝 Formlar", 
@@ -125,9 +129,9 @@ def render_sidebar():
             "Planlar": "💎 Planlar"
         }
         
+        # Radio button state ile senkronize çalışır
         selection = st.radio("Menü", list(opts.keys()), format_func=lambda x: opts[x], label_visibility="collapsed", key="sb_radio")
         
-        # Eğer sidebar'dan seçim yapılırsa state'i güncelle
         if selection != st.session_state.nav_selection:
             st.session_state.nav_selection = selection
             st.rerun()
@@ -142,23 +146,27 @@ def main():
     if not st.session_state.logged_in:
         login.render_login_page()
     else:
-        # Sidebar'ı oluştur
         render_sidebar()
         
         # Seçili sayfayı al
         sel = st.session_state.nav_selection
         
-        # --- ACİL DURUM MENÜSÜ ---
-        # Eğer sidebar görünmüyorsa buradan geçiş yapabilsin diye
-        if sel == "Dashboard":
-            # Dashboard'un içine yedek navigasyon koymuyorum, temiz kalsın.
-            dashboard.render_dashboard()
-        else:
-            # Diğer sayfalarda en üstte yedek menü dursun
-            # render_fallback_nav() 
-            pass
+        # --- YEDEK NAVİGASYON (ÜST BAR) ---
+        # Eğer sidebar yine açılmazsa, kullanıcı buradan gezebilsin diye
+        if sel != "Dashboard": # Dashboard'da gösterme, temiz kalsın
+            with st.expander("Gezinti Menüsü (Yedek)", expanded=False):
+                c1,c2,c3,c4,c5,c6,c7 = st.columns(7)
+                if c1.button("📊", help="Dashboard"): st.session_state.nav_selection="Dashboard"; st.rerun()
+                if c2.button("📦", help="Lojistik"): st.session_state.nav_selection="Lojistik"; st.rerun()
+                if c3.button("📋", help="Envanter"): st.session_state.nav_selection="Envanter"; st.rerun()
+                if c4.button("📝", help="Formlar"): st.session_state.nav_selection="Formlar"; st.rerun()
+                if c5.button("📂", help="Dokümanlar"): st.session_state.nav_selection="Dokümanlar"; st.rerun()
+                if c6.button("✅", help="Yapılacaklar"): st.session_state.nav_selection="Yapılacaklar"; st.rerun()
+                if c7.button("💎", help="Planlar"): st.session_state.nav_selection="Planlar"; st.rerun()
 
-        if sel == "Lojistik": logistics.render_logistics()
+        # Sayfaları Render Et
+        if sel == "Dashboard": dashboard.render_dashboard()
+        elif sel == "Lojistik": logistics.render_logistics()
         elif sel == "Envanter": inventory.render_inventory()
         elif sel == "Formlar": forms.render_forms()
         elif sel == "Dokümanlar": documents.render_documents()
