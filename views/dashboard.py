@@ -6,23 +6,36 @@ from datetime import datetime
 from typing import Dict, Any
 
 # ==============================================================================
-# 🎨 1. MODERN DESIGN SYSTEM (CSS)
+# 🎨 1. MODERN CSS TASARIM SİSTEMİ
 # ==============================================================================
 def inject_dashboard_css():
     st.markdown("""
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
         /* FONTLAR */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap');
         
-        /* HEADER (Glow Efektli) */
+        :root {
+            --bg-glass: rgba(20, 20, 22, 0.7);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --text-primary: #FFFFFF;
+            --text-secondary: #A1A1AA;
+            --accent-blue: #3B82F6;
+            --accent-green: #10B981;
+            --accent-purple: #8B5CF6;
+            --accent-orange: #F59E0B;
+        }
+
+        /* HEADER (Glow & Glass Efektli) */
         .dash-header-container {
-            padding: 30px;
+            padding: 24px 32px;
             background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-glass);
             border-radius: 24px;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
             display: flex;
             justify-content: space-between;
@@ -31,8 +44,8 @@ def inject_dashboard_css():
 
         /* METRİK KARTLARI (Bento Style) */
         .metric-card {
-            background: rgba(20, 20, 22, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
             border-radius: 20px;
             padding: 24px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -40,44 +53,62 @@ def inject_dashboard_css():
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
+            height: 100%; /* Aynı yükseklikte olmaları için */
         }
         
         .metric-card:hover {
             transform: translateY(-5px);
             border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.02);
         }
 
         /* İkon Kutusu */
         .icon-box {
             width: 48px; height: 48px;
-            border-radius: 12px;
+            border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
             font-size: 24px;
-            margin-bottom: 5px;
         }
 
         /* Renk Temaları */
-        .theme-blue { background: rgba(59, 130, 246, 0.15); color: #60A5FA; border: 1px solid rgba(59, 130, 246, 0.2); }
-        .theme-green { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.2); }
-        .theme-purple { background: rgba(139, 92, 246, 0.15); color: #A78BFA; border: 1px solid rgba(139, 92, 246, 0.2); }
-        .theme-orange { background: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .theme-blue { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); border: 1px solid rgba(59, 130, 246, 0.2); }
+        .theme-green { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .theme-purple { background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); border: 1px solid rgba(139, 92, 246, 0.2); }
+        .theme-orange { background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); border: 1px solid rgba(245, 158, 11, 0.2); }
 
         /* Yazı Stilleri */
-        .metric-label { font-size: 13px; font-weight: 600; color: #A1A1AA; text-transform: uppercase; letter-spacing: 1px; }
-        .metric-value { font-size: 32px; font-weight: 800; color: #FFFFFF; letter-spacing: -1px; line-height: 1; }
+        .metric-label { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .metric-value { font-family: 'Inter', sans-serif; font-size: 32px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; line-height: 1; }
         
         /* Delta (Değişim) Rozeti */
         .delta-badge {
-            display: inline-flex; align-items: center; gap: 4px;
-            font-size: 12px; font-weight: 700;
-            padding: 4px 10px; border-radius: 20px;
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700;
+            padding: 6px 12px; border-radius: 30px;
             width: fit-content;
         }
-        .delta-pos { background: rgba(16, 185, 129, 0.1); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .delta-pos { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.2); }
         .delta-neg { background: rgba(239, 68, 68, 0.1); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.2); }
-        .delta-neu { background: rgba(255, 255, 255, 0.05); color: #A1A1AA; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .delta-neu { background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        /* Chat Başlığı */
+        .chat-header {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+            padding-bottom: 15px; border-bottom: 1px solid var(--border-glass);
+        }
+        .chat-icon {
+             width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+             border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;
+             box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Canlı Durum Noktası */
+        .live-dot {
+            width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-green); animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; box-shadow: 0 0 15px var(--accent-green); } 100% { opacity: 0.6; } }
 
     </style>
     """, unsafe_allow_html=True)
@@ -93,24 +124,33 @@ def render_header(user_data):
     st.markdown(f"""
     <div class="dash-header-container">
         <div>
-            <div style="color:#A1A1AA; font-size:11px; font-weight:700; letter-spacing:2px; margin-bottom:5px;">OPERASYON MERKEZİ</div>
-            <h1 style="margin:0; font-size: 3rem; font-weight:800; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{brand}</h1>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                <span style="color:var(--accent-purple); font-size:14px;"><i class='bx bx-command'></i></span>
+                <span style="color:var(--text-secondary); font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase;">Operasyon Merkezi</span>
+            </div>
+            <h1 style="margin:0; font-family:'Inter', sans-serif; font-size: 3rem; font-weight:800; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{brand}</h1>
         </div>
-        <div style="text-align:right;">
-             <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); padding:6px 16px; border-radius:30px; margin-bottom:8px;">
-                <div style="width:8px; height:8px; background:#10B981; border-radius:50%; box-shadow:0 0 10px #10B981;"></div>
-                <span style="color:#34D399; font-size:12px; font-weight:700;">SYSTEM ONLINE</span>
+        <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+             <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); padding:6px 16px; border-radius:30px;">
+                <div class="live-dot"></div>
+                <span style="color:var(--accent-green); font-family:'JetBrains Mono'; font-size:12px; font-weight:700;">SYSTEM ONLINE</span>
              </div>
-             <div style="color:#52525B; font-family:'Inter'; font-size:13px; font-weight:500;">{date_str}</div>
+             <div style="color:var(--text-secondary); font-family:'Inter'; font-size:13px; font-weight:500; display:flex; align-items:center; gap:6px;">
+                <i class='bx bx-calendar'></i> {date_str}
+             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 def render_metric(label, value, delta, icon="bx-stats", theme="blue"):
     
-    if "+" in delta or "Yolda" in delta or "Normal" in delta: delta_class = "delta-pos"
-    elif "-" in delta or "Risk" in delta or "Kritik" in delta: delta_class = "delta-neg"
+    if any(x in delta for x in ["+", "Yolda", "Normal", "Yeni", "Bu Hafta"]): delta_class = "delta-pos"
+    elif any(x in delta for x in ["-", "Risk", "Kritik", "Acil"]): delta_class = "delta-neg"
     else: delta_class = "delta-neu"
+    
+    delta_icon = ""
+    if "+" in delta: delta_icon = "<i class='bx bx-trending-up'></i>"
+    elif "-" in delta: delta_icon = "<i class='bx bx-trending-down'></i>"
 
     st.markdown(f"""
     <div class="metric-card">
@@ -119,11 +159,10 @@ def render_metric(label, value, delta, icon="bx-stats", theme="blue"):
                 <i class='bx {icon}'></i>
             </div>
             <div class="delta-badge {delta_class}">
-                {delta}
+                {delta_icon} {delta}
             </div>
         </div>
-        <div style="margin-top:10px;">
-            <div class="metric-value">{value}</div>
+        <div style="margin-top:auto;"> <div class="metric-value">{value}</div>
             <div class="metric-label">{label}</div>
         </div>
     </div>
@@ -151,9 +190,12 @@ def render_dashboard():
     # --- SOL: AI ASİSTAN (MODERN GÖRÜNÜM) ---
     with col_chat:
         st.markdown("""
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
-            <div style="width:32px; height:32px; background:linear-gradient(135deg, #8B5CF6, #6366f1); border-radius:10px; display:flex; align-items:center; justify-content:center; color:white;"><i class='bx bx-bot'></i></div>
-            <h4 style="margin:0; color:white;">Operasyon Asistanı</h4>
+        <div class="chat-header">
+            <div class="chat-icon"><i class='bx bx-bot'></i></div>
+            <div>
+                <h4 style="margin:0; font-family:'Inter'; font-weight:700; color:var(--text-primary);">Operasyon Asistanı</h4>
+                <p style="margin:0; font-size:12px; color:var(--text-secondary);">Gerçek zamanlı veri analizi</p>
+            </div>
         </div>
         """, unsafe_allow_html=True)
         
@@ -174,7 +216,7 @@ def render_dashboard():
         if prompt := st.chat_input("Talimat verin (Örn: Lojistik durumu)..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             
-            # --- ZEKİ MOD DEĞİŞTİRİCİ ---
+            # --- ZEKİ MOD DEĞİŞTİRİCİ (BACKEND MANTIĞI AYNI) ---
             p_low = prompt.lower()
             if any(x in p_low for x in ["lojistik", "kargo", "harita"]): st.session_state.dashboard_mode = "logistics"
             elif any(x in p_low for x in ["stok", "depo", "ürün"]): st.session_state.dashboard_mode = "inventory"
@@ -192,6 +234,7 @@ def render_dashboard():
             with st.chat_message("assistant", avatar="🤖"):
                 ph = st.empty()
                 full_resp = ""
+                # BACKEND ÇAĞRISI (DEĞİŞMEDİ)
                 for chunk in brain.get_streaming_response(st.session_state.messages, user):
                     full_resp += chunk
                     ph.markdown(full_resp + "▌")
@@ -212,8 +255,8 @@ def render_dashboard():
             with c3: render_metric("Büyüme", "Stabil", "Normal", "bx-pulse", "purple")
             
             st.markdown("<br>", unsafe_allow_html=True)
-            # Grafik Container
-            st.markdown("<div class='metric-card' style='height:400px; padding:10px;'>", unsafe_allow_html=True)
+            # Grafik Container (Glass Efektli Kutu İçine Aldık)
+            st.markdown("<div class='metric-card' style='padding:10px;'>", unsafe_allow_html=True)
             st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
             st.markdown("</div>", unsafe_allow_html=True)
             
@@ -225,7 +268,7 @@ def render_dashboard():
             with c2: render_metric("Tahmini Varış", "2 Gün", "Zamanında", "bx-time", "blue")
             
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("<div class='metric-card' style='height:400px; padding:10px;'>", unsafe_allow_html=True)
+            st.markdown("<div class='metric-card' style='padding:10px;'>", unsafe_allow_html=True)
             st.plotly_chart(brain.get_logistics_map(), use_container_width=True)
             st.markdown("</div>", unsafe_allow_html=True)
             
@@ -237,7 +280,7 @@ def render_dashboard():
             with c2: render_metric("Riskli Stok", "Çanta", "Kritik", "bx-error", "orange")
             
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("<div class='metric-card' style='height:400px; padding:10px;'>", unsafe_allow_html=True)
+            st.markdown("<div class='metric-card' style='padding:10px;'>", unsafe_allow_html=True)
             st.plotly_chart(brain.get_inventory_chart(), use_container_width=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
@@ -271,14 +314,29 @@ def render_dashboard():
             
             st.markdown("<br>", unsafe_allow_html=True)
             
+            # Formları da kart içine alalım
             with st.container():
-                st.markdown("<div class='metric-card'><h4>📌 Personel İzin Formu - Ahmet Y.</h4><p style='color:#aaa'>Tarih: 15-20 Ocak | Departman: Lojistik</p></div>", unsafe_allow_html=True)
-                st.button("Onayla", key="f1")
+                st.markdown("""
+                <div class='metric-card' style='flex-direction:row; align-items:center; justify-content:space-between;'>
+                    <div>
+                        <h4 style='margin:0; color:white;'>📌 Personel İzin Formu - Ahmet Y.</h4>
+                        <p style='margin:5px 0 0 0; color:var(--text-secondary); font-size:13px;'>Tarih: 15-20 Ocak | Departman: Lojistik</p>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                st.button("Onayla", key="f1", use_container_width=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
             with st.container():
-                st.markdown("<div class='metric-card'><h4>📌 Satın Alma Talebi - #9921</h4><p style='color:#aaa'>Ürün: Ambalaj Malzemesi | Tutar: 5.000 TL</p></div>", unsafe_allow_html=True)
-                st.button("Onayla", key="f2")
+                st.markdown("""
+                <div class='metric-card' style='flex-direction:row; align-items:center; justify-content:space-between;'>
+                    <div>
+                        <h4 style='margin:0; color:white;'>📌 Satın Alma Talebi - #9921</h4>
+                        <p style='margin:5px 0 0 0; color:var(--text-secondary); font-size:13px;'>Ürün: Ambalaj Malzemesi | Tutar: 5.000 TL</p>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                st.button("Onayla", key="f2", use_container_width=True)
 
         # 6. PLANLAR (Kartlar)
         elif mode == "plans":
@@ -288,20 +346,24 @@ def render_dashboard():
             c_a, c_b = st.columns(2)
             with c_a:
                 st.markdown("""
-                <div class="metric-card" style="border-left: 4px solid #3B82F6;">
-                    <h4>🇪🇺 Avrupa Genişlemesi</h4>
-                    <p style="color:#A1A1AA; font-size:12px;">Berlin deposu açılış süreci.</p>
-                    <div style="background:#333; height:6px; width:100%; border-radius:3px; margin-top:15px;"><div style="background:#3B82F6; height:6px; width:70%; border-radius:3px;"></div></div>
-                    <p style="text-align:right; font-size:11px; margin-top:5px; color:#3B82F6;">%70 Tamamlandı</p>
+                <div class="metric-card" style="border-left: 4px solid var(--accent-blue);">
+                    <h4 style='margin:0; color:white;'>🇪🇺 Avrupa Genişlemesi</h4>
+                    <p style="color:var(--text-secondary); font-size:12px; margin-top:5px;">Berlin deposu açılış süreci.</p>
+                    <div style="background:rgba(255,255,255,0.1); height:6px; width:100%; border-radius:3px; margin-top:15px;">
+                        <div style="background:var(--accent-blue); height:6px; width:70%; border-radius:3px; box-shadow: 0 0 10px var(--accent-blue);"></div>
+                    </div>
+                    <p style="text-align:right; font-family:'JetBrains Mono'; font-size:11px; font-weight:700; margin-top:8px; color:var(--accent-blue);">%70 TAMAMLANDI</p>
                 </div>
                 """, unsafe_allow_html=True)
             
             with c_b:
                 st.markdown("""
-                <div class="metric-card" style="border-left: 4px solid #10B981;">
-                    <h4>🤖 AI Entegrasyonu</h4>
-                    <p style="color:#A1A1AA; font-size:12px;">Otomatik sipariş botu.</p>
-                    <div style="background:#333; height:6px; width:100%; border-radius:3px; margin-top:15px;"><div style="background:#10B981; height:6px; width:40%; border-radius:3px;"></div></div>
-                    <p style="text-align:right; font-size:11px; margin-top:5px; color:#10B981;">%40 Tamamlandı</p>
+                <div class="metric-card" style="border-left: 4px solid var(--accent-green);">
+                    <h4 style='margin:0; color:white;'>🤖 AI Entegrasyonu</h4>
+                    <p style="color:var(--text-secondary); font-size:12px; margin-top:5px;">Otomatik sipariş botu.</p>
+                    <div style="background:rgba(255,255,255,0.1); height:6px; width:100%; border-radius:3px; margin-top:15px;">
+                        <div style="background:var(--accent-green); height:6px; width:40%; border-radius:3px; box-shadow: 0 0 10px var(--accent-green);"></div>
+                    </div>
+                    <p style="text-align:right; font-family:'JetBrains Mono'; font-size:11px; font-weight:700; margin-top:8px; color:var(--accent-green);">%40 TAMAMLANDI</p>
                 </div>
                 """, unsafe_allow_html=True)
