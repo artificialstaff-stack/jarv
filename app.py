@@ -19,48 +19,56 @@ st.set_page_config(
 )
 
 # ==============================================================================
-# 🛠️ 2. CSS FIX (SIDEBAR BUTONU İÇİN ZORUNLU YAMA)
+# 🛠️ 2. CSS "KURTARMA OPERASYONU" (SIDEBAR BUTONU FIX)
 # ==============================================================================
+# Bu CSS bloğu, sidebar kapandığında açma butonunu zorla görünür kılar.
+# Butonu sayfanın sol üstüne 'fixed' olarak çivileriz.
 st.markdown("""
 <style>
-    /* 1. Header'ı Şeffaf Yap ama TIKLANABİLİR KIL */
+    /* 1. Header'ı Gizle (Renkli çizgi vs. gitsin) */
     header[data-testid="stHeader"] {
         background: transparent !important;
-        pointer-events: none; /* Boş yerlere tıklayınca arkaya geçsin */
+        height: 0px !important; /* Yüksekliği sıfırla */
     }
 
-    /* 2. Sidebar Açma Butonunu (Ok İşareti) Zorla Görünür Yap */
+    /* 2. Sidebar Açma Butonunu (Ok İşareti) Zorla Konumlandır */
     [data-testid="stSidebarCollapsedControl"] {
         display: block !important;
-        color: #FFFFFF !important; /* Beyaz İkon */
-        background-color: rgba(255, 255, 255, 0.05) !important; /* Hafif Arka Plan */
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        visibility: visible !important;
+        position: fixed !important; /* Sayfaya çivile */
+        top: 20px !important;
+        left: 20px !important;
+        z-index: 1000001 !important; /* Her şeyin üstünde */
+        
+        /* Görünürlük Stili */
+        background-color: #18181B !important;
+        color: #FFFFFF !important;
+        border: 1px solid #3F3F46 !important;
+        padding: 8px !important;
         border-radius: 8px !important;
-        z-index: 99999 !important; /* En Üst Katman */
-        pointer-events: auto !important; /* Tıklanabilir */
-        margin-top: 10px !important;
-        margin-left: 10px !important;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease !important;
     }
 
     /* Hover Efekti */
     [data-testid="stSidebarCollapsedControl"]:hover {
         background-color: #3B82F6 !important; /* Mavi Yanar */
         border-color: #3B82F6 !important;
-        transform: scale(1.05);
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
     }
     
-    /* 3. Streamlit'in Kendi Menüsünü (Sağ Üst) Gizle/Düzenle */
+    /* 3. Sağ Üstteki Menüyü (3 Nokta) Ayarla */
     div[data-testid="stToolbar"] {
         right: 2rem;
         top: 1rem;
-        pointer-events: auto;
+        visibility: visible !important;
+        z-index: 1000000 !important;
     }
 
-    /* 4. Sidebar Navigasyonunu Gizle (Kendi Menümüz Var) */
+    /* 4. Native Sidebar Navigasyonunu Gizle */
     div[data-testid="stSidebarNav"] { display: none; }
     
-    /* 5. Sidebar Arka Planı */
+    /* 5. Sidebar Arka Plan Rengi */
     section[data-testid="stSidebar"] {
         background-color: #050505 !important;
         border-right: 1px solid rgba(255,255,255,0.08);
@@ -95,7 +103,7 @@ if "user_data" not in st.session_state: st.session_state.user_data = {}
 
 def render_sidebar():
     with st.sidebar:
-        # --- A. MARKA BAŞLIĞI ---
+        # MARKA ALANI
         user_brand = st.session_state.user_data.get('brand', 'ARTIS AI')
         user_plan = st.session_state.user_data.get('plan', 'Enterprise')
         
@@ -117,7 +125,7 @@ def render_sidebar():
             </div>
         """), unsafe_allow_html=True)
 
-        # --- B. MENÜ ---
+        # MENÜ
         opts = {
             "Dashboard": "📊 Dashboard",
             "Lojistik": "📦 Lojistik",
@@ -129,7 +137,7 @@ def render_sidebar():
         }
         selection = st.radio("NAV", list(opts.keys()), format_func=lambda x: opts[x], label_visibility="collapsed")
         
-        # --- C. PROFIL (STICKY BOTTOM) ---
+        # PROFIL ALANI
         st.markdown("<div style='flex-grow: 1; min-height: 200px;'></div>", unsafe_allow_html=True)
         user_name = st.session_state.user_data.get('name', 'Kullanıcı')
         
