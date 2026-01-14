@@ -1,169 +1,163 @@
 import streamlit as st
-import brain
-from datetime import datetime
-from typing import Dict, Any
+import sys
+import os
 import time
+import textwrap
 
 # ==============================================================================
-# 🎨 DASHBOARD ÖZEL STİLİ (Global Header'a Dokunmaz)
+# 🔧 1. DOSYA YOLLARI
 # ==============================================================================
-def inject_dashboard_css():
-    st.markdown("""
-    <style>
-        /* Sadece Dashboard Container'ı etkiler */
-        .dash-header-container {
-            padding: 25px 30px;
-            background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-            position: relative;
-        }
-        
-        .brand-title {
-            font-size: 42px; font-weight: 800; color: #FFF; letter-spacing: -1px; margin: 0;
-            background: linear-gradient(to right, #ffffff, #a1a1aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        
-        .ai-badge {
-            background: rgba(0,0,0,0.4); border: 1px solid #8B5CF6; 
-            padding: 8px 12px; border-radius: 8px; color: #C084FC; 
-            font-family: 'Courier New', monospace; font-size: 11px; font-weight: bold; letter-spacing: 0.5px;
-            display: flex; align-items: center; gap: 6px;
-        }
-
-        /* Kartlar */
-        .glass-card {
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 16px; padding: 20px; transition: transform 0.2s;
-        }
-        .glass-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); }
-        
-        /* Metrikler */
-        .metric-val { font-size: 28px; font-weight: 700; color: #FFF; }
-        .metric-lbl { font-size: 11px; color: #A1A1AA; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
-    </style>
-    """, unsafe_allow_html=True)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
+sys.path.append(os.path.join(current_dir, 'views'))
+sys.path.append(os.path.join(current_dir, 'logic'))
 
 # ==============================================================================
-# 🧩 UI BİLEŞENLERİ
+# ⚙️ 2. SAYFA AYARLARI (KRİTİK DÜZELTME: EXPANDED)
 # ==============================================================================
-def render_header(user_data: Dict[str, Any]):
-    brand_name = user_data.get('brand', 'Anatolia Home')
-    date_str = datetime.now().strftime("%d %B, %A")
-    
-    st.markdown(f"""
-    <div class="dash-header-container">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-            <div>
-                <div style="color:#71717A; font-size:10px; letter-spacing:2px; font-weight:700; margin-bottom:8px; text-transform:uppercase;">Operasyon Merkezi</div>
-                <div class="brand-title">{brand_name}</div>
+st.set_page_config(
+    page_title="ARTIS | Intelligent Operations",
+    page_icon="⚡",
+    layout="wide",
+    initial_sidebar_state="expanded", # <-- BURAYI "expanded" YAPTIK, ARTIK AÇIK BAŞLAYACAK
+    menu_items={'About': "Powered by Artificial Staff"}
+)
+
+# ==============================================================================
+# 🛠️ 3. CSS: BUTONU ZORLA GÖRÜNÜR YAPMA
+# ==============================================================================
+st.markdown("""
+<style>
+    /* Header'ı Şeffaf Yap ama Tıklamaya İzin Ver */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        pointer-events: none !important;
+    }
+
+    /* SOL ÜSTTEKİ OK İŞARETİNİ (BUTONU) ZORLA, EN ÜSTE KOY */
+    button[data-testid="stSidebarCollapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: fixed !important;
+        top: 20px !important;
+        left: 20px !important;
+        z-index: 9999999 !important; /* En üst katman */
+        
+        /* Görünüm: Parlak Mavi Kutu */
+        background-color: #2563EB !important;
+        color: white !important;
+        width: 45px !important;
+        height: 45px !important;
+        border-radius: 8px !important;
+        border: 2px solid rgba(255,255,255,0.2) !important;
+        box-shadow: 0 0 15px rgba(37, 99, 235, 0.8) !important;
+        
+        /* Etkileşim */
+        pointer-events: auto !important; 
+        cursor: pointer !important;
+    }
+
+    /* İkonu Beyaz Yap */
+    button[data-testid="stSidebarCollapsedControl"] svg {
+        fill: white !important;
+        stroke: white !important;
+    }
+
+    /* Hover Efekti */
+    button[data-testid="stSidebarCollapsedControl"]:hover {
+        background-color: #3B82F6 !important;
+        transform: scale(1.1) !important;
+    }
+
+    /* Sidebar Arka Planı */
+    section[data-testid="stSidebar"] {
+        background-color: #050505 !important;
+        border-right: 1px solid rgba(255,255,255,0.1);
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# ==============================================================================
+# 📦 4. MODÜLLER
+# ==============================================================================
+try:
+    import styles
+    from views import login, dashboard, logistics, inventory, plan, documents, todo, forms
+except ImportError as e:
+    st.error(f"⚠️ Hata: {e}")
+    st.stop()
+
+# ==============================================================================
+# 🚀 5. UYGULAMA MANTIĞI
+# ==============================================================================
+styles.load_css()
+
+if "logged_in" not in st.session_state: st.session_state.logged_in = False
+if "user_data" not in st.session_state: st.session_state.user_data = {}
+if "nav_selection" not in st.session_state: st.session_state.nav_selection = "Dashboard"
+
+def render_sidebar():
+    with st.sidebar:
+        user = st.session_state.user_data
+        st.markdown(textwrap.dedent(f"""
+            <div style="padding:15px; margin-bottom:20px; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.05); display:flex; gap:10px; align-items:center;">
+                <div style="width:32px; height:32px; background:linear-gradient(135deg, #8B5CF6, #3B82F6); border-radius:6px; display:flex; justify-content:center; align-items:center;"><i class='bx bxs-command'></i></div>
+                <div><div style="font-weight:bold; font-size:14px;">{user.get('brand', 'ARTIS')}</div><div style="font-size:10px; color:#34D399;">● Enterprise</div></div>
             </div>
-            <div class="ai-badge">
-                <span>⚡</span> POWERED BY ARTIFICIAL STAFF
-            </div>
-        </div>
-        <div style="margin-top:25px; display:flex; gap:12px; align-items:center;">
-            <span style="background:rgba(16,185,129,0.15); color:#34D399; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:600; border:1px solid rgba(16,185,129,0.2);">● Sistem Operasyonel</span>
-            <span style="background:rgba(59,130,246,0.15); color:#60A5FA; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:600; border:1px solid rgba(59,130,246,0.2);">Istanbul HQ</span>
-            <div style="margin-left:auto; color:#71717A; font-size:12px; font-family:monospace;">{date_str}</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """), unsafe_allow_html=True)
 
-def render_metric(label, value, delta, icon, color="#3B82F6"):
-    st.markdown(f"""
-    <div class="glass-card" style="display:flex; gap:15px; align-items:center;">
-        <div style="width:48px; height:48px; background:{color}20; border-radius:12px; display:flex; align-items:center; justify-content:center; color:{color}; font-size:24px;">
-            <i class='bx {icon}'></i>
-        </div>
-        <div>
-            <div class="metric-lbl">{label}</div>
-            <div class="metric-val">{value}</div>
-            <div style="font-size:11px; color:{color}; font-weight:600; margin-top:2px;">{delta}</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# ==============================================================================
-# 🧠 DASHBOARD MAIN
-# ==============================================================================
-def render_dashboard():
-    inject_dashboard_css()
-    
-    if "dashboard_mode" not in st.session_state: st.session_state.dashboard_mode = "finance"
-    user = st.session_state.get('user_data', {'brand': 'Demo Brand'})
-
-    render_header(user)
-
-    col1, col2 = st.columns([1.2, 2], gap="large")
-
-    # SOL: CHAT
-    with col1:
-        st.markdown("##### 🤖 Operasyon Asistanı")
-        chat_cont = st.container(height=480)
+        opts = {
+            "Dashboard": "📊 Dashboard", "Lojistik": "📦 Lojistik", 
+            "Envanter": "📋 Envanter", "Formlar": "📝 Formlar", 
+            "Dokümanlar": "📂 Dokümanlar", "Yapılacaklar": "✅ Yapılacaklar", 
+            "Planlar": "💎 Planlar"
+        }
         
-        if "messages" not in st.session_state: st.session_state.messages = []
+        selection = st.radio("Menü", list(opts.keys()), format_func=lambda x: opts[x], label_visibility="collapsed", key="sb_radio")
         
-        with chat_cont:
-            if not st.session_state.messages:
-                st.info("👋 Merhaba! Finans, Stok veya Lojistik verilerinizi analiz edebilirim.")
-            
-            for msg in st.session_state.messages:
-                with st.chat_message(msg["role"]):
-                    st.write(msg["content"])
-
-        if prompt := st.chat_input("Talimat verin (Örn: Ciro analizi)..."):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            
-            # Yönlendirme
-            p_low = prompt.lower()
-            if "lojistik" in p_low: st.session_state.dashboard_mode = "logistics"
-            elif "stok" in p_low: st.session_state.dashboard_mode = "inventory"
-            else: st.session_state.dashboard_mode = "finance"
-            
-            # Streaming Response
-            full_res = ""
-            with chat_cont:
-                with st.chat_message("user"):
-                    st.write(prompt)
-                
-                with st.chat_message("assistant"):
-                    message_placeholder = st.empty()
-                    # Brain'den veri çekiyoruz
-                    for chunk in brain.get_streaming_response(prompt):
-                        full_res += chunk
-                        message_placeholder.markdown(full_res + "▌")
-                        time.sleep(0.01)
-                    message_placeholder.markdown(full_res)
-            
-            st.session_state.messages.append({"role": "assistant", "content": full_res})
+        if selection != st.session_state.nav_selection:
+            st.session_state.nav_selection = selection
             st.rerun()
 
-    # SAĞ: GRAFİKLER
-    with col2:
-        mode = st.session_state.dashboard_mode
+        st.markdown("<div style='flex-grow:1; min-height:100px;'></div>", unsafe_allow_html=True)
+        if st.button("Çıkış Yap", use_container_width=True):
+            st.session_state.logged_in = False
+            st.rerun()
+
+def main():
+    if not st.session_state.logged_in:
+        login.render_login_page()
+    else:
+        render_sidebar()
         
-        if mode == "finance":
-            st.markdown("##### 📈 Finansal Özet")
-            c1, c2 = st.columns(2)
-            with c1: render_metric("Aylık Ciro", "$42,500", "▲ %12.5", "bx-dollar-circle", "#3B82F6")
-            with c2: render_metric("Net Kâr", "%32", "▲ %4.2", "bx-trending-up", "#10B981")
-            st.markdown("<br>", unsafe_allow_html=True)
-            # Grafik Brain'den geliyor
-            st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
+        sel = st.session_state.nav_selection
+        
+        # --- ACİL DURUM MENÜSÜ (ARTIK HER SAYFADA GÖRÜNÜR) ---
+        # Sidebar bozulsa bile buradan gezebilirsin.
+        st.markdown("""
+        <style>div.stButton > button {width: 100%; border-radius: 8px;}</style>
+        """, unsafe_allow_html=True)
+        
+        # Sadece Dashboard'da değil, HER YERDE bu butonları göster (Toggle ile)
+        with st.expander("🚀 HIZLI GEÇİŞ MENÜSÜ (Yedek)", expanded=False):
+            c1,c2,c3,c4,c5,c6,c7 = st.columns(7)
+            if c1.button("📊 Dash"): st.session_state.nav_selection="Dashboard"; st.rerun()
+            if c2.button("📦 Lojistik"): st.session_state.nav_selection="Lojistik"; st.rerun()
+            if c3.button("📋 Envanter"): st.session_state.nav_selection="Envanter"; st.rerun()
+            if c4.button("📝 Formlar"): st.session_state.nav_selection="Formlar"; st.rerun()
+            if c5.button("📂 Dosyalar"): st.session_state.nav_selection="Dokümanlar"; st.rerun()
+            if c6.button("✅ İşler"): st.session_state.nav_selection="Yapılacaklar"; st.rerun()
+            if c7.button("💎 Plan"): st.session_state.nav_selection="Planlar"; st.rerun()
 
-        elif mode == "logistics":
-            st.markdown("##### 🌍 Lojistik Durumu")
-            c1, c2 = st.columns(2)
-            with c1: render_metric("Aktif Kargo", "142", "Global", "bx-map-pin", "#F59E0B")
-            with c2: render_metric("Ort. Teslimat", "12 Gün", "▼ 2 Gün", "bx-time", "#3B82F6")
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.plotly_chart(brain.get_logistics_map(), use_container_width=True)
+        # Sayfaları Render Et
+        if sel == "Dashboard": dashboard.render_dashboard()
+        elif sel == "Lojistik": logistics.render_logistics()
+        elif sel == "Envanter": inventory.render_inventory()
+        elif sel == "Formlar": forms.render_forms()
+        elif sel == "Dokümanlar": documents.render_documents()
+        elif sel == "Yapılacaklar": todo.render_todo()
+        elif sel == "Planlar": plan.render_plans()
 
-        elif mode == "inventory":
-            st.markdown("##### 📦 Depo Analizi")
-            render_metric("Kritik Stok", "3 Ürün", "⚠️ Acil Sipariş", "bx-error", "#EF4444")
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.plotly_chart(brain.get_inventory_chart(), use_container_width=True)
+if __name__ == "__main__":
+    main()
