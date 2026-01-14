@@ -5,7 +5,7 @@ import time
 import textwrap
 
 # ==============================================================================
-# 🔧 1. SİSTEM AYARLARI
+# 🔧 1. SİSTEM KONFİGÜRASYONU
 # ==============================================================================
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'views')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'logic')))
@@ -19,56 +19,69 @@ st.set_page_config(
 )
 
 # ==============================================================================
-# 🛠️ 2. CSS "KURTARMA OPERASYONU" (SIDEBAR BUTONU FIX)
+# 🛠️ 2. CSS PATCH (SIDEBAR BUTONUNU ZORLA GÖRÜNÜR YAPMA)
 # ==============================================================================
-# Bu CSS bloğu, sidebar kapandığında açma butonunu zorla görünür kılar.
-# Butonu sayfanın sol üstüne 'fixed' olarak çivileriz.
+# Bu kod, sidebar kapandığında açma butonunu header'dan bağımsızlaştırır
+# ve sol üste "Floating Action Button" (Yüzen Buton) olarak çiviler.
 st.markdown("""
 <style>
-    /* 1. Header'ı Gizle (Renkli çizgi vs. gitsin) */
+    /* 1. Header'ı Görünmez Yap ama Varlığını Koru (Tıklamaları engellememesi için) */
     header[data-testid="stHeader"] {
         background: transparent !important;
-        height: 0px !important; /* Yüksekliği sıfırla */
+        pointer-events: none !important;
     }
 
-    /* 2. Sidebar Açma Butonunu (Ok İşareti) Zorla Konumlandır */
+    /* 2. Sidebar AÇMA/KAPAMA Butonunu Özelleştir ve Sabitle */
     [data-testid="stSidebarCollapsedControl"] {
-        display: block !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         visibility: visible !important;
-        position: fixed !important; /* Sayfaya çivile */
+        
+        /* KONUMLANDIRMA (SAYFAYA ÇİVİLE) */
+        position: fixed !important;
         top: 20px !important;
         left: 20px !important;
-        z-index: 1000001 !important; /* Her şeyin üstünde */
+        z-index: 999999 !important; /* Her şeyin en üstünde */
+        pointer-events: auto !important; /* Tıklanabilir */
         
-        /* Görünürlük Stili */
-        background-color: #18181B !important;
-        color: #FFFFFF !important;
-        border: 1px solid #3F3F46 !important;
-        padding: 8px !important;
-        border-radius: 8px !important;
-        transition: all 0.2s ease !important;
+        /* GÖRÜNÜM (GÖRÜNMEMESİ İMKANSIZ OLSUN) */
+        width: 44px !important;
+        height: 44px !important;
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important; /* PARLAK MAVİ */
+        color: white !important;
+        border-radius: 12px !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.6) !important; /* NEON GLOW */
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     }
 
-    /* Hover Efekti */
+    /* Butonun İçindeki Ok İşaretini Beyaz Yap */
+    [data-testid="stSidebarCollapsedControl"] svg {
+        fill: white !important;
+        stroke: white !important;
+        width: 24px !important;
+        height: 24px !important;
+    }
+
+    /* Hover Efekti (Üzerine gelince büyüsün) */
     [data-testid="stSidebarCollapsedControl"]:hover {
-        background-color: #3B82F6 !important; /* Mavi Yanar */
-        border-color: #3B82F6 !important;
-        transform: scale(1.1);
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-    }
-    
-    /* 3. Sağ Üstteki Menüyü (3 Nokta) Ayarla */
-    div[data-testid="stToolbar"] {
-        right: 2rem;
-        top: 1rem;
-        visibility: visible !important;
-        z-index: 1000000 !important;
+        transform: scale(1.1) !important;
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.9) !important;
+        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
     }
 
-    /* 4. Native Sidebar Navigasyonunu Gizle */
+    /* 3. Sağ Üst Menü (3 Nokta) Ayarı */
+    div[data-testid="stToolbar"] {
+        right: 1.5rem;
+        top: 1rem;
+        pointer-events: auto;
+    }
+
+    /* 4. Native Sidebar Menüyü Gizle */
     div[data-testid="stSidebarNav"] { display: none; }
     
-    /* 5. Sidebar Arka Plan Rengi */
+    /* 5. Sidebar Arka Planı */
     section[data-testid="stSidebar"] {
         background-color: #050505 !important;
         border-right: 1px solid rgba(255,255,255,0.08);
@@ -94,7 +107,7 @@ except ImportError as e:
     st.stop()
 
 # ==============================================================================
-# 🚀 4. UYGULAMA MANTIĞI
+# 🚀 4. UI ENJEKSİYONU & LOGIC
 # ==============================================================================
 styles.load_css()
 
@@ -103,12 +116,12 @@ if "user_data" not in st.session_state: st.session_state.user_data = {}
 
 def render_sidebar():
     with st.sidebar:
-        # MARKA ALANI
+        # --- A. MARKA BAŞLIĞI ---
         user_brand = st.session_state.user_data.get('brand', 'ARTIS AI')
         user_plan = st.session_state.user_data.get('plan', 'Enterprise')
         
         st.markdown(textwrap.dedent(f"""
-            <div style="margin-top: 10px; margin-bottom: 25px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;">
+            <div style="margin-top: 15px; margin-bottom: 25px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25);">
                         <i class='bx bxs-command' style="color: white; font-size: 20px;"></i>
@@ -125,7 +138,7 @@ def render_sidebar():
             </div>
         """), unsafe_allow_html=True)
 
-        # MENÜ
+        # --- B. MENÜ ---
         opts = {
             "Dashboard": "📊 Dashboard",
             "Lojistik": "📦 Lojistik",
@@ -137,8 +150,8 @@ def render_sidebar():
         }
         selection = st.radio("NAV", list(opts.keys()), format_func=lambda x: opts[x], label_visibility="collapsed")
         
-        # PROFIL ALANI
-        st.markdown("<div style='flex-grow: 1; min-height: 200px;'></div>", unsafe_allow_html=True)
+        # --- C. PROFİL ---
+        st.markdown("<div style='flex-grow: 1; min-height: 150px;'></div>", unsafe_allow_html=True)
         user_name = st.session_state.user_data.get('name', 'Kullanıcı')
         
         st.markdown(textwrap.dedent(f"""
