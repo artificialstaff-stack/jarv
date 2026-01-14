@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 
 # ==============================================================================
-# 🎨 DASHBOARD STİLİ
+# 🎨 DASHBOARD TASARIMI (Senin Orijinal CSS Yapın)
 # ==============================================================================
 def inject_dashboard_css():
     st.markdown("""
@@ -19,12 +19,12 @@ def inject_dashboard_css():
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🚀 ANA DASHBOARD
+# 🚀 ANA RENDER FONKSİYONU
 # ==============================================================================
 def render_dashboard():
     inject_dashboard_css()
     
-    # Kullanıcı verisini al (Brain için gerekli!)
+    # Kullanıcı verisini al (Brain için gerekli)
     user = st.session_state.get('user_data', {'brand': 'Anatolia Home', 'name': 'User'})
     
     # Header
@@ -42,7 +42,7 @@ def render_dashboard():
 
         with chat_box:
             if not st.session_state.messages:
-                st.info("Merhaba! Finans veya Stok verilerini sorabilirsiniz.")
+                st.info("Merhaba! Operasyonel süreçlerinizle ilgili ne bilmek istersiniz?")
             
             for msg in st.session_state.messages:
                 st.chat_message(msg["role"]).write(msg["content"])
@@ -56,8 +56,9 @@ def render_dashboard():
                     msg_placeholder = st.empty()
                     full_resp = ""
                     try:
-                        # !!! İŞTE DÜZELTME BURADA !!!
-                        # Hem 'messages' hem 'user' gönderiyoruz.
+                        # !!! DÜZELTME BURADA YAPILDI !!!
+                        # Senin brain.py dosyan (messages_history, user_data) bekliyor.
+                        # Biz de tam olarak onu gönderiyoruz.
                         for chunk in brain.get_streaming_response(st.session_state.messages, user):
                             full_resp += chunk
                             msg_placeholder.markdown(full_resp + "▌")
@@ -78,6 +79,7 @@ def render_dashboard():
             st.metric("Kâr", "%32", "+4%")
             
         try:
+            # Senin brain.py içindeki grafik fonksiyonunu çağırıyoruz
             st.plotly_chart(brain.get_sales_chart(), use_container_width=True)
         except:
-            st.warning("Grafik yüklenemedi.")
+            st.warning("Grafik verisi yüklenemedi.")
