@@ -8,23 +8,26 @@ from datetime import datetime
 from google import genai
 from google.genai import types
 
-# --- 1. MODEL YAPILANDIRMASI (PRO ERİŞİMİ) ---
-# Google AI Studio'daki tam model adınız farklıysa buradan değiştirin.
-# Genellikle: "gemini-3.0-flash-preview" veya "gemini-3.0-flash-001"
-MODEL_NAME = "gemini-3.0-flash-preview" 
+# --- 1. MODEL YAPILANDIRMASI (GEMINI 3 FLASH) ---
+# Paylaştığınız snippet'e göre model adını ayarlıyoruz.
+MODEL_NAME = "gemini-3-flash-preview"
 
 def get_ai_client():
-    # API Key'i secrets veya environment'tan çeker
-    api_key = st.secrets.get("GOOGLE_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    # Streamlit Secrets veya Ortam Değişkenlerinden API Key'i al
+    # Hem GOOGLE_API_KEY hem GEMINI_API_KEY kontrol edilir.
+    api_key = st.secrets.get("GOOGLE_API_KEY") or os.environ.get("GOOGLE_API_KEY") or st.secrets.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
+    
     if not api_key:
         return None
+    
+    # Google GenAI Client Başlatma (v0.1+ SDK)
     return genai.Client(api_key=api_key)
 
-# --- 2. CORTEX ZEKASI (GEMINI 3.0 FLASH AGENT) ---
+# --- 2. CORTEX ZEKASI (GEMINI 3 AGENT) ---
 def cortex_brain(prompt):
     """
     Doğal dil komutlarını sistem aksiyonuna çeviren yönetici zekası.
-    Google Gemini 3.0 Flash (Pro) modelini kullanır.
+    Google Gemini 3 Flash Preview modelini kullanır.
     """
     client = get_ai_client()
     users = st.session_state.users_db # Global veritabanını okur
@@ -67,9 +70,9 @@ def cortex_brain(prompt):
     """
 
     try:
-        # GEMINI 3.0 FLASH ÇAĞRISI
+        # GEMINI 3 FLASH ÇAĞRISI
         response = client.models.generate_content(
-            model=MODEL_NAME, # En tepedeki değişkeni kullanır
+            model=MODEL_NAME, 
             contents=f"User Command: {prompt}",
             config=types.GenerateContentConfig(
                 system_instruction=sys_instruction,
@@ -93,6 +96,7 @@ def cortex_brain(prompt):
         # Kullanıcıyı bul ve işlemi yap
         user_found = False
         for user in st.session_state.users_db:
+            # Basit isim eşleştirme
             if target and target.lower() in user['name'].lower():
                 user_found = True
                 
@@ -178,7 +182,7 @@ def render():
         <div class='admin-header-card'>
             <div style='display:flex; justify-content:space-between; align-items:start;'>
                 <div>
-                    <div class='admin-badge'>GEMINI 3.0 FLASH ENABLED</div>
+                    <div class='admin-badge'>GEMINI 3 FLASH SYSTEM</div>
                     <h1 style='margin:10px 0 5px 0; font-size:2rem;'>ARTIS HQ Komuta Merkezi</h1>
                     <p style='color:#888; margin:0; font-size:14px;'>Google GenAI Tabanlı Otonom Yönetim Katmanı</p>
                 </div>
