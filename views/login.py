@@ -9,7 +9,7 @@ USERS = {
         "pass": "1234",
         "name": "Ahmet Yılmaz",
         "brand": "Anatolia Home",
-        "role": "CEO",
+        "role": "user",  # Standart kullanıcı
         "plan": "Enterprise",
         "avatar": "AY"
     },
@@ -17,7 +17,7 @@ USERS = {
         "pass": "1234",
         "name": "Elon M.",
         "brand": "Cyber Systems",
-        "role": "CTO",
+        "role": "user",
         "plan": "Unlimited",
         "avatar": "EM"
     },
@@ -25,7 +25,7 @@ USERS = {
         "pass": "admin",
         "name": "Sistem Yöneticisi",
         "brand": "ARTIS HQ",
-        "role": "Süper Admin",
+        "role": "admin", # [ÖNEMLİ] Bu 'admin' olmazsa panel butonu gözükmez!
         "plan": "Internal",
         "avatar": "SA"
     }
@@ -107,7 +107,7 @@ def render_login_page():
         """, unsafe_allow_html=True)
         
         # Form
-        username = st.text_input("Kullanıcı Adı", placeholder="demo", label_visibility="collapsed")
+        username = st.text_input("Kullanıcı Adı", placeholder="Kullanıcı Adı", label_visibility="collapsed")
         password = st.text_input("Şifre", type="password", placeholder="••••••", label_visibility="collapsed")
         
         st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
@@ -121,12 +121,21 @@ def render_login_page():
             if user:
                 st.session_state.logged_in = True
                 st.session_state.user_data = user
-                st.toast(f"Hoş geldin, {user['name']}!", icon="🚀")
+                
+                # Rol tabanlı karşılama mesajı
+                if user['role'] == 'admin':
+                    st.toast(f"Yönetici Erişimi Doğrulandı: {user['name']}", icon="🛡️")
+                else:
+                    st.toast(f"Hoş geldin, {user['name']}!", icon="🚀")
+                
                 time.sleep(0.5)
                 st.rerun()
             else:
                 st.error("Hatalı kullanıcı adı veya şifre.")
 
-        # Demo Bilgisi
-        with st.expander("🔑 Demo Bilgileri"):
-            st.code("User: demo\nPass: 1234", language="text")
+        # Demo Bilgisi (Geliştirici İpuçları)
+        with st.expander("🔑 Giriş Bilgileri"):
+            st.code("""
+Admin: admin / admin
+User : demo  / 1234
+            """, language="text")
