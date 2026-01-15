@@ -1,63 +1,124 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.graph_objects as go
 import time
-import random
-from datetime import datetime, timedelta
+import json
+import os
+from datetime import datetime
+from google import genai
+from google.genai import types
 
-# --- GÜVENLİK KATMANI ---
+# --- 1. GEMINI CLIENT (GENAI) ---
+def get_ai_client():
+    # API Key'i secrets veya environment'tan çeker
+    api_key = st.secrets.get("GOOGLE_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        return None
+    return genai.Client(api_key=api_key)
+
+# --- 2. CORTEX ZEKASI (GEMINI 2.0 FLASH AGENT) ---
+def cortex_brain(prompt):
+    """
+    Doğal dil komutlarını sistem aksiyonuna çeviren yönetici zekası.
+    Google Gemini 2.0 Flash Experimental modelini kullanır.
+    """
+    client = get_ai_client()
+    users = st.session_state.users_db # Global veritabanını okur
+    
+    # AI'a Sistemin Anlık Durumunu Veriyoruz (Context)
+    system_stats = {
+        "active_users_count": sum(1 for u in users if u['status'] == 'Active'),
+        "total_mrr": sum(u.get('mrr', 0) for u in users),
+        "user_database": users, # Tüm kullanıcı listesini AI görüyor
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M")
+    }
+
+    if not client:
+        return "⚠️ API Key Eksik! Lütfen .streamlit/secrets.toml dosyasına GOOGLE_API_KEY ekleyin."
+
+    # --- SYSTEM PROMPT (KARAKTER & KURALLAR) ---
+    sys_instruction = f"""
+    Sen CORTEX. Bu SaaS platformunun "God Mode" yetkilerine sahip Yönetici Yapay Zekasısın.
+    
+    GÖREVİN:
+    Kullanıcının doğal dilde verdiği emirleri analiz et ve aşağıdaki JSON formatında cevap ver.
+    SADECE JSON DÖNDÜR. Yorum yapma.
+    
+    MEVCUT SİSTEM VERİLERİ:
+    {json.dumps(system_stats)}
+
+    EYLEM TİPLERİ (action):
+    - "ban_user": Kullanıcıyı yasaklar (Status -> Suspended).
+    - "activate_user": Kullanıcıyı açar (Status -> Active).
+    - "promote_admin": Kullanıcıyı yönetici yapar (Role -> admin).
+    - "report_status": Genel durum raporu verir.
+    - "unknown": Komut anlaşılamadıysa.
+
+    JSON FORMATI:
+    {{
+        "action": "eylem_tipi",
+        "target_name": "Hedef Kullanıcı Adı (Veritabanından en yakın eşleşme)",
+        "message": "Kullanıcıya gösterilecek otoriter, Türkçe sistem mesajı."
+    }}
+    """
+
+    try:
+        # GEMINI 2.0 FLASH ÇAĞRISI
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-exp", # En hızlı ve yeni "Flash" sürümü
+            contents=f"User Command: {prompt}",
+            config=types.GenerateContentConfig(
+                system_instruction=sys_instruction,
+                temperature=0.1, # Kesinlik için düşük yaratıcılık
+                response_mime_type="application/json" # JSON zorunluluğu
+            )
+        )
+        
+        # AI Yanıtını İşle
+        cmd = json.loads(response.text)
+        action = cmd.get("action")
+        target = cmd.get("target_name")
+        message = cmd.get("message")
+
+        # --- EYLEM KATMANI (EXECUTION LAYER) ---
+        # AI sadece karar verir, Python uygular.
+        
+        if action == "report_status" or action == "unknown":
+            return message
+
+        # Kullanıcıyı bul ve işlemi yap
+        user_found = False
+        for user in st.session_state.users_db:
+            if target and target.lower() in user['name'].lower():
+                user_found = True
+                
+                if action == "ban_user":
+                    user['status'] = "Suspended"
+                elif action == "activate_user":
+                    user['status'] = "Active"
+                elif action == "promote_admin":
+                    user['role'] = "admin"
+                
+                return message # Başarılı mesajı döndür
+
+        if not user_found and target:
+            return f"⚠️ Veritabanında '{target}' bulunamadı, ancak AI işlem yapmaya çalıştı."
+        
+        return message
+
+    except Exception as e:
+        return f"⚡ CORTEX HATASI: {str(e)}"
+
+# --- GÜVENLİK ---
 def check_admin_access():
     if st.session_state.user_data.get('role') != 'admin':
         st.error("⛔ YETKİSİZ GİRİŞ TESPİT EDİLDİ (ERROR 403)")
         st.stop()
 
-# --- CORTEX AI BEYNİ (NLP -> ACTION) ---
-def cortex_brain(prompt):
-    """
-    Doğal dil komutlarını sistem aksiyonuna çeviren yönetici zekası.
-    """
-    prompt = prompt.lower()
-    users = st.session_state.users_db # app.py'deki global veritabanı
-    
-    # 1. BANLAMA / KISITLAMA
-    if any(x in prompt for x in ["banla", "kısıtla", "dondur", "blokla"]):
-        for user in users:
-            if user['name'].lower() in prompt:
-                user['status'] = "Suspended"
-                return f"🚫 AKSİYON ALINDI: {user['name']} kullanıcısı sistemden banlandı ve oturumu sonlandırıldı."
-        return "⚠️ HATA: Kullanıcı veritabanında bulunamadı."
-
-    # 2. AKTİFLEŞTİRME
-    elif any(x in prompt for x in ["aç", "aktif et", "yetki ver", "kaldır"]):
-        for user in users:
-            if user['name'].lower() in prompt:
-                user['status'] = "Active"
-                return f"✅ ONAYLANDI: {user['name']} kullanıcısının erişim engeli kaldırıldı."
-        return "⚠️ HATA: Kullanıcı bulunamadı."
-
-    # 3. YÖNETİCİ YAPMA
-    elif any(x in prompt for x in ["admin yap", "yönetici yap", "terfi"]):
-        for user in users:
-            if user['name'].lower() in prompt:
-                user['role'] = "admin"
-                return f"🛡️ YETKİ YÜKSELTİLDİ: {user['name']} artık Root/Admin yetkilerine sahip."
-        return "⚠️ HATA: Kullanıcı bulunamadı."
-    
-    # 4. GENEL DURUM
-    elif "rapor" in prompt or "durum" in prompt:
-        active = sum(1 for u in users if u['status'] == 'Active')
-        mrr = sum(u.get('mrr', 0) for u in users)
-        return f"📊 SİSTEM DURUMU:\n- Aktif Kullanıcı: {active}\n- Toplam MRR: ${mrr}\n- Sunucu Yükü: %34 (Stabil)"
-
-    else:
-        return "🤖 CORTEX: Komut anlaşılamadı. Örn: 'Ahmet'i banla', 'Rapor ver'."
-
 # --- STİL & TASARIM ---
 def inject_admin_css():
     st.markdown("""
     <style>
-        /* Header Card */
         .admin-header-card {
             background: linear-gradient(135deg, #111 0%, #050505 100%);
             border: 1px solid rgba(239, 68, 68, 0.2);
@@ -72,10 +133,9 @@ def inject_admin_css():
             border-radius: 6px;
             font-size: 11px;
             font-weight: 800;
+            letter-spacing: 1px;
             border: 1px solid rgba(220, 38, 38, 0.3);
         }
-        
-        /* CORTEX Terminal */
         .cortex-terminal {
             background-color: #0d0d0d;
             border: 1px solid #333;
@@ -85,17 +145,9 @@ def inject_admin_css():
             font-family: 'JetBrains Mono', monospace;
             margin-bottom: 30px;
         }
-        .ai-msg { color: #e0e0e0; margin-top: 5px; }
+        .ai-msg { color: #e0e0e0; margin-top: 5px; border-left: 2px solid #EF4444; padding-left: 10px; }
         .user-msg { color: #EF4444; font-weight: bold; margin-top: 10px; }
-
-        /* Metric Boxes */
-        .metric-box {
-            background: #0A0A0A;
-            border: 1px solid #222;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-        }
+        .metric-box { background: #0A0A0A; border: 1px solid #222; padding: 20px; border-radius: 12px; text-align: center; }
         .metric-val { font-size: 28px; font-weight: 700; color: #FFF; }
         .metric-lbl { font-size: 12px; color: #666; text-transform: uppercase; }
         .delta-pos { color: #10B981; font-size: 11px; }
@@ -122,9 +174,9 @@ def render():
         <div class='admin-header-card'>
             <div style='display:flex; justify-content:space-between; align-items:start;'>
                 <div>
-                    <div class='admin-badge'>CORTEX ENABLED</div>
+                    <div class='admin-badge'>GEMINI 3.0 FLASH (PREVIEW)</div>
                     <h1 style='margin:10px 0 5px 0; font-size:2rem;'>ARTIS HQ Komuta Merkezi</h1>
-                    <p style='color:#888; margin:0; font-size:14px;'>SaaS Altyapısı ve Yapay Zeka Yönetim Katmanı</p>
+                    <p style='color:#888; margin:0; font-size:14px;'>Google GenAI Tabanlı Otonom Yönetim Katmanı</p>
                 </div>
                 <div style='text-align:right;'>
                     <div style='color:#EF4444; font-weight:700; font-size:24px;'>$62,400</div>
@@ -134,18 +186,17 @@ def render():
         </div>
     """, unsafe_allow_html=True)
 
-    # 2. CORTEX AI TERMİNALİ (YENİ EKLEME)
+    # 2. CORTEX AI TERMİNALİ
     st.markdown("### 🧠 CORTEX Yönetici Ajanı")
-    st.caption("Sistemi doğal dille yönetin. Örn: 'Ahmet Yılmaz'ı banla', 'Sistem raporu ver'.")
+    st.caption("Sistemi doğal dille yönetin. Örn: 'Ahmet Yılmaz çok sorun çıkarıyor, sistemden at'.")
     
     with st.container():
         st.markdown("<div class='cortex-terminal'>", unsafe_allow_html=True)
         
-        # Geçmişi Göster
         if "cortex_history" not in st.session_state:
-            st.session_state.cortex_history = [{"role": "ai", "content": "Sistemler hazır. Komut bekliyorum..."}]
+            st.session_state.cortex_history = [{"role": "ai", "content": "Gemini 3 Flash Preview aktif. Veritabanına bağlıyım."}]
         
-        for msg in st.session_state.cortex_history[-3:]: # Son 3 mesajı göster
+        for msg in st.session_state.cortex_history[-3:]: 
             if msg['role'] == 'user':
                 st.markdown(f"<div class='user-msg'>> {msg['content']}</div>", unsafe_allow_html=True)
             else:
@@ -153,19 +204,17 @@ def render():
         
         st.markdown("</div>", unsafe_allow_html=True)
         
-        # Komut Girişi
         cortex_input = st.chat_input("CORTEX'e emir ver...")
         if cortex_input:
             st.session_state.cortex_history.append({"role": "user", "content": cortex_input})
-            with st.spinner("İşleniyor..."):
-                time.sleep(0.5)
+            with st.spinner("Gemini 3 Flash analiz ediyor..."):
                 resp = cortex_brain(cortex_input)
                 st.session_state.cortex_history.append({"role": "ai", "content": resp})
             st.rerun()
 
     st.markdown("---")
 
-    # 3. KPI GRID (MEVCUT KOD)
+    # 3. KPI WIDGETS
     k1, k2, k3, k4 = st.columns(4)
     with k1: st.markdown("<div class='metric-box'><div class='metric-lbl'>Aktif Müşteri</div><div class='metric-val'>1,240</div><div class='metric-delta delta-pos'>+%12</div></div>", unsafe_allow_html=True)
     with k2: st.markdown("<div class='metric-box'><div class='metric-lbl'>Churn Rate</div><div class='metric-val'>%2.1</div><div class='metric-delta delta-pos'>-%0.4</div></div>", unsafe_allow_html=True)
@@ -177,12 +226,9 @@ def render():
     # 4. YÖNETİM SEKMELERİ
     tabs = st.tabs(["👥 Canlı Veritabanı (AI Sync)", "🚀 Özellik Kontrolü", "📢 Duyuru", "⚙️ Sistem Logları"])
 
-    # --- TAB 1: CANLI VERİTABANI (APP.PY İLE SENKRONİZE) ---
+    # --- TAB 1: CANLI VERİTABANI ---
     with tabs[0]:
         st.subheader("Global Kullanıcı Listesi")
-        st.info("Bu tablo CORTEX AI ile senkronizedir. AI üzerinden yapılan banlamalar burada anında görülür.")
-        
-        # app.py'deki veritabanını DataFrame'e çevir
         current_db = pd.DataFrame(st.session_state.users_db)
         
         edited_df = st.data_editor(
@@ -197,52 +243,21 @@ def render():
             key="user_editor"
         )
         
-        # Manuel değişiklikleri kaydet
-        if st.button("💾 Manuel Değişiklikleri Kaydet", type="primary"):
-            # DataFrame'i geri dict listesine çevirip session_state'e kaydet
+        if st.button("💾 Değişiklikleri Kaydet", type="primary"):
             st.session_state.users_db = edited_df.to_dict('records')
             st.toast("Veritabanı güncellendi.", icon="✅")
 
-    # --- TAB 2: ÖZELLİK ANAHTARLARI ---
+    # --- TAB 2, 3, 4 (Görsel Öğeler) ---
     with tabs[1]:
-        st.subheader("Modül Yönetimi")
         f1, f2, f3 = st.columns(3)
-        with f1:
-            st.container(border=True).markdown("#### 🤖 AI Lead Gen")
-            st.toggle("Beta Erişim", value=True)
-        with f2:
-            st.container(border=True).markdown("#### 💳 Stripe Ödeme")
-            st.toggle("Sandbox Modu", value=True)
-        with f3:
-            st.container(border=True).markdown("#### 📱 Mobil API")
-            st.toggle("API v2", value=True)
-
-    # --- TAB 3: GLOBAL DUYURU ---
+        with f1: st.toggle("AI Lead Gen (Beta)", value=True)
+        with f2: st.toggle("Stripe Sandbox", value=True)
+        with f3: st.toggle("API v2", value=True)
     with tabs[2]:
-        col_ann1, col_ann2 = st.columns([1, 1])
-        with col_ann1:
-            st.subheader("Sistem Duyurusu")
-            ann_type = st.selectbox("Tip", ["Bilgi", "Kritik"])
-            ann_msg = st.text_area("Mesaj", "Örn: Sistem bakımı...")
-            if st.button("Gönder"):
-                st.toast("İletildi!", icon="🚀")
-        with col_ann2:
-            st.subheader("Aktif Duyurular")
-            st.warning("⚠️ Planlı Bakım: 20 Ocak")
-
-    # --- TAB 4: FİNANS & LOGLAR ---
+        if st.button("Duyuru Gönder"): st.toast("İletildi!", icon="🚀")
     with tabs[3]:
-        st.subheader("Finansal Büyüme")
         st.plotly_chart(revenue_chart(), use_container_width=True)
-        st.divider()
-        st.subheader("Sistem Logları")
-        logs = pd.DataFrame({
-            "Zaman": ["14:42", "14:40"],
-            "Seviye": ["INFO", "WARNING"],
-            "Mesaj": ["Admin login successful", "High CPU usage"]
-        })
-        st.dataframe(logs, use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame({"Zaman": ["14:02"], "Log": ["Gemini Agent Started"]}), use_container_width=True)
 
-    # Footer
     st.markdown("---")
-    st.caption("CORTEX AI Engine v1.0 | Root Access Active")
+    st.caption("Powered by Google Gemini 2.0 Flash Experimental (Gen 3 Preview)")
