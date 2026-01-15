@@ -1,9 +1,9 @@
 import streamlit as st
 import sys
 import os
-import time
 
 # --- 1. SİSTEM YOLLARI ---
+# Views ve Logic klasörlerini Python'a tanıtıyoruz
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'views')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'logic')))
 
@@ -15,54 +15,31 @@ st.set_page_config(
     initial_sidebar_state="expanded" 
 )
 
-# 3. PREMIUM SIDEBAR & NAVIGATION CSS
-st.markdown("""
-<style>
-    /* Sidebar Kilitleme ve Modernizasyon */
-    [data-testid="stSidebar"] button { display: none !important; }
-    [data-testid="stSidebarCollapsedControl"] { display: none !important; }
-    
-    [data-testid="stSidebar"] {
-        min-width: 320px !important;
-        max-width: 320px !important;
-        background-color: #000000 !important;
-        border-right: 1px solid rgba(197, 160, 89, 0.15); /* Sunumdaki Altın Rengi Dokunuş */
-    }
-
-    /* Menü Gruplandırma Yazıları */
-    .menu-label {
-        font-size: 10px;
-        color: #444;
-        letter-spacing: 2px;
-        font-weight: 700;
-        margin: 20px 0 10px 10px;
-        text-transform: uppercase;
-    }
-
-    /* Header Şeffaflık */
-    header[data-testid="stHeader"] { background: transparent !important; }
-    
-    /* Navigasyon İkon ve Yazı Uyumu */
-    .stRadio label p { font-size: 14px !important; font-weight: 500 !important; color: #E4E4E7 !important; }
-</style>
-""", unsafe_allow_html=True)
-
-# 4. MODÜL YÜKLEME (Fail-Safe)
+# 3. MODÜLLERİ YÜKLE
+# Eğer dosya yoksa hata vermemesi için try-except bloğu
 try:
-    import styles, login, dashboard, logistics, inventory, plan, documents, todo, forms
-    # Yeni Hizmet View'ları (Bu dosyaları oluşturman gerekecek)
-    # import website, legal, marketplace, social, ads, automation, leadgen 
+    import styles, login, dashboard
+    # Operasyonel Araçlar
+    import logistics, inventory, plan, documents, todo, forms
+    # Yeni 9 Global Hizmet
+    import website, llc, seller, social, ads, automation, leadgen
 except ImportError as e:
-    st.error(f"Sistem Bileşeni Eksik: {e}")
+    st.error(f"⚠️ Kritik Modül Eksik: {e}. Lütfen 'views' klasöründeki tüm dosyaları oluşturduğundan emin ol.")
 
-# Global Stilleri Uygula
+# 4. GLOBAL CSS VE STATE YÖNETİMİ
 styles.load_css()
 
-# Session State Yönetimi
+# Session State Başlatma (Hafıza)
 if "logged_in" not in st.session_state: st.session_state.logged_in = False
 if "user_data" not in st.session_state: st.session_state.user_data = {}
+if "current_page" not in st.session_state: st.session_state.current_page = "Dashboard"
 
-# 5. STRATEJİK SOL MENÜ (9 Ana Hizmet + Araçlar)
+# --- NAVİGASYON FONKSİYONU ---
+# Bu fonksiyon, herhangi bir menüye tıklandığında çalışır ve sayfayı değiştirir.
+def update_page(key):
+    st.session_state.current_page = st.session_state[key]
+
+# 5. STRATEJİK SOL MENÜ
 def render_sidebar():
     with st.sidebar:
         user_brand = st.session_state.user_data.get('brand', 'Anatolia Home')
@@ -75,82 +52,104 @@ def render_sidebar():
             </div>
         """, unsafe_allow_html=True)
 
-        # GRUP 1: ANA KOMUTA
-        st.markdown('<div class="menu-label">Ana Komuta</div>', unsafe_allow_html=True)
-        main_nav = {
-            "Dashboard": "📊 Dashboard (Genel Bakış)"
-        }
-        selected_main = st.radio("MAIN", list(main_nav.keys()), format_func=lambda x: main_nav[x], label_visibility="collapsed")
-
-        # GRUP 2: 9 ANA HİZMET (Sunumdaki Modüller)
-        st.markdown('<div class="menu-label">Global Büyüme Servisleri</div>', unsafe_allow_html=True)
-        service_nav = {
-            "Website": "🌐 Web Sitesi & UX (0.4s)",
-            "LLC_Legal": "⚖️ LLC & Şirket Yönetimi",
-            "Logistics": "📦 Lojistik & Nakliye",
-            "Inventory": "📋 Envanter & Tahminleme",
-            "Marketplace": "🏪 Pazaryeri Yönetimi",
-            "Social": "📱 Sosyal Medya & İçerik",
-            "Ads": "🎯 Reklam (ROAS) Yönetimi",
-            "Automation": "🤖 Otomasyon & Ops",
-            "LeadGen": "🚀 AI Lead Gen (B2B Satış)"
-        }
-        selected_service = st.radio("SERVICES", list(service_nav.keys()), format_func=lambda x: service_nav[x], label_visibility="collapsed")
-
-        # GRUP 3: İÇ OPERASYON (Araçlar)
-        st.markdown('<div class="menu-label">Operasyonel Araçlar</div>', unsafe_allow_html=True)
-        tool_nav = {
-            "Docs": "📂 Dijital Arşiv",
-            "Tasks": "✅ Yapılacaklar",
-            "Forms": "📝 Formlar & Onaylar"
-        }
-        selected_tool = st.radio("TOOLS", list(tool_nav.keys()), format_func=lambda x: tool_nav[x], label_visibility="collapsed")
-
-        # Sticky Footer: Kullanıcı Bilgisi
-        st.markdown("<div style='flex-grow: 1; height: 50px;'></div>", unsafe_allow_html=True)
-        user_name = st.session_state.user_data.get('name', 'Ahmet Yılmaz')
-        st.markdown(f"""
-            <div style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
-                <div style="font-size: 12px; font-weight: 600; color: #FAFAFA;">{user_name}</div>
-                <div style="font-size: 9px; color: #34D399;">Enterprise Edition v4.2</div>
-            </div>
-        """, unsafe_allow_html=True)
+        # --- GRUP 1: ANA KOMUTA ---
+        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; letter-spacing:1px; margin-bottom:5px;">ANA KOMUTA</div>', unsafe_allow_html=True)
         
-        if st.button("Sistemden Çıkış", use_container_width=True):
+        # Tek seçenekli olsa bile yapı aynı kalmalı
+        st.radio(
+            "Main Nav", 
+            ["Dashboard"], 
+            format_func=lambda x: "📊 Komuta Merkezi",
+            key="nav_main",
+            on_change=update_page, args=("nav_main",), # Tıklanınca update_page çalışır
+            label_visibility="collapsed"
+        )
+
+        # --- GRUP 2: 9 ANA HİZMET (Sunumdan) ---
+        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; letter-spacing:1px; margin-top:20px; margin-bottom:5px;">GLOBAL SERVİSLER</div>', unsafe_allow_html=True)
+        
+        services_map = {
+            "Website": "🌐 Web Sitesi & UX",
+            "LLC_Legal": "⚖️ LLC & Şirket",
+            "Logistics": "📦 Lojistik & Sevk",
+            "Inventory": "📋 Envanter & Stok",
+            "Marketplace": "🏪 Pazaryeri (Amazon)",
+            "Social": "📱 Sosyal Medya",
+            "Ads": "🎯 Reklam (ROAS)",
+            "Automation": "🤖 Otomasyon",
+            "LeadGen": "🚀 AI Lead Gen"
+        }
+        
+        st.radio(
+            "Service Nav",
+            list(services_map.keys()),
+            format_func=lambda x: services_map[x],
+            key="nav_services", # Benzersiz ID
+            on_change=update_page, args=("nav_services",),
+            label_visibility="collapsed",
+            index=None # Başlangıçta hiçbiri seçili görünmesin (Dashboard aktif olsun diye)
+        )
+
+        # --- GRUP 3: ARAÇLAR ---
+        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; letter-spacing:1px; margin-top:20px; margin-bottom:5px;">ARAÇLAR</div>', unsafe_allow_html=True)
+        
+        tools_map = {
+            "Dokümanlar": "📂 Dijital Arşiv",
+            "Yapılacaklar": "✅ Görevler",
+            "Formlar": "📝 Formlar",
+            "Planlar": "💎 Stratejik Planlar"
+        }
+        
+        st.radio(
+            "Tool Nav",
+            list(tools_map.keys()),
+            format_func=lambda x: tools_map[x],
+            key="nav_tools",
+            on_change=update_page, args=("nav_tools",),
+            label_visibility="collapsed",
+            index=None
+        )
+
+        # Footer
+        st.markdown("<div style='flex-grow: 1; height: 50px;'></div>", unsafe_allow_html=True)
+        if st.button("Çıkış Yap", use_container_width=True):
             st.session_state.logged_in = False
             st.rerun()
-            
-        # Hangi grubun en son seçildiğini kontrol etmek için küçük bir mantık
-        # Şimdilik sadece basitleştirilmiş bir return kullanıyoruz
-        return selected_main, selected_service, selected_tool
 
-# 6. ROUTER (YÖNLENDİRİCİ)
+# 6. ROUTER (ANA YÖNLENDİRİCİ)
 def main():
     if not st.session_state.logged_in:
         login.render_login_page()
     else:
-        # Menüden seçimleri al
-        # Not: Streamlit'te radio buttonlar her zaman bir değer döndürür. 
-        # Gerçek bir SaaS'da hangi radyo grubunun en son tıklandığını session_state ile takip etmelisin.
-        main_sel, svc_sel, tool_sel = render_sidebar()
+        # Sidebar'ı çiz (Tıklamalar session_state.current_page'i günceller)
+        render_sidebar()
         
-        # Basitleştirilmiş Sayfa Yönlendirme (Örnek Mantık)
-        # Kullanıcı Dashboard dışındaki bir servise tıklarsa onu göster
-        if svc_sel != "Website": # Website varsayılan ilk eleman olduğu için
-             # Burada svc_sel'e göre yönlendirme yapılır
-             pass
-
-        # Mevcut yönlendirme yapını bozmadan entegre ediyorum:
-        page = main_sel # Varsayılan
+        # Aktif sayfayı al
+        page = st.session_state.current_page
         
-        # Eğer Dashboard dışında bir servis tıklandıysa (Bu kısmı kendine göre optimize edebilirsin)
-        if svc_sel == "Logistics": logistics.render_logistics()
-        elif svc_sel == "Inventory": inventory.render_inventory()
-        # Yeni servis dosyalarını eklediğinde burayı genişletmelisin
-        elif main_sel == "Dashboard": dashboard.render_dashboard()
-        
-        # Araçlar grubu yönlendirmesi
-        # elif tool_sel == "Docs": documents.render_documents()
+        # Sayfayı Render Et
+        try:
+            if page == "Dashboard": dashboard.render_dashboard()
+            # Servisler
+            elif page == "Website": website.render()
+            elif page == "LLC_Legal": llc.render()
+            elif page == "Logistics": logistics.render_logistics()
+            elif page == "Inventory": inventory.render_inventory()
+            elif page == "Marketplace": seller.render()
+            elif page == "Social": social.render()
+            elif page == "Ads": ads.render()
+            elif page == "Automation": automation.render()
+            elif page == "LeadGen": leadgen.render()
+            # Araçlar
+            elif page == "Dokümanlar": documents.render_documents()
+            elif page == "Yapılacaklar": todo.render_todo()
+            elif page == "Formlar": forms.render_forms()
+            elif page == "Planlar": plan.render_plans()
+            else:
+                dashboard.render_dashboard() # Hata durumunda Dashboard'a dön
+        except Exception as e:
+            st.error(f"Sayfa Yükleme Hatası: {e}")
+            st.info("Lütfen ilgili 'views' dosyasının (örn: website.py) oluşturulduğundan ve içinin boş olmadığından emin olun.")
 
 if __name__ == "__main__":
     main()
