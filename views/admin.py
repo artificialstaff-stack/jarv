@@ -8,7 +8,11 @@ from datetime import datetime
 from google import genai
 from google.genai import types
 
-# --- 1. GEMINI CLIENT (GENAI) ---
+# --- 1. MODEL YAPILANDIRMASI (PRO ERİŞİMİ) ---
+# Google AI Studio'daki tam model adınız farklıysa buradan değiştirin.
+# Genellikle: "gemini-3.0-flash-preview" veya "gemini-3.0-flash-001"
+MODEL_NAME = "gemini-3.0-flash-preview" 
+
 def get_ai_client():
     # API Key'i secrets veya environment'tan çeker
     api_key = st.secrets.get("GOOGLE_API_KEY") or os.environ.get("GOOGLE_API_KEY")
@@ -16,11 +20,11 @@ def get_ai_client():
         return None
     return genai.Client(api_key=api_key)
 
-# --- 2. CORTEX ZEKASI (GEMINI 2.0 FLASH AGENT) ---
+# --- 2. CORTEX ZEKASI (GEMINI 3.0 FLASH AGENT) ---
 def cortex_brain(prompt):
     """
     Doğal dil komutlarını sistem aksiyonuna çeviren yönetici zekası.
-    Google Gemini 2.0 Flash Experimental modelini kullanır.
+    Google Gemini 3.0 Flash (Pro) modelini kullanır.
     """
     client = get_ai_client()
     users = st.session_state.users_db # Global veritabanını okur
@@ -63,9 +67,9 @@ def cortex_brain(prompt):
     """
 
     try:
-        # GEMINI 2.0 FLASH ÇAĞRISI
+        # GEMINI 3.0 FLASH ÇAĞRISI
         response = client.models.generate_content(
-            model="gemini-2.0-flash-exp", # En hızlı ve yeni "Flash" sürümü
+            model=MODEL_NAME, # En tepedeki değişkeni kullanır
             contents=f"User Command: {prompt}",
             config=types.GenerateContentConfig(
                 system_instruction=sys_instruction,
@@ -107,7 +111,7 @@ def cortex_brain(prompt):
         return message
 
     except Exception as e:
-        return f"⚡ CORTEX HATASI: {str(e)}"
+        return f"⚡ CORTEX HATASI ({MODEL_NAME}): {str(e)}"
 
 # --- GÜVENLİK ---
 def check_admin_access():
@@ -170,11 +174,11 @@ def render():
     inject_admin_css()
 
     # 1. HEADER
-    st.markdown("""
+    st.markdown(f"""
         <div class='admin-header-card'>
             <div style='display:flex; justify-content:space-between; align-items:start;'>
                 <div>
-                    <div class='admin-badge'>GEMINI 3.0 FLASH (PREVIEW)</div>
+                    <div class='admin-badge'>GEMINI 3.0 FLASH ENABLED</div>
                     <h1 style='margin:10px 0 5px 0; font-size:2rem;'>ARTIS HQ Komuta Merkezi</h1>
                     <p style='color:#888; margin:0; font-size:14px;'>Google GenAI Tabanlı Otonom Yönetim Katmanı</p>
                 </div>
@@ -194,7 +198,7 @@ def render():
         st.markdown("<div class='cortex-terminal'>", unsafe_allow_html=True)
         
         if "cortex_history" not in st.session_state:
-            st.session_state.cortex_history = [{"role": "ai", "content": "Gemini 3 Flash Preview aktif. Veritabanına bağlıyım."}]
+            st.session_state.cortex_history = [{"role": "ai", "content": f"Cortex v3.0 ({MODEL_NAME}) devrede. Veritabanına bağlıyım."}]
         
         for msg in st.session_state.cortex_history[-3:]: 
             if msg['role'] == 'user':
@@ -257,7 +261,7 @@ def render():
         if st.button("Duyuru Gönder"): st.toast("İletildi!", icon="🚀")
     with tabs[3]:
         st.plotly_chart(revenue_chart(), use_container_width=True)
-        st.dataframe(pd.DataFrame({"Zaman": ["14:02"], "Log": ["Gemini Agent Started"]}), use_container_width=True)
+        st.dataframe(pd.DataFrame({"Zaman": ["14:02"], "Log": ["Cortex Agent Started"]}), use_container_width=True)
 
     st.markdown("---")
-    st.caption("Powered by Google Gemini 2.0 Flash Experimental (Gen 3 Preview)")
+    st.caption(f"Powered by Google {MODEL_NAME} | Enterprise License")
