@@ -3,11 +3,10 @@ import sys
 import os
 
 # --- 1. SİSTEM YOLLARI ---
-# Views ve Logic klasörlerini Python'a tanıtıyoruz
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'views')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'logic')))
 
-# 2. SAYFA AYARLARI (Silicon Valley UX Standards)
+# 2. SAYFA AYARLARI
 st.set_page_config(
     page_title="ARTIS | Global Operations Engine",
     page_icon="⚡",
@@ -16,14 +15,13 @@ st.set_page_config(
 )
 
 # 3. MODÜLLERİ YÜKLE
-# Eğer dosya yoksa hata vermemesi için try-except bloğu
 try:
     import styles, login, dashboard
     # Operasyonel Araçlar
     import logistics, inventory, plan, documents, todo, forms
     # Yeni 9 Global Hizmet
     import website, llc, seller, social, ads, automation, leadgen
-    # [YENİ] Admin Modülü
+    # [YENİ] Admin Modülü (CORTEX AI)
     import admin
 except ImportError as e:
     st.error(f"⚠️ Kritik Modül Eksik: {e}. Lütfen 'views' klasöründeki tüm dosyaları oluşturduğundan emin ol.")
@@ -31,26 +29,34 @@ except ImportError as e:
 # 4. GLOBAL CSS VE STATE YÖNETİMİ
 styles.load_css()
 
-# Session State Başlatma (Hafıza)
+# Session State Başlatma
 if "logged_in" not in st.session_state: st.session_state.logged_in = False
 
-# [GÜNCELLEME] Kullanıcı verisi Login.py'den gelecek, burayı boş bırakıyoruz.
+# [GÜNCELLEME] Kullanıcı verisi Login.py'den gelecek.
 if "user_data" not in st.session_state: 
     st.session_state.user_data = {} 
+
+# --- [YENİ] GLOBAL KULLANICI VERİTABANI (CORTEX AI YÖNETİMİ İÇİN) ---
+# AI'ın kullanıcıları banlayıp/açabilmesi için veritabanının burada tanımlı olması gerek.
+if "users_db" not in st.session_state:
+    st.session_state.users_db = [
+        {"id": 101, "name": "Ahmet Yılmaz", "role": "editor", "status": "Active", "mrr": 1200},
+        {"id": 102, "name": "Ayşe Demir", "role": "viewer", "status": "Active", "mrr": 850},
+        {"id": 103, "name": "Mehmet Kaya", "role": "editor", "status": "Pending", "mrr": 0},
+        {"id": 104, "name": "John Doe", "role": "admin", "status": "Active", "mrr": 5000},
+    ]
 
 if "current_page" not in st.session_state: st.session_state.current_page = "Dashboard"
 
 # --- NAVİGASYON FONKSİYONU ---
-# Bu fonksiyon, herhangi bir menüye tıklandığında çalışır ve sayfayı değiştirir.
 def update_page(key):
     st.session_state.current_page = st.session_state[key]
 
 # 5. STRATEJİK SOL MENÜ
 def render_sidebar():
     with st.sidebar:
-        # Veriyi güvenli çek (Login olmamışsa varsayılan göster)
         user_brand = st.session_state.user_data.get('brand', 'ARTIS AI')
-        user_role = st.session_state.user_data.get('role', 'user') # Yetki kontrolü için
+        user_role = st.session_state.user_data.get('role', 'user') # Yetki kontrolü
         
         # Marka Kimliği
         st.markdown(f"""
@@ -72,7 +78,7 @@ def render_sidebar():
             label_visibility="collapsed"
         )
 
-        # --- GRUP 2: 9 ANA HİZMET (Sunumdan) ---
+        # --- GRUP 2: 9 ANA HİZMET ---
         st.markdown('<div class="menu-label" style="font-size:10px; color:#666; letter-spacing:1px; margin-top:20px; margin-bottom:5px;">GLOBAL SERVİSLER</div>', unsafe_allow_html=True)
         
         services_map = {
@@ -117,10 +123,11 @@ def render_sidebar():
             index=None
         )
 
-        # --- [EKLENDİ] YÖNETİM (SADECE ADMIN GÖRÜR) ---
+        # --- [EKLENDİ] CORTEX YÖNETİM (SADECE ADMIN GÖRÜR) ---
         if user_role == 'admin':
             st.markdown("---")
-            if st.button("🛡️ Admin Paneli", use_container_width=True):
+            # Buton ismini güncelledik
+            if st.button("🧠 CORTEX (Super AI)", use_container_width=True):
                 st.session_state.current_page = "Admin"
                 st.rerun()
 
@@ -140,7 +147,7 @@ def main():
         
         try:
             if page == "Dashboard": dashboard.render_dashboard()
-            # [EKLENDİ] Admin Yönlendirmesi
+            # [EKLENDİ] Admin/Cortex Yönlendirmesi
             elif page == "Admin": admin.render()
             
             # Servisler
