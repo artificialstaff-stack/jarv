@@ -3,11 +3,10 @@ import sys
 import os
 
 # --- 1. SİSTEM YOLLARI ---
-# Views ve Logic klasörlerini Python'a tanıtıyoruz
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'views')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'logic')))
 
-# 2. SAYFA AYARLARI (Silicon Valley UX Standards)
+# 2. SAYFA AYARLARI
 st.set_page_config(
     page_title="ARTIS | Global Operations Engine",
     page_icon="⚡",
@@ -16,14 +15,13 @@ st.set_page_config(
 )
 
 # 3. MODÜLLERİ YÜKLE
-# Eğer dosya yoksa hata vermemesi için try-except bloğu
 try:
     import styles, login, dashboard
     # Operasyonel Araçlar
     import logistics, inventory, plan, documents, todo, forms
     # Yeni 9 Global Hizmet
     import website, llc, seller, social, ads, automation, leadgen
-    # [YENİ] Admin Modülü
+    # [YENİ] Admin Modülü (SaaS Yönetimi İçin)
     import admin
 except ImportError as e:
     st.error(f"⚠️ Kritik Modül Eksik: {e}. Lütfen 'views' klasöründeki tüm dosyaları oluşturduğundan emin ol.")
@@ -31,13 +29,20 @@ except ImportError as e:
 # 4. GLOBAL CSS VE STATE YÖNETİMİ
 styles.load_css()
 
-# Session State Başlatma (Hafıza)
+# Session State Başlatma
 if "logged_in" not in st.session_state: st.session_state.logged_in = False
-if "user_data" not in st.session_state: st.session_state.user_data = {'brand': 'Anatolia Home', 'name': 'Ahmet Yılmaz'} # Varsayılan veri
+
+# [ÖNEMLİ] Admin Panelini görebilmen için varsayılan yetkiyi 'admin' yaptım.
+if "user_data" not in st.session_state: 
+    st.session_state.user_data = {
+        'brand': 'Anatolia Home', 
+        'name': 'Ahmet Yılmaz',
+        'role': 'admin' # <-- Bu yetki sayesinde Admin paneline girebilirsin
+    }
+
 if "current_page" not in st.session_state: st.session_state.current_page = "Dashboard"
 
 # --- NAVİGASYON FONKSİYONU ---
-# Bu fonksiyon, herhangi bir menüye tıklandığında çalışır ve sayfayı değiştirir.
 def update_page(key):
     st.session_state.current_page = st.session_state[key]
 
@@ -56,61 +61,25 @@ def render_sidebar():
 
         # --- GRUP 1: ANA KOMUTA ---
         st.markdown('<div class="menu-label" style="font-size:10px; color:#666; letter-spacing:1px; margin-bottom:5px;">ANA KOMUTA</div>', unsafe_allow_html=True)
-        
-        # Tek seçenekli olsa bile yapı aynı kalmalı
-        st.radio(
-            "Main Nav", 
-            ["Dashboard"], 
-            format_func=lambda x: "📊 Komuta Merkezi",
-            key="nav_main",
-            on_change=update_page, args=("nav_main",), # Tıklanınca update_page çalışır
-            label_visibility="collapsed"
-        )
+        st.radio("Main Nav", ["Dashboard"], format_func=lambda x: "📊 Komuta Merkezi", key="nav_main", on_change=update_page, args=("nav_main",), label_visibility="collapsed")
 
-        # --- GRUP 2: 9 ANA HİZMET (Sunumdan) ---
+        # --- GRUP 2: 9 ANA HİZMET ---
         st.markdown('<div class="menu-label" style="font-size:10px; color:#666; letter-spacing:1px; margin-top:20px; margin-bottom:5px;">GLOBAL SERVİSLER</div>', unsafe_allow_html=True)
-        
         services_map = {
-            "Website": "🌐 Web Sitesi & UX",
-            "LLC_Legal": "⚖️ LLC & Şirket",
-            "Logistics": "📦 Lojistik & Sevk",
-            "Inventory": "📋 Envanter & Stok",
-            "Marketplace": "🏪 Pazaryeri (Amazon)",
-            "Social": "📱 Sosyal Medya",
-            "Ads": "🎯 Reklam (ROAS)",
-            "Automation": "🤖 Otomasyon",
-            "LeadGen": "🚀 AI Lead Gen"
+            "Website": "🌐 Web Sitesi & UX", "LLC_Legal": "⚖️ LLC & Şirket",
+            "Logistics": "📦 Lojistik & Sevk", "Inventory": "📋 Envanter & Stok",
+            "Marketplace": "🏪 Pazaryeri (Amazon)", "Social": "📱 Sosyal Medya",
+            "Ads": "🎯 Reklam (ROAS)", "Automation": "🤖 Otomasyon", "LeadGen": "🚀 AI Lead Gen"
         }
-        
-        st.radio(
-            "Service Nav",
-            list(services_map.keys()),
-            format_func=lambda x: services_map[x],
-            key="nav_services", # Benzersiz ID
-            on_change=update_page, args=("nav_services",),
-            label_visibility="collapsed",
-            index=None # Başlangıçta hiçbiri seçili görünmesin (Dashboard aktif olsun diye)
-        )
+        st.radio("Service Nav", list(services_map.keys()), format_func=lambda x: services_map[x], key="nav_services", on_change=update_page, args=("nav_services",), label_visibility="collapsed", index=None)
 
         # --- GRUP 3: ARAÇLAR ---
         st.markdown('<div class="menu-label" style="font-size:10px; color:#666; letter-spacing:1px; margin-top:20px; margin-bottom:5px;">ARAÇLAR</div>', unsafe_allow_html=True)
-        
         tools_map = {
-            "Dokümanlar": "📂 Dijital Arşiv",
-            "Yapılacaklar": "✅ Görevler",
-            "Formlar": "📝 Formlar",
-            "Planlar": "💎 Stratejik Planlar"
+            "Dokümanlar": "📂 Dijital Arşiv", "Yapılacaklar": "✅ Görevler",
+            "Formlar": "📝 Formlar", "Planlar": "💎 Stratejik Planlar"
         }
-        
-        st.radio(
-            "Tool Nav",
-            list(tools_map.keys()),
-            format_func=lambda x: tools_map[x],
-            key="nav_tools",
-            on_change=update_page, args=("nav_tools",),
-            label_visibility="collapsed",
-            index=None
-        )
+        st.radio("Tool Nav", list(tools_map.keys()), format_func=lambda x: tools_map[x], key="nav_tools", on_change=update_page, args=("nav_tools",), label_visibility="collapsed", index=None)
 
         # --- [EKLENDİ] YÖNETİM ---
         st.markdown("---")
@@ -129,13 +98,9 @@ def main():
     if not st.session_state.logged_in:
         login.render_login_page()
     else:
-        # Sidebar'ı çiz (Tıklamalar session_state.current_page'i günceller)
         render_sidebar()
-        
-        # Aktif sayfayı al
         page = st.session_state.current_page
         
-        # Sayfayı Render Et
         try:
             if page == "Dashboard": dashboard.render_dashboard()
             # [EKLENDİ] Admin Yönlendirmesi
@@ -158,10 +123,10 @@ def main():
             elif page == "Formlar": forms.render_forms()
             elif page == "Planlar": plan.render_plans()
             else:
-                dashboard.render_dashboard() # Hata durumunda Dashboard'a dön
+                dashboard.render_dashboard()
         except Exception as e:
             st.error(f"Sayfa Yükleme Hatası: {e}")
-            st.info("Lütfen ilgili 'views' dosyasının (örn: admin.py) oluşturulduğundan emin olun.")
+            st.info("Lütfen 'views/admin.py' dosyasını oluşturduğunuzdan emin olun.")
 
 if __name__ == "__main__":
     main()
