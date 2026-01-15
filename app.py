@@ -23,6 +23,8 @@ try:
     import logistics, inventory, plan, documents, todo, forms
     # Yeni 9 Global Hizmet
     import website, llc, seller, social, ads, automation, leadgen
+    # [YENİ] Admin Modülü
+    import admin
 except ImportError as e:
     st.error(f"⚠️ Kritik Modül Eksik: {e}. Lütfen 'views' klasöründeki tüm dosyaları oluşturduğundan emin ol.")
 
@@ -31,7 +33,7 @@ styles.load_css()
 
 # Session State Başlatma (Hafıza)
 if "logged_in" not in st.session_state: st.session_state.logged_in = False
-if "user_data" not in st.session_state: st.session_state.user_data = {}
+if "user_data" not in st.session_state: st.session_state.user_data = {'brand': 'Anatolia Home', 'name': 'Ahmet Yılmaz'} # Varsayılan veri
 if "current_page" not in st.session_state: st.session_state.current_page = "Dashboard"
 
 # --- NAVİGASYON FONKSİYONU ---
@@ -110,8 +112,14 @@ def render_sidebar():
             index=None
         )
 
+        # --- [EKLENDİ] YÖNETİM ---
+        st.markdown("---")
+        if st.button("🛡️ Admin Paneli", use_container_width=True):
+            st.session_state.current_page = "Admin"
+            st.rerun()
+
         # Footer
-        st.markdown("<div style='flex-grow: 1; height: 50px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='flex-grow: 1; height: 30px;'></div>", unsafe_allow_html=True)
         if st.button("Çıkış Yap", use_container_width=True):
             st.session_state.logged_in = False
             st.rerun()
@@ -130,6 +138,9 @@ def main():
         # Sayfayı Render Et
         try:
             if page == "Dashboard": dashboard.render_dashboard()
+            # [EKLENDİ] Admin Yönlendirmesi
+            elif page == "Admin": admin.render()
+            
             # Servisler
             elif page == "Website": website.render()
             elif page == "LLC_Legal": llc.render()
@@ -140,6 +151,7 @@ def main():
             elif page == "Ads": ads.render()
             elif page == "Automation": automation.render()
             elif page == "LeadGen": leadgen.render()
+            
             # Araçlar
             elif page == "Dokümanlar": documents.render_documents()
             elif page == "Yapılacaklar": todo.render_todo()
@@ -149,7 +161,7 @@ def main():
                 dashboard.render_dashboard() # Hata durumunda Dashboard'a dön
         except Exception as e:
             st.error(f"Sayfa Yükleme Hatası: {e}")
-            st.info("Lütfen ilgili 'views' dosyasının (örn: website.py) oluşturulduğundan ve içinin boş olmadığından emin olun.")
+            st.info("Lütfen ilgili 'views' dosyasının (örn: admin.py) oluşturulduğundan emin olun.")
 
 if __name__ == "__main__":
     main()
