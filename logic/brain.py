@@ -5,8 +5,9 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
-# --- 1. MODEL YAPILANDIRMASI (GÜNCEL) ---
-MODEL_NAME = "gemini-2.5-flash" 
+# --- 1. MODEL YAPILANDIRMASI (GÜNCEL: GEMINI 3 FLASH) ---
+# En yeni ve hızlı model: gemini-3-flash-preview
+MODEL_NAME = "gemini-3-flash-preview" 
 
 def get_client():
     """
@@ -14,24 +15,30 @@ def get_client():
     Önce Streamlit secrets, sonra ortam değişkenlerini kontrol eder.
     """
     api_key = None
+    # Streamlit Cloud'da secrets.toml dosyasından okur
     if "GOOGLE_API_KEY" in st.secrets:
         api_key = st.secrets["GOOGLE_API_KEY"]
     elif "GEMINI_API_KEY" in st.secrets:
         api_key = st.secrets["GEMINI_API_KEY"]
+    # Lokal ortam değişkenlerinden okur
+    elif "GOOGLE_API_KEY" in os.environ:
+        api_key = os.environ["GOOGLE_API_KEY"]
 
     if api_key:
-        os.environ["GOOGLE_API_KEY"] = api_key
-    
-    try:
-        return genai.Client()
-    except Exception:
-        return None
+        os.environ["GOOGLE_API_KEY"] = api_key # SDK bazen env'den okumayı tercih eder
+        try:
+            # Google GenAI v0.1+ Client Başlatma
+            return genai.Client(api_key=api_key)
+        except Exception as e:
+            print(f"Client Init Error: {e}")
+            return None
+    return None
 
 # --- 2. AI MOTORU (Çift Parametre Garantili) ---
 def get_streaming_response(messages_history, user_data):
     """
     Dashboard'dan gelen mesajları ve kullanıcı verisini alıp
-    Gemini 2.5 Flash modeline iletir ve cevabı stream eder.
+    Gemini 3 Flash modeline iletir ve cevabı stream eder.
     """
     client = get_client()
     
@@ -56,21 +63,23 @@ def get_streaming_response(messages_history, user_data):
 
     # API Kontrolü
     if not client:
-        yield "⚠️ API Anahtarı bulunamadı. Simülasyon moduna geçiliyor..."
-        yield f"\n\nSimüle Cevap: {brand} verilerini analiz ettim. Sistemler normal görünüyor ancak API bağlantısı kurulamadı."
+        yield "⚠️ API Anahtarı bulunamadı. Lütfen .streamlit/secrets.toml dosyasına GOOGLE_API_KEY ekleyin."
+        # Demo modunda olduğumuz belli olsun diye sahte bir cevap da dönebiliriz:
+        yield f"\n\n[SİMÜLASYON]: {brand} verilerini analiz ediyorum... (API Key eksik olduğu için bu bir simülasyondur)."
         return
 
-    # Canlı Cevap Üretimi
+    # Canlı Cevap Üretimi (Gemini 3 Flash)
     try:
+        # v0.1 SDK'sında generate_content methodu kullanılır
         response = client.models.generate_content_stream(
-            model=MODEL_NAME,
+            model=MODEL_NAME, # gemini-3-flash-preview
             contents=full_prompt
         )
         for chunk in response:
             if chunk.text:
                 yield chunk.text
     except Exception as e:
-        yield f"❌ Bağlantı Hatası: {str(e)}"
+        yield f"❌ Bağlantı Hatası ({MODEL_NAME}): {str(e)}"
 
 # --- 3. GÖRSELLEŞTİRME FABRİKASI (Silicon Valley Style) ---
 
