@@ -17,34 +17,28 @@ st.set_page_config(
 # 3. MODÜLLERİ YÜKLE
 try:
     import styles, login, dashboard
-    # Operasyonel Araçlar (YENİ: Birleştirilmiş Modül)
+    # Operasyonel Araçlar
     import operations, logistics, inventory, plan
-    # Yeni 9 Global Hizmet
+    # Servisler
     import website, llc, seller, social, ads, automation, leadgen
-    # Admin Modülü (CORTEX AI)
+    # Admin
     import admin
 except ImportError as e:
-    st.error(f"⚠️ Kritik Modül Eksik: {e}. Lütfen 'views' klasöründeki tüm dosyaları oluşturduğundan emin ol.")
+    st.error(f"⚠️ Kritik Modül Eksik: {e}")
 
-# 4. GLOBAL CSS VE STATE YÖNETİMİ
+# 4. GLOBAL CSS VE STATE
 styles.load_css()
 
-# Session State Başlatma
 if "logged_in" not in st.session_state: st.session_state.logged_in = False
-
-if "user_data" not in st.session_state: 
-    st.session_state.user_data = {} 
+if "user_data" not in st.session_state: st.session_state.user_data = {} 
+if "current_page" not in st.session_state: st.session_state.current_page = "Dashboard"
 
 # CORTEX AI İçin Global Veritabanı
 if "users_db" not in st.session_state:
     st.session_state.users_db = [
         {"id": 101, "name": "Ahmet Yılmaz", "role": "editor", "status": "Active", "mrr": 1200},
-        {"id": 102, "name": "Ayşe Demir", "role": "viewer", "status": "Active", "mrr": 850},
-        {"id": 103, "name": "Mehmet Kaya", "role": "editor", "status": "Pending", "mrr": 0},
         {"id": 104, "name": "John Doe", "role": "admin", "status": "Active", "mrr": 5000},
     ]
-
-if "current_page" not in st.session_state: st.session_state.current_page = "Dashboard"
 
 # --- NAVİGASYON FONKSİYONU ---
 def update_page(key):
@@ -54,7 +48,7 @@ def update_page(key):
 def render_sidebar():
     with st.sidebar:
         user_brand = st.session_state.user_data.get('brand', 'ARTIS AI')
-        user_role = st.session_state.user_data.get('role', 'user') # Yetki kontrolü
+        user_role = st.session_state.user_data.get('role', 'user')
         
         # Marka Kimliği
         st.markdown(f"""
@@ -64,8 +58,14 @@ def render_sidebar():
             </div>
         """, unsafe_allow_html=True)
 
+        # Mevcut sayfayı al
+        curr = st.session_state.current_page
+
         # --- GRUP 1: ANA KOMUTA ---
-        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; letter-spacing:1px; margin-bottom:5px;">ANA KOMUTA</div>', unsafe_allow_html=True)
+        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; margin-bottom:5px;">ANA KOMUTA</div>', unsafe_allow_html=True)
+        
+        # Seçili index mantığı
+        idx_main = 0 if curr == "Dashboard" else None
         
         st.radio(
             "Main Nav", 
@@ -73,11 +73,12 @@ def render_sidebar():
             format_func=lambda x: "📊 Komuta Merkezi",
             key="nav_main",
             on_change=update_page, args=("nav_main",),
-            label_visibility="collapsed"
+            label_visibility="collapsed",
+            index=idx_main
         )
 
-        # --- GRUP 2: 9 ANA HİZMET ---
-        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; letter-spacing:1px; margin-top:20px; margin-bottom:5px;">GLOBAL SERVİSLER</div>', unsafe_allow_html=True)
+        # --- GRUP 2: SERVİSLER ---
+        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; margin-top:20px; margin-bottom:5px;">GLOBAL SERVİSLER</div>', unsafe_allow_html=True)
         
         services_map = {
             "Website": "🌐 Web Sitesi & UX",
@@ -91,35 +92,42 @@ def render_sidebar():
             "LeadGen": "🚀 AI Lead Gen"
         }
         
+        # Servisler listesinde mi?
+        svc_keys = list(services_map.keys())
+        idx_svc = svc_keys.index(curr) if curr in svc_keys else None
+        
         st.radio(
             "Service Nav",
-            list(services_map.keys()),
+            svc_keys,
             format_func=lambda x: services_map[x],
             key="nav_services", 
             on_change=update_page, args=("nav_services",),
             label_visibility="collapsed",
-            index=None 
+            index=idx_svc 
         )
 
-        # --- GRUP 3: ARAÇLAR (GÜNCELLENDİ) ---
-        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; letter-spacing:1px; margin-top:20px; margin-bottom:5px;">ARAÇLAR</div>', unsafe_allow_html=True)
+        # --- GRUP 3: ARAÇLAR ---
+        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; margin-top:20px; margin-bottom:5px;">ARAÇLAR</div>', unsafe_allow_html=True)
         
         tools_map = {
-            "Operasyonlar": "🛠️ Operasyon Merkezi", # Tek çatı altında toplandı
+            "Operasyonlar": "🛠️ Operasyon Merkezi",
             "Planlar": "💎 Stratejik Planlar"
         }
         
+        tools_keys = list(tools_map.keys())
+        idx_tool = tools_keys.index(curr) if curr in tools_keys else None
+        
         st.radio(
             "Tool Nav",
-            list(tools_map.keys()),
+            tools_keys,
             format_func=lambda x: tools_map[x],
             key="nav_tools",
             on_change=update_page, args=("nav_tools",),
             label_visibility="collapsed",
-            index=None
+            index=idx_tool
         )
 
-        # --- CORTEX YÖNETİM (SADECE ADMIN) ---
+        # --- ADMIN ---
         if user_role == 'admin':
             st.markdown("---")
             if st.button("🧠 CORTEX (Super AI)", use_container_width=True):
@@ -132,17 +140,19 @@ def render_sidebar():
             st.session_state.logged_in = False
             st.rerun()
 
-# 6. ROUTER (ANA YÖNLENDİRİCİ)
+# 6. ROUTER
 def main():
     if not st.session_state.logged_in:
         login.render_login_page()
     else:
+        # Önce render sidebar, çünkü state güncellenebilir
         render_sidebar()
+        
+        # Sonra sayfayı göster
         page = st.session_state.current_page
         
         try:
             if page == "Dashboard": dashboard.render_dashboard()
-            # Admin/Cortex Yönlendirmesi
             elif page == "Admin": admin.render()
             
             # Servisler
@@ -156,14 +166,13 @@ def main():
             elif page == "Automation": automation.render()
             elif page == "LeadGen": leadgen.render()
             
-            # Araçlar (GÜNCELLENDİ)
-            elif page == "Operasyonlar": operations.render_operations() # YENİ MODÜL
+            # Araçlar
+            elif page == "Operasyonlar": operations.render_operations()
             elif page == "Planlar": plan.render_plans()
             else:
                 dashboard.render_dashboard() 
         except Exception as e:
-            st.error(f"Sayfa Yükleme Hatası: {e}")
-            st.info("Lütfen ilgili 'views' dosyasının (örn: operations.py) oluşturulduğundan emin olun.")
+            st.error(f"Sayfa Yükleme Hatası ({page}): {e}")
 
 if __name__ == "__main__":
     main()
