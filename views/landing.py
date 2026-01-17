@@ -1,141 +1,124 @@
 import streamlit as st
 
 def render_landing():
-    # --- CSS: MANUS TARZI TEMİZ ARAYÜZ ---
+    # --- CSS: MANUS STYLE DARK THEME ---
     st.markdown("""
         <style>
-        /* Ana arka planı temizle */
         .stApp {
-            background-color: #0e0e0e; /* Manus Dark Theme */
-            background-image: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #0e0e0e 50%);
+            background-color: #000000;
+            background-image: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #000000 60%);
         }
         
-        /* Header Gizle */
-        header {visibility: hidden;}
+        header, footer { visibility: hidden; }
         
-        /* Ortalanmış İçerik */
         .landing-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding-top: 10vh;
+            padding-top: 15vh;
             text-align: center;
         }
         
-        /* Başlık */
         .landing-title {
-            font-size: 60px;
+            font-size: 56px;
             font-weight: 400;
             color: #e5e5e5;
-            font-family: 'Times New Roman', serif; /* Manus benzeri serif font */
+            font-family: "Times New Roman", serif;
             margin-bottom: 40px;
+            letter-spacing: -1px;
         }
         
-        /* Öneri Çipleri (Butonlar) */
-        .suggestion-btn {
-            background-color: transparent;
-            border: 1px solid #333;
-            color: #888;
-            border-radius: 20px;
-            padding: 8px 16px;
-            font-size: 14px;
-            margin: 0 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-block;
-        }
-        .suggestion-btn:hover {
-            border-color: #d4af37;
-            color: #d4af37;
-        }
-
-        /* Input Alanı Özelleştirme */
+        /* Input Field Styling */
         .stTextInput input {
-            background-color: #1a1a1a !important;
+            background-color: #111 !important;
             border: 1px solid #333 !important;
             color: white !important;
             border-radius: 24px !important;
-            padding: 15px 20px !important;
-            font-size: 16px !important;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            padding: 25px 25px !important;
+            font-size: 18px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
         }
         .stTextInput input:focus {
             border-color: #d4af37 !important;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2) !important;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.15) !important;
         }
         
-        /* Navigasyon Barı */
+        /* Suggestion Buttons */
+        .suggestion-btn {
+            display: inline-block;
+            background: transparent;
+            border: 1px solid #333;
+            color: #888;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .suggestion-btn:hover {
+            border-color: #666;
+            color: #eee;
+        }
+
+        /* Navbar */
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 20px 40px;
-            width: 100%;
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
         }
-        .nav-logo { font-size: 20px; font-weight: bold; color: white; }
-        .nav-link { color: #888; text-decoration: none; margin-left: 20px; font-size: 14px; cursor: pointer;}
-        .nav-link:hover { color: white; }
-        
         </style>
     """, unsafe_allow_html=True)
 
     # --- NAVBAR ---
     c1, c2 = st.columns([1, 1])
     with c1:
-        st.markdown('<div class="nav-logo">ARTIS</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:24px; font-weight:bold; color:white;">ARTIS</div>', unsafe_allow_html=True)
     with c2:
-        # Sağ üst menü (Login/Register)
-        # Buradaki butonlar app.py'deki state'i değiştirecek
-        col_space, col_login, col_reg = st.columns([6, 1, 1])
+        # Right side buttons
+        col_spacer, col_login, col_reg = st.columns([6, 1, 1])
         with col_login:
-            if st.button("Giriş Yap", type="secondary"):
+            if st.button("Giriş", type="secondary"):
                 st.session_state.page = "Login"
                 st.rerun()
         with col_reg:
             if st.button("Kaydol", type="primary"):
-                st.session_state.page = "Login" # Kayıt da login sayfasına atsın şimdilik
+                st.session_state.page = "Login"
                 st.rerun()
 
-    # --- ANA İÇERİK ---
+    # --- MAIN CONTENT ---
     st.markdown('<div class="landing-container"><div class="landing-title">Sizin için ne yapabilirim?</div></div>', unsafe_allow_html=True)
 
-    # Arama Çubuğu (Giriş Noktası)
-    # Form kullanarak Enter tuşunu yakalıyoruz
+    # Search Bar Form
     with st.form("landing_search", border=False):
         c_space1, c_input, c_space2 = st.columns([1, 2, 1])
         with c_input:
-            prompt = st.text_input("Prompt", placeholder="Bir şeyler yazın...", label_visibility="collapsed")
+            prompt = st.text_input("Prompt", placeholder="Lojistik maliyetlerini analiz et...", label_visibility="collapsed")
             
-            # Altın Renkli Submit Butonu (İkon gibi)
-            submit = st.form_submit_button("BAŞLA", use_container_width=True)
+            # Invisible submit button logic
+            submitted = st.form_submit_button("Başla", use_container_width=True)
 
-    # Öneri Butonları (Dummy)
+    # Suggestions
     st.markdown("""
-        <div style="text-align:center; margin-top: 20px;">
-            <span class="suggestion-btn">📄 Gümrük Raporu Hazırla</span>
-            <span class="suggestion-btn">📦 Lojistik Maliyeti Hesapla</span>
+        <div style="text-align:center; margin-top:20px;">
+            <span class="suggestion-btn">📄 Gümrük Raporu Oluştur</span>
+            <span class="suggestion-btn">📦 Stok Tahmini Yap</span>
             <span class="suggestion-btn">📈 ABD Pazar Analizi</span>
         </div>
     """, unsafe_allow_html=True)
 
-    # Alt Bilgi
-    st.markdown("""
-        <div style="text-align:center; margin-top: 100px; color: #444; font-size: 12px;">
-            ARTIS AI v2.4 | Global Operations Engine
-        </div>
-    """, unsafe_allow_html=True)
+    # Footer
+    st.markdown('<div style="position:fixed; bottom:20px; width:100%; text-align:center; color:#444; font-size:12px;">ARTIS Global Operations Engine</div>', unsafe_allow_html=True)
 
-    # --- AKSİYON MANTIĞI ---
-    if submit and prompt:
-        # Kullanıcı bir şey yazdı!
-        # Promptu hafızaya at ve Login'e yönlendir
+    # Logic: Redirect to Login on Submit
+    if submitted and prompt:
         st.session_state.pending_prompt = prompt
         st.session_state.page = "Login"
         st.rerun()
-
-if __name__ == "__main__":
-    render_landing()
