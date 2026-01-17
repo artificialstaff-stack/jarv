@@ -1,19 +1,17 @@
 import streamlit as st
 
 def render_landing():
-    # --- MANUS / PERPLEXITY STYLE CSS ---
+    # --- PIXEL PERFECT MANUS CSS ---
     st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap');
 
-        /* 1. GENEL AYARLAR (Light Theme) */
+        /* 1. TEMEL AYARLAR */
         .stApp {
-            background-color: #F9F9F9; /* Manus arkaplan rengi */
-            color: #000000;
+            background-color: #F9F9F9;
+            color: #111111;
             font-family: 'Inter', sans-serif;
         }
-        
-        /* Streamlit varsayılanlarını temizle */
         .block-container {
             padding-top: 0 !important;
             padding-bottom: 0 !important;
@@ -21,291 +19,311 @@ def render_landing():
         }
         header, footer { display: none !important; }
 
-        /* 2. NAVBAR (ÜST MENÜ) */
+        /* 2. NAVBAR (ÜST MENÜ) - Flexbox ile Tam Hizalama */
         .navbar-container {
+            width: 100%;
+            padding: 16px 48px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 18px 40px;
-            background-color: transparent;
+            background: transparent;
             position: sticky;
             top: 0;
-            z-index: 1000;
+            z-index: 100;
         }
         
+        /* Logo ve Linkler */
         .nav-left {
             display: flex;
             align-items: center;
             gap: 40px;
         }
-        
-        .nav-logo {
-            font-family: 'Times New Roman', serif; /* Serif Logo */
+        .logo-text {
+            font-family: 'Newsreader', serif; /* Manus benzeri şık font */
             font-size: 26px;
             font-weight: 600;
             color: #000;
             letter-spacing: -0.5px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            text-decoration: none;
         }
-        
-        .nav-links {
+        .nav-items {
             display: flex;
             gap: 24px;
         }
-        .nav-link {
+        .nav-item {
             font-size: 14px;
             color: #555;
             text-decoration: none;
             font-weight: 500;
             transition: color 0.2s;
         }
-        .nav-link:hover { color: #000; }
+        .nav-item:hover { color: #000; }
 
-        /* 3. HERO (BAŞLIK ALANI) */
-        .hero-section {
+        /* Sağ Taraftaki Butonlar (Streamlit Butonlarını Özelleştirme) */
+        /* Bu butonlar kolonların içinde render edilecek, onlara özel stiller */
+        button[key="login_btn"], button[key="signup_btn"] {
+            font-family: 'Inter', sans-serif !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            line-height: 1 !important;
+            height: 36px !important;
+            min-height: 0px !important;
+            margin: 0 !important;
+        }
+        
+        /* Giriş Yap (Siyah) */
+        button[key="login_btn"] {
+            background-color: #111 !important;
+            color: #fff !important;
+            border: 1px solid #111 !important;
+        }
+        button[key="login_btn"]:hover {
+            background-color: #333 !important;
+            border-color: #333 !important;
+        }
+
+        /* Kaydol (Beyaz/Gri) */
+        button[key="signup_btn"] {
+            background-color: #fff !important;
+            color: #111 !important;
+            border: 1px solid #E0E0E0 !important;
+        }
+        button[key="signup_btn"]:hover {
+            background-color: #F5F5F5 !important;
+            border-color: #D0D0D0 !important;
+        }
+
+        /* 3. HERO (BAŞLIK) */
+        .hero-wrapper {
+            margin-top: 10vh;
+            margin-bottom: 40px;
+            text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 8vh; /* Görseldeki boşluk */
-            text-align: center;
         }
-        
-        .hero-title {
-            font-family: 'Times New Roman', serif; /* Manus Başlık Fontu */
+        .hero-heading {
+            font-family: 'Newsreader', serif;
             font-size: 64px;
-            color: #111;
             font-weight: 400;
-            letter-spacing: -1.5px;
-            margin-bottom: 40px;
+            color: #111;
+            letter-spacing: -1.2px;
+            line-height: 1.1;
         }
 
-        /* 4. ARAMA ÇUBUĞU (EN ÖNEMLİ KISIM) */
+        /* 4. SEARCH INPUT (HAP ŞEKLİ) */
+        /* Konteyner */
         div[data-testid="stForm"] {
-            width: 100%;
-            max-width: 750px; /* Genişlik görseldeki ile aynı */
+            max-width: 720px;
             margin: 0 auto;
             position: relative;
         }
-        
+
+        /* Input Alanı */
         div[data-testid="stTextInput"] input {
+            height: 64px !important; /* Yükseklik */
+            border-radius: 32px !important; /* Tam yuvarlak köşeler */
+            border: 1px solid #E0E0E0 !important;
             background-color: #FFFFFF !important;
-            border: 1px solid #E5E5E5 !important;
-            color: #000 !important;
-            border-radius: 20px !important; /* Köşeler */
-            padding: 22px 60px 22px 50px !important; /* İkonlar için boşluk */
-            font-size: 17px !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-            transition: all 0.2s;
+            color: #111 !important;
+            padding-left: 56px !important; /* Soldaki + ikonu için boşluk */
+            padding-right: 60px !important; /* Sağdaki buton için boşluk */
+            font-size: 18px !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            transition: all 0.2s ease;
         }
         div[data-testid="stTextInput"] input:focus {
-            border-color: #DDD !important;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-color: #CCC !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            outline: none !important;
         }
-        
-        /* Sol Taraftaki (+) İkonu (Pseudo-element inputa eklenemediği için CSS hilesi) */
-        /* Streamlit inputunun başına ikon koymak zor olduğu için placeholder kullanıyoruz veya dışarıdan div ekliyoruz.
-           Burada görsel sadelik için inputu temiz bırakıyoruz. */
+        div[data-testid="stTextInput"] input::placeholder {
+            color: #888;
+            opacity: 1;
+        }
 
-        /* SAĞDAKİ SİYAH OK BUTONU (Submit) */
+        /* SOL "+" İKONU (CSS Fake Element) */
+        /* Inputun kapsayıcısına relative verip içine ikon koyuyoruz */
+        div[data-testid="stTextInput"] {
+            position: relative;
+        }
+        div[data-testid="stTextInput"]::after {
+            content: '+';
+            position: absolute;
+            left: 24px;
+            top: 50%;
+            transform: translateY(-55%);
+            font-size: 24px;
+            color: #999;
+            font-weight: 300;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* SAĞ "OK" BUTONU (Submit) */
         div[data-testid="stFormSubmitButton"] button {
             position: absolute;
-            top: -62px;
-            right: 12px;
-            background-color: #000000 !important; /* Simsiyah */
-            color: white !important;
+            top: -56px; /* Inputun içine hizala (yüksekliğe göre ayarla) */
+            right: 8px;
+            width: 48px !important;
+            height: 48px !important;
             border-radius: 50% !important;
-            width: 36px !important;
-            height: 36px !important;
+            background-color: #000 !important;
+            color: #FFF !important;
             border: none !important;
             padding: 0 !important;
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 10;
             transition: transform 0.2s;
-            z-index: 5;
         }
         div[data-testid="stFormSubmitButton"] button:hover {
-            transform: scale(1.1);
+            transform: scale(1.05);
             background-color: #222 !important;
         }
-        div[data-testid="stFormSubmitButton"] button::after {
-            content: '↑'; /* Yukarı Ok */
-            font-size: 18px;
-            font-weight: bold;
-        }
-        /* "GO" yazısını gizle */
+        /* Butonun içindeki p etiketini gizle */
         div[data-testid="stFormSubmitButton"] button p { display: none; }
+        /* Ok ikonu */
+        div[data-testid="stFormSubmitButton"] button::before {
+            content: '↑';
+            font-size: 20px;
+            font-weight: 500;
+        }
 
-
-        /* 5. KARTLAR (GRID YAPISI) */
-        .section-label {
-            max-width: 750px;
-            margin: 60px auto 15px auto;
-            text-align: left;
+        /* 5. ÖNERİ KARTLARI */
+        .label-text {
+            max-width: 720px;
+            margin: 60px auto 16px auto;
+            padding-left: 4px;
             font-size: 14px;
             font-weight: 600;
             color: #111;
-            padding-left: 5px;
         }
 
-        /* Streamlit butonlarını KART gibi gösterme */
-        div.stButton > button {
+        /* Butonları Karta Dönüştürme */
+        .stButton button {
             width: 100%;
             background-color: #FFFFFF !important;
             border: 1px solid #EAEAEA !important;
             border-radius: 12px !important;
-            padding: 15px 20px !important;
-            text-align: left !important;
+            padding: 16px 20px !important;
             height: auto !important;
-            min-height: 80px !important;
+            min-height: 84px !important;
             display: flex !important;
             flex-direction: column !important;
             align-items: flex-start !important;
-            box-shadow: none !important;
-            transition: all 0.2s;
+            justify-content: center !important;
+            text-align: left !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
+            transition: all 0.2s ease !important;
         }
-        div.stButton > button:hover {
+        .stButton button:hover {
             border-color: #CCC !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
         }
-        div.stButton > button p {
-            text-align: left;
-            line-height: 1.4;
-            color: #333;
+        
+        /* Buton İçeriği (Markdown ile yazılanlar) */
+        .stButton button p {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #111;
+            line-height: 1.5;
         }
-
-        /* Navbar Butonları Özel Stil */
-        /* Giriş Yap (Siyah) */
-        button[key="login_btn"] {
-            background-color: #000 !important;
-            color: #fff !important;
-            border-radius: 8px !important;
-            padding: 6px 16px !important;
-            font-size: 13px !important;
-            min-height: 0 !important;
-            height: 36px !important;
-            border: none !important;
-        }
-        /* Kaydol (Beyaz) */
-        button[key="signup_btn"] {
-            background-color: #fff !important;
-            color: #000 !important;
-            border: 1px solid #E5E5E5 !important;
-            border-radius: 8px !important;
-            padding: 6px 16px !important;
-            font-size: 13px !important;
-            min-height: 0 !important;
-            height: 36px !important;
-        }
-
         </style>
     """, unsafe_allow_html=True)
 
-    # --- NAVBAR (HTML + Streamlit Columns) ---
-    # Navbar'ı HTML ve Streamlit kolonlarını karıştırarak yapıyoruz ki butonlar çalışsın.
+    # --- NAVBAR LAYOUT (MANUEL KOLONLAMA) ---
+    # Streamlit kolonları kullanarak logoyu sola, butonları sağa itiyoruz.
     
-    # 1. Logo ve Linkler (Sol)
-    # 2. Butonlar (Sağ)
+    col_nav_1, col_nav_spacer, col_nav_2 = st.columns([2, 5, 1.5])
     
-    col_nav_left, col_nav_spacer, col_btn1, col_btn2 = st.columns([6, 4, 0.8, 0.8])
-    
-    with col_nav_left:
+    with col_nav_1:
         st.markdown("""
         <div class="nav-left">
-            <div class="nav-logo">
-                <img src="https://cdn-icons-png.flaticon.com/512/16020/16020054.png" width="24" style="opacity:0.8"/> ARTIS
-            </div>
-            <div class="nav-links">
-                <a class="nav-link">Özellikler</a>
-                <a class="nav-link">Kaynaklar</a>
-                <a class="nav-link">Fiyatlandırma</a>
+            <a href="#" class="logo-text">⚡ ARTIS</a>
+            <div class="nav-items" style="margin-left:20px;">
+                <a href="#" class="nav-item">Özellikler</a>
+                <a href="#" class="nav-item">Kaynaklar</a>
+                <a href="#" class="nav-item">Fiyatlandırma</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
-
-    with col_btn1:
-        # "Giriş Yap" -> Siyah Buton (CSS ile key="login_btn" hedeflendi)
-        if st.button("Giriş yap", key="login_btn"):
-            st.session_state.page = "Login"
-            st.rerun()
-            
-    with col_btn2:
-        # "Kaydol" -> Beyaz Buton (CSS ile key="signup_btn" hedeflendi)
-        if st.button("Kaydol", key="signup_btn"):
-            st.session_state.page = "Login"
-            st.rerun()
+        
+    with col_nav_2:
+        # Sağ taraftaki butonları yan yana koymak için alt kolonlar
+        c_btn_1, c_btn_2 = st.columns(2)
+        with c_btn_1:
+            if st.button("Giriş yap", key="login_btn"):
+                st.session_state.page = "Login"
+                st.rerun()
+        with c_btn_2:
+            if st.button("Kaydol", key="signup_btn"):
+                st.session_state.page = "Login"
+                st.rerun()
 
     # --- HERO AREA ---
-    st.markdown('<div class="hero-section"><div class="hero-title">Sizin için ne yapabilirim?</div></div>', unsafe_allow_html=True)
+    st.markdown("""
+        <div class="hero-wrapper">
+            <h1 class="hero-heading">Sizin için ne yapabilirim?</h1>
+        </div>
+    """, unsafe_allow_html=True)
 
-    # --- SEARCH BAR ---
-    with st.form("landing_search", border=False):
-        # Inputu ortalamak için boşluk kolonları
+    # --- SEARCH FORM ---
+    with st.form("search_form", border=False):
+        # Ortalamak için: [Boşluk] [Input] [Boşluk]
         c_l, c_center, c_r = st.columns([1, 6, 1])
         with c_center:
-            # Placeholder başına boşluk koyarak ikona yer açıyoruz
-            prompt = st.text_input("search", placeholder="      Lojistik maliyetlerini analiz et...", label_visibility="collapsed")
-            # CSS ile Inputun içine taşınan Siyah Yuvarlak Buton
-            submit = st.form_submit_button("GO")
-            
-            # "+" İkonu (Inputun içinde gibi görünen sol ikon)
-            st.markdown("""
-            <style>
-            /* Inputun solundaki + ikonunu simüle eden CSS */
-            div[data-testid="stTextInput"]::before {
-                content: '+';
-                position: absolute;
-                left: 20px;
-                top: 50%;
-                transform: translateY(-50%);
-                font-size: 20px;
-                color: #999;
-                z-index: 2;
-                pointer-events: none;
-            }
-            </style>
-            """, unsafe_allow_html=True)
+            # Placeholder başına boşluk yok, padding-left CSS ile halledildi
+            prompt = st.text_input("prompt", placeholder="Lojistik maliyetlerini analiz et...", label_visibility="collapsed")
+            submit = st.form_submit_button("Submit") # Yazısı CSS ile gizlendi
 
-    # --- ÖNERİ KARTLARI ---
-    st.markdown('<div class="section-label">Ne inşa ediyorsunuz?</div>', unsafe_allow_html=True)
+    # --- SUGGESTIONS ---
+    st.markdown('<div class="label-text">Ne inşa ediyorsunuz?</div>', unsafe_allow_html=True)
 
-    # Grid Yapısı: 750px genişliğinde, ortalanmış
-    col_grid_main = st.columns([1, 6, 1])[1] # Ortadaki kolonu al
+    # Grid (Ortalanmış)
+    col_grid = st.columns([1, 6, 1])[1]
     
-    with col_grid_main:
-        c_row1_1, c_row1_2 = st.columns(2)
+    with col_grid:
+        r1_c1, r1_c2 = st.columns(2)
         
-        with c_row1_1:
+        with r1_c1:
             # Kart 1
-            if st.button("📦 **Lojistik Maliyet Analizi**\n\nTürkiye'den ABD depolarına en uygun rota ve maliyet hesaplaması.", use_container_width=True):
+            if st.button("📦 **Lojistik Maliyet Analizi**\n\nTürkiye'den ABD'ye en uygun rota ve depo maliyeti hesaplaması.", use_container_width=True):
                 st.session_state.pending_prompt = "Lojistik maliyet analizi yap"
                 st.session_state.page = "Login"
                 st.rerun()
-        
-        with c_row1_2:
+
+        with r1_c2:
             # Kart 2
-            if st.button("⚖️ **Gümrük Mevzuatı**\n\nGTIP koduna göre vergi oranları, belge listesi ve yasal gereklilikler.", use_container_width=True):
+            if st.button("⚖️ **Gümrük Mevzuatı**\n\nGTIP koduna göre vergi oranları ve gerekli belge listesi.", use_container_width=True):
                 st.session_state.pending_prompt = "Gümrük mevzuatı kontrolü"
                 st.session_state.page = "Login"
                 st.rerun()
 
-        # İkinci Satır
-        c_row2_1, c_row2_2 = st.columns(2)
-        with c_row2_1:
-            if st.button("📈 **Rakip Pazar Analizi**\n\nAmazon'daki rakiplerin fiyat, stok ve yorum stratejilerini analiz et.", use_container_width=True):
+        r2_c1, r2_c2 = st.columns(2)
+        
+        with r2_c1:
+            # Kart 3
+            if st.button("📈 **Rakip Pazar Analizi**\n\nAmazon'daki rakiplerin fiyat ve stok stratejilerini analiz et.", use_container_width=True):
                 st.session_state.pending_prompt = "Rakip pazar analizi yap"
                 st.session_state.page = "Login"
                 st.rerun()
-        with c_row2_2:
-            if st.button("🤖 **Otomasyon Kurulumu**\n\nSiparişten teslimata %100 otonom iş akışı oluştur ve entegre et.", use_container_width=True):
+
+        with r2_c2:
+            # Kart 4
+            if st.button("🤖 **Otomasyon Kurulumu**\n\nSiparişten teslimata %100 otonom iş akışı oluştur.", use_container_width=True):
                 st.session_state.pending_prompt = "Otomasyon kurulumu başlat"
                 st.session_state.page = "Login"
                 st.rerun()
 
-    # --- LOGIC ---
+    # --- ACTION ---
     if submit and prompt:
         st.session_state.pending_prompt = prompt
         st.session_state.page = "Login"
