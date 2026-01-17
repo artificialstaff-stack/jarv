@@ -72,7 +72,7 @@ def render_dashboard():
         if prompt := st.chat_input("Talimat verin..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             
-            # ZEKİ MOD DEĞİŞTİRİCİ
+            # 1. KULLANICI GİRDİSİNE GÖRE MOD DEĞİŞTİRME (Hızlı Tepki)
             p_low = prompt.lower()
             if any(x in p_low for x in ["lojistik", "kargo"]): st.session_state.dashboard_mode = "logistics"
             elif any(x in p_low for x in ["stok", "depo", "ürün"]): st.session_state.dashboard_mode = "inventory"
@@ -84,20 +84,43 @@ def render_dashboard():
             
             st.rerun()
 
-    # ASİSTAN CEVABI (Stream)
+    # ASİSTAN CEVABI (Stream ve AI Cevabına Göre Mod Değiştirme)
     if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
         with chat_cont:
             with st.chat_message("assistant"):
                 ph = st.empty()
                 full_resp = ""
-                # Brain'den stream cevap al (logic/brain.py dosyasının var olduğundan emin olun)
+                # Brain'den stream cevap al
                 try:
+                    current_mode_triggered = False # Döngüde sürekli rerun yapmamak için bayrak
+                    
                     for chunk in brain.get_streaming_response(st.session_state.messages, user):
                         full_resp += chunk
                         ph.markdown(full_resp + "▌")
+                        
+                        # 2. AI CEVABINA GÖRE MOD DEĞİŞTİRME (Dinamik)
+                        # AI cevabının içinde geçen kelimelere bakar.
+                        # Eğer mod henüz değişmediyse ve anahtar kelime geçtiyse sayfayı yeniler.
+                        if not current_mode_triggered:
+                            resp_low = full_resp.lower()
+                            new_mode = None
+                            
+                            if "lojistik" in resp_low or "kargo" in resp_low: new_mode = "logistics"
+                            elif "stok" in resp_low or "depo" in resp_low: new_mode = "inventory"
+                            elif "finans" in resp_low or "ciro" in resp_low: new_mode = "finance"
+                            elif "belge" in resp_low or "doküman" in resp_low: new_mode = "documents"
+                            
+                            # Eğer yeni bir mod algılandıysa ve mevcut moddan farklıysa
+                            if new_mode and new_mode != st.session_state.dashboard_mode:
+                                st.session_state.dashboard_mode = new_mode
+                                current_mode_triggered = True # Bir kere tetikle
+                                st.rerun() # Sağ tarafı güncellemek için sayfayı yenile
+                        
                         time.sleep(0.01)
+                    
                     ph.markdown(full_resp)
                     st.session_state.messages.append({"role": "assistant", "content": full_resp})
+                
                 except Exception as e:
                     st.error(f"AI Yanıt Hatası: {e}")
 
