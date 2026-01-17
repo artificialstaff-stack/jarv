@@ -3,247 +3,205 @@ import time
 import random
 
 # ==============================================================================
-# 1. TEMEL AYARLAR (EN BAŞTA)
+# 1. TEMEL AYARLAR
 # ==============================================================================
-try:
-    st.set_page_config(page_title="ARTIS Login", layout="wide", initial_sidebar_state="collapsed")
-except:
-    pass
+st.set_page_config(page_title="ARTIS Login", layout="wide", initial_sidebar_state="collapsed")
 
 # ==============================================================================
-# 2. VERİTABANI (MOCK)
+# 2. İÇERİK HAVUZU (GTA STYLE)
 # ==============================================================================
-USERS = {
-    "admin": {"pass": "admin", "name": "Yönetici", "role": "admin"},
-    "demo": {"pass": "1234", "name": "Demo User", "role": "user"}
-}
+def get_gta_assets():
+    # Yüksek kaliteli, koyu temalı arka planlar
+    backgrounds = [
+        "https://images.unsplash.com/photo-1535868463750-c78d9543614f?q=80&w=2076&auto=format&fit=crop", # Cyberpunk City
+        "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop", # Tech Room
+        "https://images.unsplash.com/photo-1519608487953-e999c9dc296f?q=80&w=2070&auto=format&fit=crop", # Dark Mist
+        "https://images.unsplash.com/photo-1614064641938-3e821efd8536?q=80&w=2070&auto=format&fit=crop"  # Abstract Blue
+    ]
+    
+    # Kayan yazılar
+    tips = [
+        {"h": "ARTIS INTELLIGENCE", "t": "Yapay zeka motoru iş süreçlerinizi %40 hızlandırır."},
+        {"h": "GLOBAL CONNECT", "t": "Dünyanın her yerinden güvenli ve şifreli erişim."},
+        {"h": "VERİ GÜVENLİĞİ", "t": "Tüm operasyon verileriniz uçtan uca şifrelenmektedir."},
+        {"h": "OPERASYON YÖNETİMİ", "t": "Tek panelden tüm lojistik ağını kontrol edin."}
+    ]
+    return random.choice(backgrounds), random.choice(tips)
 
 # ==============================================================================
-# 3. CSS "RESET" & TASARIM (AGRESİF STİL)
+# 3. CSS (BÜYÜ YAPIYORUZ - OVERLAY TEKNİĞİ)
 # ==============================================================================
-def load_css(bg_url):
+def inject_custom_css(bg_url):
     st.markdown(f"""
     <style>
-        /* --- A. SAYFA YAPISINI SIFIRLA (SCROLL ENGELLEME) --- */
-        
-        /* 1. Tüm sayfa kapsayıcısını ekrana kilitle */
+        /* --- A. SAYFAYI DONDUR VE ARKA PLANI YAPIŞTIR --- */
         .stApp {{
-            overflow: hidden !important;
-            height: 100vh !important;
-            background-color: #0E1117; /* Sağ tarafın rengi */
+            background-image: url('{bg_url}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            height: 100vh;
+            overflow: hidden !important; /* Asla kaydırma çubuğu çıkmasın */
         }}
-        
-        /* 2. Streamlit'in varsayılan boşluklarını YOK ET */
+
+        /* Streamlit'in kendi boşluklarını yok et */
         .block-container {{
             padding: 0 !important;
             margin: 0 !important;
             max-width: 100% !important;
-            height: 100vh !important;
         }}
         
-        /* 3. Header, Footer ve Sidebar'ı tamamen kaldır */
-        header, footer, section[data-testid="stSidebar"] {{
-            display: none !important;
+        /* Gereksiz elementleri gizle */
+        header, footer, [data-testid="stSidebar"] {{ display: none !important; }}
+
+        /* --- B. GİRİŞ KUTUSU STİLİ (GLASSMORPHISM) --- */
+        /* Bu class'ı formun olduğu kolona vereceğiz */
+        div[data-testid="column"]:nth-of-type(2) {{
+            background: rgba(0, 0, 0, 0.6); /* Yarı saydam siyah */
+            backdrop-filter: blur(15px);     /* Arkayı bulanıklaştır */
+            -webkit-backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-top: 15vh; /* Yukarıdan biraz boşluk bırak */
         }}
 
-        /* --- B. KOLON YAPISI (SOL VE SAĞ PANEL) --- */
-        
-        /* Kolonlar arası boşluğu sil */
-        div[data-testid="column"] {{
-            padding: 0 !important;
-        }}
-        
-        div[data-testid="stHorizontalBlock"] {{
-            gap: 0 !important;
-        }}
-
-        /* --- SOL TARAF: GÖRSEL ALANI --- */
-        .split-left {{
-            height: 100vh;
-            width: 100%;
-            background-image: url('{bg_url}');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end; /* Yazıyı aşağı it */
-            padding: 60px;
-            position: relative;
-        }}
-        
-        /* Resim üzerine siyah perde */
-        .split-left::before {{
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.2));
-            z-index: 1;
-        }}
-        
-        /* Yazı Grubu */
-        .text-group {{
-            position: relative;
-            z-index: 2;
-            margin-bottom: 20px;
-        }}
-        
-        .brand-title {{
-            font-size: 80px;
-            font-weight: 900;
-            color: white;
-            line-height: 0.9;
-            margin-bottom: 20px;
-            letter-spacing: -2px;
-        }}
-        
-        .brand-subtitle {{
-            font-size: 18px;
-            color: #d0d0d0;
-            border-left: 5px solid #FF4B4B;
-            padding-left: 20px;
-            max-width: 500px;
-        }}
-
-        /* --- SAĞ TARAF: LOGIN ALANI --- */
-        /* Bu class'ı sağdaki div'e vereceğiz */
-        .login-container {{
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            background-color: #0E1117;
-            padding: 0 50px;
-        }}
-        
-        /* Giriş Kartı */
-        .auth-card {{
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-        }}
-        
-        .login-header {{
-            font-size: 32px;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 10px;
-        }}
-        
-        .login-desc {{
-            color: #6c757d;
-            margin-bottom: 40px;
-            font-size: 14px;
-        }}
-
-        /* --- INPUT ALANLARI --- */
+        /* Input Alanlarını Özelleştir */
         .stTextInput input {{
-            background-color: #161b22 !important;
-            border: 1px solid #30363d !important;
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
             color: white !important;
+            border-radius: 10px !important;
             height: 50px !important;
-            border-radius: 6px !important;
         }}
         
         .stTextInput input:focus {{
             border-color: #FF4B4B !important;
+            box-shadow: 0 0 15px rgba(255, 75, 75, 0.3) !important;
         }}
-        
-        /* Buton */
+
+        /* Giriş Butonu */
         .stButton button {{
-            background-color: #FF4B4B !important;
-            color: white !important;
+            background: linear-gradient(90deg, #FF4B4B 0%, #FF2E2E 100%) !important;
             border: none !important;
-            height: 50px !important;
+            color: white !important;
             font-weight: bold !important;
-            border-radius: 6px !important;
-            margin-top: 10px;
+            height: 50px !important;
+            border-radius: 10px !important;
+            transition: all 0.3s ease !important;
         }}
         .stButton button:hover {{
-            background-color: #ff3333 !important;
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(255, 75, 75, 0.4);
         }}
+
+        /* --- C. SOL ALTTAKİ ANİMASYONLU YAZI (SABİT POZİSYON) --- */
+        .gta-info-box {{
+            position: fixed;
+            bottom: 60px;
+            left: 60px;
+            max-width: 600px;
+            z-index: 999;
+            color: white;
+            animation: slideUpFade 1.5s ease-out forwards;
+        }}
+        
+        .gta-header {{
+            font-size: 50px;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+        }}
+        
+        .gta-text {{
+            font-size: 18px;
+            font-weight: 300;
+            color: #e0e0e0;
+            border-left: 4px solid #FF4B4B;
+            padding-left: 20px;
+            background: linear-gradient(90deg, rgba(0,0,0,0.8), transparent);
+            padding-right: 20px;
+        }}
+
+        @keyframes slideUpFade {{
+            0% {{ opacity: 0; transform: translateY(40px); }}
+            100% {{ opacity: 1; transform: translateY(0); }}
+        }}
+        
+        /* Checkbox rengi */
+        .stCheckbox span {{ color: #ccc !important; }}
 
     </style>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 4. İÇERİK YÖNETİMİ
-# ==============================================================================
-def get_content():
-    images = [
-        "https://images.unsplash.com/photo-1620641788421-7f1c338e420a?q=80&w=2070&auto=format&fit=crop", # Dark Cyber
-        "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop", # Tech Room
-        "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop"  # Matrix Code
-    ]
-    texts = [
-        {"h": "ARTIS<br>CORE", "p": "Yeni nesil operasyon yönetim sistemi."},
-        {"h": "FUTURE<br>READY", "p": "Verileriniz yapay zeka ile işleniyor."},
-        {"h": "SECURE<br>ACCESS", "p": "Uçtan uca şifreli bağlantı güvenliği."}
-    ]
-    return random.choice(images), random.choice(texts)
-
-# ==============================================================================
-# 5. ANA EKRAN (RENDER)
+# 4. GİRİŞ MANTIĞI
 # ==============================================================================
 def render_login_page():
+    # 1. Rastgele İçerik Seç
+    bg, data = get_gta_assets()
     
-    # Verileri al
-    bg_img, content = get_content()
-    load_css(bg_img)
+    # 2. CSS'i Sayfaya Enjekte Et
+    inject_custom_css(bg)
     
-    # EKRANI İKİYE BÖL (SOL %65 - SAĞ %35)
-    # gap="small" diyerek Streamlit'in varsayılan boşluğunu en aza indiriyoruz, CSS gerisini hallediyor.
-    col1, col2 = st.columns([1.7, 1], gap="small")
+    # 3. YERLEŞİM PLANI (GRID SİSTEMİ)
+    # Ekranı 3 parçaya bölüyoruz: [BOŞLUK] - [GİRİŞ KUTUSU] - [BOŞLUK]
+    # Böylece giriş kutusu sağ tarafta "yüzen" bir ada gibi duracak.
+    col1, col2, col3 = st.columns([1, 0.8, 0.2]) 
+    # Not: col2 giriş kutusunun genişliğidir. Artırırsan genişler.
     
-    # --- SOL KOLON (GÖRSEL) ---
-    with col1:
-        st.markdown(f"""
-        <div class="split-left">
-            <div class="text-group">
-                <div class="brand-title">{content['h']}</div>
-                <div class="brand-subtitle">{content['p']}</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    # --- SAĞ KOLON (FORM) ---
+    # --- ORTA/SAĞ KOLON: GİRİŞ FORMU ---
     with col2:
-        # Sağ tarafı ortalamak için boş konteyner hilesi yerine,
-        # CSS ile özelleştirilmiş bir alan yaratıyoruz.
+        st.markdown("<br>", unsafe_allow_html=True) # Üstten biraz it
         
-        st.markdown('<div class="login-container"><div class="auth-card">', unsafe_allow_html=True)
-        
-        st.markdown('<div class="login-header">Giriş Yap</div>', unsafe_allow_html=True)
-        st.markdown('<div class="login-desc">Hesabınıza erişmek için bilgilerinizi girin.</div>', unsafe_allow_html=True)
-        
-        # Form
-        username = st.text_input("Kullanıcı Adı", placeholder="admin", label_visibility="collapsed")
-        password = st.text_input("Şifre", type="password", placeholder="••••••••", label_visibility="collapsed")
-        
-        # Checkbox ve Şifremi Unuttum (Yan Yana)
-        c1, c2 = st.columns([1,1])
-        with c1:
-            st.checkbox("Beni Hatırla")
-        with c2:
-            st.markdown('<div style="text-align:right; padding-top:5px;"><a href="#" style="color:#6c757d; text-decoration:none; font-size:14px;">Şifremi Unuttum</a></div>', unsafe_allow_html=True)
+        st.markdown('<h2 style="color:white; margin-bottom:0; text-align:center;">Giriş Yap</h2>', unsafe_allow_html=True)
+        st.markdown('<p style="color:#aaa; margin-bottom:30px; text-align:center;">ARTIS Operasyon Paneli</p>', unsafe_allow_html=True)
 
-        st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+        with st.form("login_form"):
+            username = st.text_input("Kullanıcı Adı", placeholder="admin", label_visibility="collapsed")
+            st.write("")
+            password = st.text_input("Şifre", type="password", placeholder="••••••••", label_visibility="collapsed")
+            
+            st.write("")
+            c1, c2 = st.columns([1,1])
+            with c1:
+                st.checkbox("Beni Hatırla", value=True)
+            with c2:
+                pass # Boş bırak, buton aşağıda
+            
+            st.write("")
+            submit = st.form_submit_button("SİSTEME GİRİŞ", type="primary", use_container_width=True)
+        
+        # Form Altı Link
+        st.markdown('<div style="text-align:center; margin-top:15px;"><a href="#" style="color:#666; font-size:12px; text-decoration:none;">Şifremi Unuttum?</a></div>', unsafe_allow_html=True)
 
-        # Buton
-        if st.button("GİRİŞ YAP", use_container_width=True):
-            user = USERS.get(username)
-            if user and user['pass'] == password:
-                st.success("Giriş yapılıyor...")
+        if submit:
+            if username == "admin" and password == "admin":
+                with st.spinner("Kimlik doğrulanıyor..."):
+                    time.sleep(1)
+                st.success("Başarılı!")
                 st.session_state.logged_in = True
-                time.sleep(1)
+                time.sleep(0.5)
                 st.rerun()
             else:
-                st.error("Hatalı kullanıcı adı veya şifre")
+                st.error("Hatalı bilgi.")
 
-        st.markdown('</div></div>', unsafe_allow_html=True) # Divleri kapat
+    # 4. SOL ALT KÖŞE (HTML İLE EKLENEN SABİT YAZI)
+    # Bu kısım Streamlit kolonlarından bağımsızdır, CSS ile sabitlenmiştir.
+    st.markdown(f"""
+    <div class="gta-info-box">
+        <div class="gta-header">{data['h']}</div>
+        <div class="gta-text">{data['t']}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 6. ÇALIŞTIRMA (APP.PY TARAFINDAN ÇAĞRILACAK)
+# 5. ÇALIŞTIR
 # ==============================================================================
 if __name__ == "__main__":
     render_login_page()
