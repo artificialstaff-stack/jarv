@@ -3,44 +3,53 @@ import time
 import random
 
 # ==============================================================================
-# ⚙️ 1. SAYFA YAPILANDIRMASI
-# NOT: Eğer app.py dosyanızda zaten set_page_config varsa, bu satırı silebilirsiniz.
+# ⚙️ 1. SAYFA YAPILANDIRMASI (ZORUNLU - EN BAŞTA)
 # ==============================================================================
 try:
     st.set_page_config(page_title="ARTIS - Giriş", layout="wide", initial_sidebar_state="collapsed")
 except:
-    pass # Sayfa ayarları zaten yapılmışsa hata verme
+    pass
 
 # ==============================================================================
-# 🖌️ 2. CSS: SCROLL ENGELLEME & MODERN TASARIM
+# 🖌️ 2. CSS - AGRESIF NO-SCROLL (KAYDIRMA ENGELLEYİCİ)
 # ==============================================================================
 def inject_css(bg_image):
     st.markdown(f"""
     <style>
-        /* A. SAYFAYI KİLİTLE (SCROLL YOK) */
-        .stApp {{
-            overflow: hidden !important;
-            height: 100vh !important;
+        /* 1. SCROLLBAR'I TAMAMEN GİZLE (Chrome, Safari, Edge) */
+        ::-webkit-scrollbar {{
+            display: none;
         }}
         
-        /* B. STREAMLIT BOŞLUKLARINI SIFIRLA */
+        /* Firefox için Scrollbar gizle */
+        .stApp {{
+            scrollbar-width: none;
+            overflow: hidden !important; /* Kaydırmayı kitle */
+            height: 100vh !important;
+        }}
+
+        /* 2. STREAMLIT'İN İNATÇI ÜST BOŞLUĞUNU YOK ET */
         .block-container {{
-            padding: 0 !important;
+            padding-top: 0rem !important; /* En önemli satır burası */
+            padding-bottom: 0rem !important;
+            padding-left: 0rem !important;
+            padding-right: 0rem !important;
             margin: 0 !important;
             max-width: 100% !important;
-            height: 100vh !important;
         }}
         
-        /* Header, Footer, Sidebar GİZLE */
-        header, footer, [data-testid="stSidebar"] {{ display: none !important; }}
+        /* 3. HEADER, FOOTER, SIDEBAR'I YOK ET */
+        header {{ display: none !important; visibility: hidden !important; }}
+        footer {{ display: none !important; }}
+        [data-testid="stSidebar"] {{ display: none !important; }}
         
-        /* C. KOLON YAPISI - GAP SİLME */
+        /* 4. KOLONLAR ARASI BOŞLUKLARI SIFIRLA */
         [data-testid="column"] {{
             padding: 0 !important;
             overflow: hidden !important;
         }}
         
-        [data-testid="stHorizontalBlock"] {{
+        div[data-testid="stVerticalBlock"] {{
             gap: 0 !important;
         }}
 
@@ -53,12 +62,11 @@ def inject_css(bg_image):
             background-position: center;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* Yazıyı alta it */
+            justify-content: flex-end;
             padding: 80px;
             position: relative;
         }}
         
-        /* Karartma Perdesi */
         .left-panel::before {{
             content: "";
             position: absolute;
@@ -75,20 +83,20 @@ def inject_css(bg_image):
         }}
         
         .hero-title {{
-            font-size: 4rem;
+            font-size: 3.5rem; /* Biraz küçülttüm sığması garanti olsun */
             font-weight: 900;
             line-height: 1;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-transform: uppercase;
             color: #ffffff;
             text-shadow: 0px 10px 30px rgba(0,0,0,0.8);
         }}
         
         .hero-subtitle {{
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: #d1d5db;
-            border-left: 5px solid #FF4B4B; /* Kırmızı Vurgu */
-            padding-left: 20px;
+            border-left: 5px solid #FF4B4B;
+            padding-left: 15px;
             font-family: 'Segoe UI', sans-serif;
             background: linear-gradient(90deg, rgba(0,0,0,0.6), transparent);
         }}
@@ -101,15 +109,15 @@ def inject_css(bg_image):
         /* --- SAĞ PANEL (FORM) --- */
         .right-panel-wrapper {{
             height: 100vh;
-            background-color: #09090b; /* Simsiyah mat */
+            width: 100%;
+            background-color: #09090b;
             display: flex;
             align-items: center; /* Dikey Ortala */
             justify-content: center; /* Yatay Ortala */
         }}
         
-        /* Login Kutusu */
         .login-box {{
-            width: 380px;
+            width: 360px; /* Kompakt genişlik */
             padding: 40px;
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -119,7 +127,7 @@ def inject_css(bg_image):
         }}
         
         .box-title {{
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 700;
             color: white;
             text-align: center;
@@ -127,10 +135,10 @@ def inject_css(bg_image):
         }}
         
         .box-desc {{
-            font-size: 13px;
+            font-size: 12px;
             color: #71717a;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }}
         
         /* Input Stilleri */
@@ -138,8 +146,8 @@ def inject_css(bg_image):
             background-color: #18181b !important;
             border: 1px solid #27272a !important;
             color: white !important;
-            padding: 12px 15px !important;
-            border-radius: 12px !important;
+            padding: 10px 15px !important;
+            border-radius: 10px !important;
             font-size: 14px !important;
         }}
         
@@ -151,8 +159,8 @@ def inject_css(bg_image):
         /* Şifremi Unuttum Linki */
         .forgot-pass {{
             text-align: right;
-            margin-top: 12px;
-            font-size: 12px;
+            margin-top: 10px;
+            font-size: 11px;
         }}
         .forgot-pass a {{
             color: #71717a;
@@ -183,9 +191,9 @@ def get_gta_content():
     return random.choice(images), random.choice(texts)
 
 # ==============================================================================
-# 🚀 4. DOĞRULAMA VE ANA FONKSİYON
+# 🚀 4. RENDER FONKSİYONU
 # ==============================================================================
-def render_login_page():  # <--- HATA BURADAYDI, İSMİNİ DÜZELTTİK
+def render_login_page():
     
     # İçerik ve CSS Yükle
     bg_image, content = get_gta_content()
@@ -207,7 +215,7 @@ def render_login_page():  # <--- HATA BURADAYDI, İSMİNİ DÜZELTTİK
 
     # --- SAĞ TARAFI DOLDUR ---
     with col2:
-        # Wrapper div ile formu tam ortalıyoruz (Flexbox)
+        # Wrapper div ile formu tam ortalıyoruz
         st.markdown('<div class="right-panel-wrapper">', unsafe_allow_html=True)
         
         # Giriş Kutusunu Başlat
@@ -223,20 +231,19 @@ def render_login_page():  # <--- HATA BURADAYDI, İSMİNİ DÜZELTTİK
             st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
             password = st.text_input("Şifre", type="password", placeholder="••••••••", label_visibility="collapsed")
             
-            st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
             
             # Hatırla ve Buton Düzeni
             col_chk, col_btn = st.columns([1, 1.5])
             with col_chk:
-                remember = st.checkbox("Beni Hatırla", value=True)
+                st.checkbox("Hatırla", value=True)
             with col_btn:
-                # Kırmızı Buton (CSS ile override edilebilir ama primary genelde kırmızıdır senin temanda)
                 submit_btn = st.form_submit_button("GİRİŞ", type="primary", use_container_width=True)
 
         # Şifremi Unuttum Linki
         st.markdown("""
             <div class="forgot-pass">
-                <a href="#" onclick="alert('Lütfen sistem yöneticisiyle iletişime geçin.');">Şifremi Unuttum?</a>
+                <a href="#">Şifremi Unuttum?</a>
             </div>
         </div> </div> """, unsafe_allow_html=True)
 
@@ -244,7 +251,7 @@ def render_login_page():  # <--- HATA BURADAYDI, İSMİNİ DÜZELTTİK
         if submit_btn:
             if username == "admin" and password == "admin":
                 with st.spinner("Oturum açılıyor..."):
-                    time.sleep(1) # Efekt
+                    time.sleep(1)
                 st.success("Giriş Başarılı!")
                 st.session_state.logged_in = True
                 st.session_state.username = username
@@ -253,6 +260,6 @@ def render_login_page():  # <--- HATA BURADAYDI, İSMİNİ DÜZELTTİK
             else:
                 st.error("Hatalı kullanıcı adı veya şifre.")
 
-# Bu dosya tek başına çalıştırılırsa testi görmek için:
+# Test için
 if __name__ == "__main__":
     render_login_page()
