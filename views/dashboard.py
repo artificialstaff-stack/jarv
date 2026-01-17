@@ -1,26 +1,14 @@
 import streamlit as st
-import brain  # logic/brain.py dosyasını kullanır
+import brain
 import time
-import pandas as pd 
 from datetime import datetime
 
 # ==============================================================================
-# 🎨 DASHBOARD STİLİ
+# 🎨 DASHBOARD STİLİ (Sadece Kartlar İçin)
 # ==============================================================================
 def inject_dashboard_css():
     st.markdown("""
     <style>
-        .dash-header-container {
-            padding: 15px 25px;
-            background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            margin-bottom: 25px;
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
         .metric-card {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.05);
@@ -29,65 +17,18 @@ def inject_dashboard_css():
             transition: transform 0.2s;
         }
         .metric-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.1); }
-        
         [data-testid="stDataFrame"] { background: transparent !important; }
-        
-        /* Sağ üst butonlar için stil */
-        div.stButton > button {
-            background-color: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #e0e0e0;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        div.stButton > button:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.5);
-            color: white;
-        }
     </style>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🚀 ANA DASHBOARD FONKSİYONU
+# 🚀 ANA DASHBOARD İÇERİĞİ (HEADER YOK - ARTIK APP.PY'DE)
 # ==============================================================================
 def render_dashboard():
     inject_dashboard_css()
     
     # KULLANICI BİLGİSİ
     user = st.session_state.get('user_data', {'brand': 'Demo Brand', 'name': 'User'})
-    brand = user.get('brand', 'Anatolia Home')
-
-    # HEADER (Üst Bar)
-    # Burada CSS flexbox yapısı yerine Streamlit columns kullanarak butonları sağa yerleştiriyoruz.
-    
-    col_brand, col_space, col_notify, col_settings, col_profile = st.columns([4, 2, 0.5, 0.5, 0.5])
-
-    with col_brand:
-        st.markdown(f"""
-        <div style="line-height: 1.2;">
-            <h1 style="margin:0; font-size: 2rem; color:white;">{brand}</h1>
-            <div style="color: #34D399; font-size: 0.8rem;">● SYSTEM ONLINE | Istanbul HQ</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    # Sağ Üst Butonlar
-    with col_notify:
-        if st.button("🔔", help="Bildirimler (2 Yeni)", use_container_width=True):
-            st.toast("2 yeni sipariş onayı bekliyor!", icon="🔔")
-    
-    with col_settings:
-        if st.button("⚙️", help="Ayarlar", use_container_width=True):
-            st.toast("Ayarlar menüsü yükleniyor...", icon="⚙️")
-            # st.switch_page("views/settings.py") # Eğer ayarlar sayfanız varsa burayı açın
-    
-    with col_profile:
-        if st.button("👤", help="Profil & Çıkış", use_container_width=True):
-            # Basit bir popover veya işlem menüsü simülasyonu
-            st.session_state.logged_in = False
-            st.rerun()
-
-    st.markdown("<hr style='border-color: rgba(255,255,255,0.1); margin-top: 5px; margin-bottom: 25px;'>", unsafe_allow_html=True)
     
     # MOD YÖNETİMİ
     if "dashboard_mode" not in st.session_state: st.session_state.dashboard_mode = "finance"
@@ -112,61 +53,43 @@ def render_dashboard():
         if prompt := st.chat_input("Talimat verin..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             
-            # 1. KULLANICI GİRDİSİNE GÖRE MOD DEĞİŞTİRME (Hızlı Tepki)
+            # Hızlı Mod Değiştirme
             p_low = prompt.lower()
             if any(x in p_low for x in ["lojistik", "kargo"]): st.session_state.dashboard_mode = "logistics"
             elif any(x in p_low for x in ["stok", "depo", "ürün"]): st.session_state.dashboard_mode = "inventory"
             elif any(x in p_low for x in ["finans", "ciro", "satış"]): st.session_state.dashboard_mode = "finance"
             elif any(x in p_low for x in ["belge", "doküman"]): st.session_state.dashboard_mode = "documents"
-            elif any(x in p_low for x in ["görev", "todo"]): st.session_state.dashboard_mode = "todo"
-            elif any(x in p_low for x in ["form", "talep"]): st.session_state.dashboard_mode = "forms"
-            elif any(x in p_low for x in ["plan", "hedef"]): st.session_state.dashboard_mode = "plans"
             
             st.rerun()
 
-    # ASİSTAN CEVABI (Stream ve AI Cevabına Göre Mod Değiştirme)
+    # ASİSTAN CEVABI
     if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
         with chat_cont:
             with st.chat_message("assistant"):
                 ph = st.empty()
                 full_resp = ""
-                # Brain'den stream cevap al
                 try:
-                    current_mode_triggered = False # Döngüde sürekli rerun yapmamak için bayrak
-                    
+                    current_mode_triggered = False
                     for chunk in brain.get_streaming_response(st.session_state.messages, user):
                         full_resp += chunk
                         ph.markdown(full_resp + "▌")
                         
-                        # 2. AI CEVABINA GÖRE MOD DEĞİŞTİRME (Dinamik)
-                        # AI cevabının içinde geçen kelimelere bakar.
-                        # Eğer mod henüz değişmediyse ve anahtar kelime geçtiyse sayfayı yeniler.
                         if not current_mode_triggered:
                             resp_low = full_resp.lower()
                             new_mode = None
+                            if "lojistik" in resp_low: new_mode = "logistics"
+                            elif "stok" in resp_low: new_mode = "inventory"
+                            elif "finans" in resp_low: new_mode = "finance"
                             
-                            if "lojistik" in resp_low or "kargo" in resp_low: new_mode = "logistics"
-                            elif "stok" in resp_low or "depo" in resp_low: new_mode = "inventory"
-                            elif "finans" in resp_low or "ciro" in resp_low: new_mode = "finance"
-                            elif "belge" in resp_low or "doküman" in resp_low: new_mode = "documents"
-                            
-                            # Eğer yeni bir mod algılandıysa ve mevcut moddan farklıysa
                             if new_mode and new_mode != st.session_state.dashboard_mode:
                                 st.session_state.dashboard_mode = new_mode
-                                current_mode_triggered = True # Bir kere tetikle
-                                st.rerun() # Sağ tarafı güncellemek için sayfayı yenile
-                        
+                                current_mode_triggered = True
+                                st.rerun()
                         time.sleep(0.01)
-                    
                     ph.markdown(full_resp)
                     st.session_state.messages.append({"role": "assistant", "content": full_resp})
-                
                 except Exception as e:
-                    # Hata durumunda (brain modülü yoksa veya hata verirse) graceful fallback
-                    err_msg = "Şu anda bağlantı kurulamıyor. Lütfen daha sonra tekrar deneyin."
-                    ph.markdown(err_msg)
-                    st.session_state.messages.append({"role": "assistant", "content": err_msg})
-                    # st.error(f"AI Yanıt Hatası: {e}") # Geliştirme aşamasında açılabilir
+                    ph.markdown("Bağlantı hatası.")
 
     # --- SAĞ: DİNAMİK GÖRSELLER ---
     with col_viz:
@@ -201,25 +124,9 @@ def render_dashboard():
             st.markdown("<br>", unsafe_allow_html=True)
             try: st.plotly_chart(brain.get_inventory_chart(), use_container_width=True)
             except: st.warning("Grafik yüklenemedi.")
+            
+        else:
+            st.info("Modül yükleniyor...")
 
-        elif mode == "documents":
-            st.markdown("##### 📂 Dijital Arşiv")
-            st.info("Son yüklenen belgeler burada görüntülenir.")
-            metric_card("Toplam Belge", "1,240", "+5 Bugün", "#3B82F6")
-
-        elif mode == "todo":
-            st.markdown("##### ✅ Görevler")
-            st.checkbox("Gümrük Müşaviri ile Görüş", value=True)
-            st.checkbox("Sevkiyat Onayı", value=False)
-
-        elif mode == "forms":
-            st.markdown("##### 📝 Formlar")
-            st.info("Bekleyen onaylarınız var.")
-
-        elif mode == "plans":
-            st.markdown("##### 💎 Stratejik Planlar")
-            st.success("Q1 Hedefi: %15 Büyüme")
-
-# App.py'den çağrılacak fonksiyon
 if __name__ == "__main__":
     render_dashboard()
