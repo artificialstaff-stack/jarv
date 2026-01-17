@@ -21,7 +21,7 @@ def inject_operations_css():
         .metric-label { font-size: 12px; color: #A1A1AA; text-transform: uppercase; letter-spacing: 1px; }
         .metric-value { font-size: 24px; font-weight: 700; color: #FFF; }
 
-        /* --- GÖREV KARTLARI (TODO) --- */
+        /* --- GÖREV KARTLARI --- */
         .task-card {
             background-color: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -40,7 +40,7 @@ def inject_operations_css():
         .task-meta { font-size: 11px; color: #A1A1AA; display: flex; gap: 10px; margin-top: 4px; }
         .task-tag { background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 4px; font-weight: 600; }
 
-        /* --- DOSYA SATIRLARI (DOCS) --- */
+        /* --- DOSYA SATIRLARI --- */
         .file-row {
             background-color: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -84,6 +84,7 @@ def init_state():
             {"id": 1, "task": "Vergileri öde", "tag": "Finans", "prio": "High", "done": False, "date": "2026-01-15"},
             {"id": 2, "task": "Washington stok sayımı", "tag": "Operasyon", "prio": "Medium", "done": False, "date": "2026-01-20"},
         ]
+    # Arşiv veritabanını başlat
     if "documents" not in st.session_state:
         st.session_state.documents = [
             {"name": "2026_Ocak_Gümrük_Beyan.pdf", "type": "pdf", "size": "2.4 MB", "date": "14 Jan", "category": "Gümrük"},
@@ -104,9 +105,14 @@ def toggle_task(idx):
 def save_uploaded_file(uploaded_file, category="Genel"):
     """Dosyayı hafızaya kaydeder ve Arşiv sekmesinde gösterir."""
     if uploaded_file is not None:
-        file_type = "pdf" if "pdf" in uploaded_file.type else "xls" if "sheet" in uploaded_file.type or "excel" in uploaded_file.type else "img"
+        # Dosya tipini belirle
+        if "pdf" in uploaded_file.type: file_type = "pdf"
+        elif "sheet" in uploaded_file.type or "excel" in uploaded_file.type: file_type = "xls"
+        else: file_type = "img"
+        
         file_size = f"{uploaded_file.size / 1024:.1f} KB"
         
+        # Yeni dosya objesi
         new_doc = {
             "name": uploaded_file.name,
             "type": file_type,
@@ -114,7 +120,8 @@ def save_uploaded_file(uploaded_file, category="Genel"):
             "date": datetime.now().strftime("%d %b"),
             "category": category
         }
-        # Listeye en başa ekle
+        
+        # Listeye en başa ekle (Session State'e yazar)
         st.session_state.documents.insert(0, new_doc)
         return True
     return False
@@ -195,13 +202,11 @@ def render_operations():
                 submitted = st.form_submit_button("🚀 Teklif Al ve Operasyonu Başlat", type="primary", use_container_width=True)
 
         with col_summary:
-            # Hacimsel Ağırlık Hesabı
             volumetric_weight = (dim_l * dim_w * dim_h / 5000) * total_cartons
             chargeable_weight = max(total_weight, volumetric_weight)
             cbm = (dim_l * dim_w * dim_h * total_cartons) / 1000000
             
-            # Tahmini Fiyat (Mock)
-            rate = 4.5 if "Hava" in ship_method else 0.8 # $/kg
+            rate = 4.5 if "Hava" in ship_method else 0.8
             est_cost = chargeable_weight * rate
             
             st.markdown(f"""
@@ -218,14 +223,12 @@ def render_operations():
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            
-            st.info("Commercial Invoice ve Packing List zorunludur.")
 
         if submitted:
             if not product_name or not hs_code:
                 st.error("Lütfen Ürün Tanımı ve GTİP Kodunu giriniz.")
             else:
-                # --- DOSYALARI KAYDETME İŞLEMİ (DÜZELTİLDİ) ---
+                # --- DOSYALARI KAYDETME İŞLEMİ ---
                 files_saved = 0
                 if doc1:
                     save_uploaded_file(doc1, category="Lojistik")
@@ -247,9 +250,9 @@ def render_operations():
                 
                 st.success(f"Talebiniz Alındı! Operasyon Kodu: **US-EXP-{random.randint(10000,99999)}**")
                 
-                # HATA VEREN KISIM DÜZELTİLDİ: "wq" yerine geçerli emoji
+                # [DÜZELTME] Emoji hatası giderildi: "cloud" yerine "✅"
                 if files_saved > 0:
-                    st.toast(f"{files_saved} dosya arşivlendi.", icon="📂")
+                    st.toast(f"{files_saved} dosya arşivlendi.", icon="✅")
                 st.balloons()
 
     # --- SEKME 2: GÖREVLER (TODO) ---
@@ -285,7 +288,7 @@ def render_operations():
             uploaded_doc = st.file_uploader("Hızlı Yükle", label_visibility="collapsed")
             if uploaded_doc:
                 if save_uploaded_file(uploaded_doc, category="Genel"):
-                    # HATA VEREN KISIM DÜZELTİLDİ: "cloud" yerine emoji
+                    # [DÜZELTME] Emoji hatası giderildi
                     st.toast("Dosya arşivlendi!", icon="✅")
         
         st.markdown("##### 📄 Son Dosyalar")
