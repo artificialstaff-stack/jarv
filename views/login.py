@@ -237,4 +237,21 @@ def render_login_page():
                 st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
                 
                 if st.form_submit_button("HEMEN BAŞVUR", type="primary", use_container_width=True):
-                    valid, msg = validate_registration
+                    valid, msg = validate_registration(email, phone)
+                    if not company:
+                        st.warning("Firma adı zorunludur.")
+                    elif not valid:
+                        st.error(msg)
+                    else:
+                        st.success("Başvurunuz alındı. Sizinle iletişime geçeceğiz.")
+                        time.sleep(2)
+
+    # --- SOL ÜST: YAZILAR ---
+    html_code = ""
+    for msg in messages:
+        html_code += f'<div class="typewriter-line">{msg}</div>'
+    
+    st.markdown(f'<div class="terminal-container">{html_code}</div>', unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    render_login_page()
