@@ -7,12 +7,18 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'views')
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'logic')))
 
 # 2. SAYFA AYARLARI
-st.set_page_config(
-    page_title="ARTIS | Global Operations Engine",
-    page_icon="⚡",
-    layout="wide",
-    initial_sidebar_state="expanded" 
-)
+# Not: Eğer login.py içinde set_page_config kullanıyorsanız, buradaki hata verebilir. 
+# Streamlit'te set_page_config sadece bir kez çağrılmalıdır. 
+# En güvenli yol, bunu sadece app.py'nin en başında tutmaktır.
+try:
+    st.set_page_config(
+        page_title="ARTIS | Global Operations Engine",
+        page_icon="⚡",
+        layout="wide",
+        initial_sidebar_state="expanded" 
+    )
+except:
+    pass
 
 # 3. MODÜLLERİ YÜKLE
 try:
@@ -40,7 +46,7 @@ if "users_db" not in st.session_state:
         {"id": 104, "name": "John Doe", "role": "admin", "status": "Active", "mrr": 5000},
     ]
 
-# --- NAVİGASYON MANTIĞI (DÜZELTİLDİ) ---
+# --- NAVİGASYON MANTIĞI ---
 def update_page(key):
     """
     Bir menü grubuna tıklandığında diğerlerini sıfırlar.
@@ -59,25 +65,24 @@ def update_page(key):
         st.session_state["nav_main"] = None
         st.session_state["nav_services"] = None
 
-# 5. STRATEJİK SOL MENÜ
+# 5. STRATEJİK SOL MENÜ (GÜNCELLENDİ)
 def render_sidebar():
     with st.sidebar:
-        user_brand = st.session_state.user_data.get('brand', 'ARTIS AI')
-        user_role = st.session_state.user_data.get('role', 'user')
-        
+        # LOGO ALANI (SADELEŞTİRİLDİ)
+        # Kullanıcı bilgileri artık Dashboard Header'da olduğu için burası marka alanı oldu.
         st.markdown(f"""
-            <div style="padding: 15px; background: rgba(197, 160, 89, 0.03); border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(197, 160, 89, 0.1);">
-                <div style="font-weight: 800; font-size: 18px; color: #FFF; letter-spacing: -0.5px;">⚡ {user_brand}</div>
-                <div style="font-size: 10px; color: #C5A059; font-weight: 700;">● GLOBAL INTEGRATION ACTIVE</div>
+            <div style="padding: 20px 0; text-align: center; margin-bottom: 20px;">
+                <div style="font-weight: 900; font-size: 24px; color: #FFF; letter-spacing: 2px;">ARTIS<span style="color:#d4af37;">AI</span></div>
+                <div style="font-size: 9px; color: #666; letter-spacing: 1px; margin-top: 5px;">GLOBAL OPERATIONS ENGINE</div>
             </div>
         """, unsafe_allow_html=True)
 
+        user_role = st.session_state.user_data.get('role', 'user')
         curr = st.session_state.current_page
 
         # --- GRUP 1: ANA KOMUTA ---
-        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; margin-bottom:5px;">ANA KOMUTA</div>', unsafe_allow_html=True)
+        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; margin-bottom:5px; font-weight:600;">ANA KOMUTA</div>', unsafe_allow_html=True)
         
-        # Eğer sayfa Dashboard ise index 0, değilse None (Seçimi kaldır)
         idx_main = 0 if curr == "Dashboard" else None
         
         st.radio(
@@ -91,7 +96,7 @@ def render_sidebar():
         )
 
         # --- GRUP 2: SERVİSLER ---
-        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; margin-top:20px; margin-bottom:5px;">GLOBAL SERVİSLER</div>', unsafe_allow_html=True)
+        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; margin-top:20px; margin-bottom:5px; font-weight:600;">GLOBAL SERVİSLER</div>', unsafe_allow_html=True)
         
         services_map = {
             "Website": "🌐 Web Sitesi & UX",
@@ -119,7 +124,7 @@ def render_sidebar():
         )
 
         # --- GRUP 3: ARAÇLAR ---
-        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; margin-top:20px; margin-bottom:5px;">ARAÇLAR</div>', unsafe_allow_html=True)
+        st.markdown('<div class="menu-label" style="font-size:10px; color:#666; margin-top:20px; margin-bottom:5px; font-weight:600;">ARAÇLAR</div>', unsafe_allow_html=True)
         
         tools_map = {
             "Operasyonlar": "🛠️ Operasyon Merkezi",
@@ -146,15 +151,13 @@ def render_sidebar():
                 st.session_state.current_page = "Admin"
                 st.rerun()
 
-        # Footer
-        st.markdown("<div style='flex-grow: 1; height: 30px;'></div>", unsafe_allow_html=True)
-        if st.button("Çıkış Yap", use_container_width=True):
-            st.session_state.logged_in = False
-            st.rerun()
+        # ÇIKIŞ BUTONU KALDIRILDI (Artık Dashboard Header'da)
 
 # 6. ROUTER
 def main():
+    # Login Kontrolü
     if not st.session_state.logged_in:
+        # Login sayfası kendi içinde set_page_config çağırıyor olabilir, bu yüzden app.py başındaki try-except önemli.
         login.render_login_page()
     else:
         render_sidebar()
