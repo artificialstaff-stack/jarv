@@ -11,12 +11,15 @@ def inject_dashboard_css():
     st.markdown("""
     <style>
         .dash-header-container {
-            padding: 20px 25px;
+            padding: 15px 25px;
             background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 20px;
             margin-bottom: 25px;
             backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .metric-card {
             background: rgba(255,255,255,0.03);
@@ -28,6 +31,20 @@ def inject_dashboard_css():
         .metric-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.1); }
         
         [data-testid="stDataFrame"] { background: transparent !important; }
+        
+        /* Sağ üst butonlar için stil */
+        div.stButton > button {
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        div.stButton > button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: white;
+        }
     </style>
     """, unsafe_allow_html=True)
 
@@ -41,13 +58,36 @@ def render_dashboard():
     user = st.session_state.get('user_data', {'brand': 'Demo Brand', 'name': 'User'})
     brand = user.get('brand', 'Anatolia Home')
 
-    # HEADER
-    st.markdown(f"""
-    <div class="dash-header-container">
-        <h1 style="margin:0; font-size: 2.5rem; color:white;">{brand}</h1>
-        <div style="color: #34D399; font-size: 0.8rem; margin-top: 5px;">● SYSTEM ONLINE | Istanbul HQ</div>
-    </div>
-    """, unsafe_allow_html=True)
+    # HEADER (Üst Bar)
+    # Burada CSS flexbox yapısı yerine Streamlit columns kullanarak butonları sağa yerleştiriyoruz.
+    
+    col_brand, col_space, col_notify, col_settings, col_profile = st.columns([4, 2, 0.5, 0.5, 0.5])
+
+    with col_brand:
+        st.markdown(f"""
+        <div style="line-height: 1.2;">
+            <h1 style="margin:0; font-size: 2rem; color:white;">{brand}</h1>
+            <div style="color: #34D399; font-size: 0.8rem;">● SYSTEM ONLINE | Istanbul HQ</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Sağ Üst Butonlar
+    with col_notify:
+        if st.button("🔔", help="Bildirimler (2 Yeni)", use_container_width=True):
+            st.toast("2 yeni sipariş onayı bekliyor!", icon="🔔")
+    
+    with col_settings:
+        if st.button("⚙️", help="Ayarlar", use_container_width=True):
+            st.toast("Ayarlar menüsü yükleniyor...", icon="⚙️")
+            # st.switch_page("views/settings.py") # Eğer ayarlar sayfanız varsa burayı açın
+    
+    with col_profile:
+        if st.button("👤", help="Profil & Çıkış", use_container_width=True):
+            # Basit bir popover veya işlem menüsü simülasyonu
+            st.session_state.logged_in = False
+            st.rerun()
+
+    st.markdown("<hr style='border-color: rgba(255,255,255,0.1); margin-top: 5px; margin-bottom: 25px;'>", unsafe_allow_html=True)
     
     # MOD YÖNETİMİ
     if "dashboard_mode" not in st.session_state: st.session_state.dashboard_mode = "finance"
@@ -122,7 +162,11 @@ def render_dashboard():
                     st.session_state.messages.append({"role": "assistant", "content": full_resp})
                 
                 except Exception as e:
-                    st.error(f"AI Yanıt Hatası: {e}")
+                    # Hata durumunda (brain modülü yoksa veya hata verirse) graceful fallback
+                    err_msg = "Şu anda bağlantı kurulamıyor. Lütfen daha sonra tekrar deneyin."
+                    ph.markdown(err_msg)
+                    st.session_state.messages.append({"role": "assistant", "content": err_msg})
+                    # st.error(f"AI Yanıt Hatası: {e}") # Geliştirme aşamasında açılabilir
 
     # --- SAĞ: DİNAMİK GÖRSELLER ---
     with col_viz:
@@ -175,3 +219,7 @@ def render_dashboard():
         elif mode == "plans":
             st.markdown("##### 💎 Stratejik Planlar")
             st.success("Q1 Hedefi: %15 Büyüme")
+
+# App.py'den çağrılacak fonksiyon
+if __name__ == "__main__":
+    render_dashboard()
