@@ -7,7 +7,7 @@ import re
 # 1. AYARLAR
 # ==============================================================================
 try:
-    st.set_page_config(page_title="ARTIS - Premium Access", layout="wide", initial_sidebar_state="collapsed")
+    st.set_page_config(page_title="ARTIS - Global Access", layout="wide", initial_sidebar_state="collapsed")
 except:
     pass
 
@@ -15,35 +15,33 @@ except:
 # 2. İÇERİK HAVUZU
 # ==============================================================================
 def get_assets():
-    # PREMIUM ARKA PLANLAR (High-End Tech & Architecture)
+    # Premium, İnsansız, Koyu Tonlu Arka Planlar
     backgrounds = [
-        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop", # Finans Merkezi (Mavi/Gri)
-        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop", # Global Ağ (Siyah/Mavi)
-        "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop", # Server (Karanlık)
-        "https://images.unsplash.com/photo-1493934558415-9d19f0b2b4d2?q=80&w=2054&auto=format&fit=crop"  # Matrix/Derin Teknoloji
+        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop", # Finans/Gökdelen (Mavi tonlu)
+        "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop", # Server Room (Siyah tonlu)
+        "https://images.unsplash.com/photo-1605218456194-bccca572a661?q=80&w=2070&auto=format&fit=crop", # Konteyner Gemisi (Ticaret)
+        "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop"  # Matrix Code (Yazılım)
     ]
 
-    # FOMO YARATAN MESAJLAR
     messages = [
-        "► ABD E-Ticaret Hacmi: 1.1 Trilyon $ (Fırsatı Kaçırmayın).",
-        "► Üretimden Teslimata: %100 Otonom İhracat Yönetimi.",
+        "► ABD E-Ticaret Hacmi: 1.1 Trilyon $ (Fırsat Kapısı).",
+        "► Üretimden Teslimata: %100 Otonom Süreç Yönetimi.",
+        "► Rakipleriniz Manuel Çalışırken Siz Otomasyonla Kazanın.",
         "► Amazon FBA & Walmart Entegrasyonu ile Satışları Katlayın.",
-        "► Lojistik Operasyonlarında %60 Maliyet Tasarrufu.",
-        "► ARTIS: Yerel Güçten Global Markaya Dönüşüm Motoru."
+        "► ARTIS: Yerel Üreticiden Global Markaya."
     ]
     
     return random.choice(backgrounds), messages
 
 # ==============================================================================
-# 3. CSS (SPOTLIGHT THEME - BLACK & PLATINUM)
+# 3. CSS (LUXURY GOLD & ONYX THEME)
 # ==============================================================================
 def inject_css(bg_url):
     st.markdown(f"""
     <style>
-        /* --- ARKA PLAN (SPOTLIGHT İÇİN KARARTMA) --- */
+        /* --- ARKA PLAN & KARARTMA --- */
         .stApp {{
-            /* Arka plana %80 Siyah Perde Çektik - Kutu öne çıksın diye */
-            background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('{bg_url}');
+            background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('{bg_url}');
             background-size: cover;
             background-position: center;
             height: 100vh;
@@ -58,15 +56,17 @@ def inject_css(bg_url):
             top: 50px;
             left: 50px;
             z-index: 99;
-            font-family: 'Segoe UI', monospace;
+            font-family: 'Segoe UI', sans-serif;
         }}
 
         .typewriter-line {{
             font-size: 15px;
-            color: #94a3b8; /* Sönük Gri - Gözü yormasın, kutuya baksın */
+            font-weight: 500;
+            color: #e2e8f0; 
             margin-bottom: 8px;
-            border-left: 3px solid #3b82f6; /* Elektrik Mavisi Çizgi */
-            padding-left: 15px;
+            border-left: 3px solid #d4af37; /* GOLD ÇİZGİ */
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.1), transparent);
+            padding: 8px 15px;
             opacity: 0;
             animation: fadeInMove 1s ease forwards;
         }}
@@ -75,126 +75,130 @@ def inject_css(bg_url):
         .typewriter-line:nth-child(2) {{ animation-delay: 2.5s; }}
         .typewriter-line:nth-child(3) {{ animation-delay: 4.5s; }}
         .typewriter-line:nth-child(4) {{ animation-delay: 6.5s; }}
+        .typewriter-line:nth-child(5) {{ animation-delay: 8.5s; }}
 
-        @keyframes fadeInMove {{
-            from {{ opacity: 0; transform: translateX(-20px); }}
-            to {{ opacity: 1; transform: translateX(0); }}
-        }}
+        @keyframes fadeInMove {{ from {{ opacity: 0; transform: translateX(-20px); }} to {{ opacity: 1; transform: translateX(0); }} }}
 
-        /* --- SAĞ KOLON (GİRİŞ KUTUSU) --- */
-        
-        /* KUTU TASARIMI (SPOTLIGHT EFFECT) */
+        /* --- GİRİŞ KUTUSU (SPOTLIGHT) --- */
         div[data-testid="column"]:nth-of-type(2) {{
-            background-color: #000000; /* TAM SİYAH */
-            padding: 50px;
-            border-radius: 20px;
-            /* ÖNE ÇIKARAN EFEKT BURADA: */
-            border: 1px solid rgba(255, 255, 255, 0.15); /* İnce Gümüş Çerçeve */
-            box-shadow: 0 0 100px rgba(0,0,0, 1); /* Arkaya çok koyu gölge */
+            background-color: #050505; /* PITCH BLACK */
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid rgba(212, 175, 55, 0.3); /* İNCE GOLD ÇERÇEVE */
+            box-shadow: 0 0 60px rgba(0,0,0, 1); /* Derin Gölge */
             margin-top: 5vh;
             position: relative;
             z-index: 100;
         }}
 
-        /* Sekmeler (Tabs) */
-        .stTabs [data-baseweb="tab-list"] {{
-            gap: 10px;
-            background-color: #111;
-            padding: 5px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-        }}
-        .stTabs [data-baseweb="tab"] {{
-            height: 40px;
-            background-color: transparent;
-            border: none;
-            color: #64748b;
-            font-weight: 600;
-            border-radius: 8px;
-        }}
-        .stTabs [data-baseweb="tab"][aria-selected="true"] {{
-            background-color: #333 !important; /* Seçili Tab Koyu Gri */
-            color: #fff !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }}
-
-        /* Inputlar (Form Alanları) */
-        .stTextInput input, .stSelectbox div[data-baseweb="select"] {{
-            background-color: #0a0a0a !important;
+        /* --- FORM ELEMANLARI DÜZENLEMESİ (FIX) --- */
+        
+        /* Input Alanları */
+        .stTextInput input {{
+            background-color: #121212 !important;
             border: 1px solid #333 !important;
             color: white !important;
-            height: 48px !important;
             border-radius: 8px !important;
-            padding-left: 15px !important;
+            padding: 10px 15px !important;
         }}
         .stTextInput input:focus {{
-            border-color: #ffffff !important; /* Focus olunca BEYAZ yanar */
-            background-color: #000 !important;
+            border-color: #d4af37 !important; /* Focus Gold */
+            box-shadow: 0 0 8px rgba(212, 175, 55, 0.3) !important;
         }}
 
-        /* BUTON TASARIMI (EN ÖNEMLİ KISIM) */
-        /* Beyaz Buton - Siyah Yazı -> En Premium Kombinasyon */
+        /* --- SELECTBOX (AÇILIR MENÜ) DÜZELTME --- */
+        /* Sorun çıkaran buton kaymasını engeller */
+        div[data-baseweb="select"] > div {{
+            background-color: #121212 !important;
+            border: 1px solid #333 !important;
+            color: white !important;
+            border-radius: 8px !important;
+            display: flex;
+            align-items: center; /* Dikey ortalama */
+        }}
+        /* Menü içindeki yazılar */
+        div[data-baseweb="select"] span {{
+            color: #e2e8f0 !important;
+        }}
+        /* Menü açılınca çıkan liste */
+        ul[data-baseweb="menu"] {{
+            background-color: #121212 !important;
+            border: 1px solid #333 !important;
+        }}
+        li[data-baseweb="option"] {{
+            color: white !important;
+        }}
+
+        /* --- BUTONLAR (PREMIUM GOLD) --- */
         .stButton button {{
-            background-color: #ffffff !important;
-            color: #000000 !important;
+            /* METALİK GOLD DEGRADE */
+            background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
+            color: #000000 !important; /* Siyah Yazı (Kontrast için) */
             font-weight: 800 !important;
             border: none !important;
-            height: 55px !important;
+            height: 50px !important;
             font-size: 15px !important;
             border-radius: 8px !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             transition: all 0.3s ease;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
         }}
         .stButton button:hover {{
-            background-color: #e2e8f0 !important;
+            background: linear-gradient(135deg, #ebd168 0%, #d4af37 100%) !important; /* Açık Gold */
             transform: scale(1.02);
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3); /* Parlama artar */
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
         }}
 
-        /* Yazı Stilleri */
-        h2 {{ color: white !important; font-family: 'Helvetica', sans-serif; letter-spacing: -1px; }}
-        p {{ color: #94a3b8 !important; }}
-        a {{ color: #64748b !important; text-decoration: none; font-size: 13px; }}
-        a:hover {{ color: white !important; }}
-        .stCheckbox span {{ color: #64748b !important; font-size: 13px; }}
+        /* --- TABS --- */
+        .stTabs [data-baseweb="tab-list"] {{ border-bottom: 1px solid #333; }}
+        .stTabs [data-baseweb="tab"] {{ color: #666; }}
+        .stTabs [data-baseweb="tab"][aria-selected="true"] {{
+            color: #d4af37 !important; /* Seçili Tab Gold */
+            border-top-color: #d4af37 !important;
+        }}
+
+        /* Diğer */
+        h2 {{ color: white !important; }}
+        p {{ color: #888 !important; }}
+        a {{ color: #d4af37 !important; text-decoration: none; }}
+        .stCheckbox span {{ color: #aaa !important; font-size: 13px; }}
 
     </style>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 4. SAAS ANALİZ & VALİDASYON
+# 4. VALİDASYON (SAAS MANTIĞI)
 # ==============================================================================
 def validate_application(email, phone, company):
-    if not company or len(company) < 3:
-        return False, "Firma ünvanı geçerli değil."
+    if not company or len(company) < 2:
+        return False, "Firma adı gereklidir."
     if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-        return False, "Kurumsal e-posta formatı hatalı."
+        return False, "Geçersiz e-posta formatı."
     if len(phone) < 10 or not phone.isdigit():
-        return False, "Telefon numarası eksik veya hatalı."
+        return False, "Telefon numarası hatalı."
     return True, ""
 
 # ==============================================================================
-# 5. RENDER SAYFASI
+# 5. EKRAN RENDER
 # ==============================================================================
 def render_login_page():
     bg, messages = get_assets()
     inject_css(bg)
     
-    # GRID SİSTEMİ: Ortadaki kutuyu biraz daha büyüttüm (1.3)
-    # [Sol Boşluk] - [Kutu] - [Sağ Boşluk]
-    col1, col2, col3 = st.columns([1.3, 1.3, 0.4])
+    # Grid: Sol(1.4) - Orta(1.2) - Sağ(0.4)
+    col1, col2, col3 = st.columns([1.4, 1.2, 0.4])
     
     with col2:
-        # BAŞLIK
         st.markdown("<h2 style='text-align:center; margin-bottom:5px;'>ARTIS PANEL</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align:center; margin-bottom:25px; font-size:13px;'>Global Operasyon & İhracat Yönetim Sistemi</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align:center; margin-bottom:20px; font-size:13px;'>Global Operasyon & İhracat Yönetim Sistemi</p>", unsafe_allow_html=True)
 
-        # SEKMELER
+        # TABLAR
         tab_login, tab_apply = st.tabs(["GİRİŞ YAP", "BAŞVURU YAP"])
         
-        # --- 1. GİRİŞ FORMU ---
+        # --- GİRİŞ ---
         with tab_login:
-            st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
             with st.form("login_form"):
                 user = st.text_input("Kullanıcı Adı", placeholder="admin")
                 pw = st.text_input("Şifre", type="password", placeholder="••••••••")
@@ -211,57 +215,56 @@ def render_login_page():
                 
                 if st.form_submit_button("GÜVENLİ GİRİŞ", type="primary", use_container_width=True):
                     if user == "admin" and pw == "admin":
-                        with st.spinner("Yetkilendirme sağlanıyor..."):
+                        with st.spinner("Giriş yapılıyor..."):
                             time.sleep(1)
                         st.session_state.logged_in = True
                         st.rerun()
                     else:
-                        st.error("Giriş bilgileri doğrulanamadı.")
+                        st.error("Hatalı giriş.")
 
-        # --- 2. BAŞVURU FORMU (SAAS ANALİZİ) ---
+        # --- BAŞVURU (SAAS ANALİZİ) ---
         with tab_apply:
             st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-            st.markdown("<p style='color:#64748b; font-size:12px; text-align:center; margin-bottom:15px;'>Amerika pazarı için üretici ön değerlendirme formu.</p>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align:center; margin-bottom:15px; font-size:12px;'>Amerika pazarı için üretici ön değerlendirme.</p>", unsafe_allow_html=True)
             
             with st.form("apply_form"):
-                # Firma Kimliği
-                company = st.text_input("Firma Ünvanı", placeholder="Örn: Yılmaz Tekstil A.Ş.")
+                # 1. Satır: Firma
+                company = st.text_input("Firma Ünvanı", placeholder="Şirket Adı A.Ş.")
                 
-                c_sec, c_exp = st.columns(2)
-                with c_sec:
-                    sector = st.selectbox("Sektörünüz", ["Tekstil & Giyim", "Mobilya", "Gıda", "Otomotiv", "Kozmetik", "Endüstriyel", "Diğer"])
-                with c_exp:
-                    # Kritik Soru: Müşteriyi segmentlere ayırır
-                    status = st.selectbox("İhracat Durumu", ["Henüz Başlamadım", "Yeni Başladım (Az Hacim)", "Profesyonel İhracatçıyım"])
+                # 2. Satır: Sektör & Durum (Yanyana)
+                r1_c1, r1_c2 = st.columns(2)
+                with r1_c1:
+                    # CSS Fix'i sayesinde artık düzgün görünecek
+                    sector = st.selectbox("Sektörünüz", ["Tekstil", "Mobilya", "Gıda", "Otomotiv", "Kozmetik", "Diğer"])
+                with r1_c2:
+                    status = st.selectbox("İhracat Deneyimi", ["Yeni Başlıyorum", "Orta Seviye", "Profesyonel"])
 
-                # Hacim ve Hedef (Lead Scoring için)
-                c_vol, c_target = st.columns(2)
-                with c_vol:
-                    volume = st.selectbox("Aylık Tahmini Gönderi", ["0 - 50 Adet", "50 - 500 Adet", "500 - 5000 Adet", "5000+ Adet"])
-                with c_target:
-                    target = st.selectbox("Hedef Pazar", ["Sadece ABD", "ABD + Kanada", "Avrupa", "Global"])
+                # 3. Satır: Hacim & Hedef (Yanyana)
+                r2_c1, r2_c2 = st.columns(2)
+                with r2_c1:
+                    volume = st.selectbox("Aylık Tahmini Ürün", ["0 - 100", "100 - 1000", "1000+"])
+                with r2_c2:
+                    target = st.selectbox("Hedef Pazar", ["Sadece ABD", "Kuzey Amerika", "Global"])
 
-                st.markdown("---") # Ayırıcı çizgi
+                st.markdown("---") 
                 
-                # İletişim
-                c_email, c_phone = st.columns(2)
-                with c_email:
-                    email = st.text_input("Kurumsal E-Posta", placeholder="info@firma.com")
-                with c_phone:
-                    phone = st.text_input("Yetkili Telefon", placeholder="05XX...")
+                # 4. Satır: İletişim
+                r3_c1, r3_c2 = st.columns(2)
+                with r3_c1:
+                    email = st.text_input("E-Posta", placeholder="info@...")
+                with r3_c2:
+                    phone = st.text_input("Telefon", placeholder="05XX...")
 
                 st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
                 
-                if st.form_submit_button("BAŞVURUYU GÖNDER", type="primary", use_container_width=True):
+                if st.form_submit_button("HEMEN BAŞVUR", type="primary", use_container_width=True):
                     valid, msg = validate_application(email, phone, company)
-                    
-                    if not valid:
-                        st.error(msg)
+                    if valid:
+                        st.success("Başvuru alındı! Uzmanlarımız sizi arayacak.")
                     else:
-                        st.success("Başvurunuz başarıyla alındı! İhracat uzmanlarımız 24 saat içinde sizinle iletişime geçecektir.")
-                        time.sleep(3)
+                        st.warning(msg)
 
-    # --- SOL ÜST YAZILAR ---
+    # --- YAZILAR ---
     html_code = ""
     for msg in messages:
         html_code += f'<div class="typewriter-line">{msg}</div>'
