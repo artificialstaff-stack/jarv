@@ -15,33 +15,35 @@ except:
 # 2. İÇERİK HAVUZU
 # ==============================================================================
 def get_assets():
-    # Arka planlar (Lojistik, Teknoloji, Şehir)
+    # PREMIUM ARKA PLANLAR (High-End Tech & Architecture)
     backgrounds = [
-        "https://images.unsplash.com/photo-1480074568708-e7b720bb6fce?q=80&w=2070&auto=format&fit=crop", # Gece Şehri (Premium)
-        "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2832&auto=format&fit=crop",   # Lojistik Depo
-        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop", # Dünya Ağı
-        "https://images.unsplash.com/photo-1494412574643-35d324688133?q=80&w=2070&auto=format&fit=crop"   # Teknoloji (Anakart)
+        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop", # Finans Merkezi (Mavi/Gri)
+        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop", # Global Ağ (Siyah/Mavi)
+        "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop", # Server (Karanlık)
+        "https://images.unsplash.com/photo-1493934558415-9d19f0b2b4d2?q=80&w=2054&auto=format&fit=crop"  # Matrix/Derin Teknoloji
     ]
 
+    # FOMO YARATAN MESAJLAR
     messages = [
-        "► ABD E-Ticaret Pazarı: 1.1 Trilyon $'lık Dev Fırsat.",
+        "► ABD E-Ticaret Hacmi: 1.1 Trilyon $ (Fırsatı Kaçırmayın).",
         "► Üretimden Teslimata: %100 Otonom İhracat Yönetimi.",
-        "► Amazon & Walmart Entegrasyonu ile Satışlarınızı Katlayın.",
-        "► Lojistik Maliyetlerinde %60 Tasarruf Sağlayın.",
-        "► ARTIS: Yerel Güçten Global Markaya."
+        "► Amazon FBA & Walmart Entegrasyonu ile Satışları Katlayın.",
+        "► Lojistik Operasyonlarında %60 Maliyet Tasarrufu.",
+        "► ARTIS: Yerel Güçten Global Markaya Dönüşüm Motoru."
     ]
     
     return random.choice(backgrounds), messages
 
 # ==============================================================================
-# 3. CSS (ONYX & TITANIUM THEME - PREMIUM)
+# 3. CSS (SPOTLIGHT THEME - BLACK & PLATINUM)
 # ==============================================================================
 def inject_css(bg_url):
     st.markdown(f"""
     <style>
-        /* --- ARKA PLAN VE KARARTMA (SPOTLIGHT) --- */
+        /* --- ARKA PLAN (SPOTLIGHT İÇİN KARARTMA) --- */
         .stApp {{
-            background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('{bg_url}'); /* %70 KARARTMA */
+            /* Arka plana %80 Siyah Perde Çektik - Kutu öne çıksın diye */
+            background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('{bg_url}');
             background-size: cover;
             background-position: center;
             height: 100vh;
@@ -50,93 +52,88 @@ def inject_css(bg_url):
         .block-container {{ padding: 0 !important; margin: 0 !important; max-width: 100% !important; }}
         header, footer, [data-testid="stSidebar"] {{ display: none !important; }}
 
-        /* --- SOL ÜST YAZILAR (DAHA BELİRGİN) --- */
+        /* --- SOL ÜST YAZILAR --- */
         .terminal-container {{
             position: fixed;
             top: 50px;
             left: 50px;
             z-index: 99;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Daha modern font */
+            font-family: 'Segoe UI', monospace;
         }}
 
         .typewriter-line {{
-            display: block;
-            font-size: 16px;
-            font-weight: 500;
-            color: #f1f5f9;
-            background: rgba(255, 255, 255, 0.1); /* Hafif beyaz zemin */
-            backdrop-filter: blur(5px);
-            padding: 10px 15px;
-            margin-bottom: 10px;
-            border-left: 4px solid #ffffff; /* BEYAZ Çizgi */
-            border-radius: 0 4px 4px 0;
-            
-            /* Animasyon */
-            overflow: hidden;
-            white-space: nowrap;
-            width: 0;
+            font-size: 15px;
+            color: #94a3b8; /* Sönük Gri - Gözü yormasın, kutuya baksın */
+            margin-bottom: 8px;
+            border-left: 3px solid #3b82f6; /* Elektrik Mavisi Çizgi */
+            padding-left: 15px;
             opacity: 0;
-            animation: typeText 1.0s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards; /* Daha akıcı animasyon */
+            animation: fadeInMove 1s ease forwards;
         }}
         
-        .typewriter-line:nth-child(1) {{ animation-delay: 0.5s; opacity: 1; }}
-        .typewriter-line:nth-child(2) {{ animation-delay: 2.5s; opacity: 1; }}
-        .typewriter-line:nth-child(3) {{ animation-delay: 4.5s; opacity: 1; }}
-        .typewriter-line:nth-child(4) {{ animation-delay: 6.5s; opacity: 1; }}
-        .typewriter-line:nth-child(5) {{ animation-delay: 8.5s; opacity: 1; }}
+        .typewriter-line:nth-child(1) {{ animation-delay: 0.5s; }}
+        .typewriter-line:nth-child(2) {{ animation-delay: 2.5s; }}
+        .typewriter-line:nth-child(3) {{ animation-delay: 4.5s; }}
+        .typewriter-line:nth-child(4) {{ animation-delay: 6.5s; }}
 
-        @keyframes typeText {{ 0% {{ width: 0; opacity: 1; }} 100% {{ width: 100%; opacity: 1; }} }}
+        @keyframes fadeInMove {{
+            from {{ opacity: 0; transform: translateX(-20px); }}
+            to {{ opacity: 1; transform: translateX(0); }}
+        }}
 
-        /* --- GİRİŞ KUTUSU (ODAK NOKTASI) --- */
+        /* --- SAĞ KOLON (GİRİŞ KUTUSU) --- */
         
-        /* Tab Tasarımı - Minimalist */
+        /* KUTU TASARIMI (SPOTLIGHT EFFECT) */
+        div[data-testid="column"]:nth-of-type(2) {{
+            background-color: #000000; /* TAM SİYAH */
+            padding: 50px;
+            border-radius: 20px;
+            /* ÖNE ÇIKARAN EFEKT BURADA: */
+            border: 1px solid rgba(255, 255, 255, 0.15); /* İnce Gümüş Çerçeve */
+            box-shadow: 0 0 100px rgba(0,0,0, 1); /* Arkaya çok koyu gölge */
+            margin-top: 5vh;
+            position: relative;
+            z-index: 100;
+        }}
+
+        /* Sekmeler (Tabs) */
         .stTabs [data-baseweb="tab-list"] {{
-            gap: 20px;
-            background-color: transparent;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
+            gap: 10px;
+            background-color: #111;
+            padding: 5px;
+            border-radius: 10px;
+            margin-bottom: 25px;
         }}
         .stTabs [data-baseweb="tab"] {{
             height: 40px;
             background-color: transparent;
             border: none;
-            color: #94a3b8;
+            color: #64748b;
             font-weight: 600;
-            font-size: 14px;
+            border-radius: 8px;
         }}
         .stTabs [data-baseweb="tab"][aria-selected="true"] {{
-            color: #ffffff !important;
-            border-bottom: 2px solid #ffffff; /* Seçili olanın altında beyaz çizgi */
+            background-color: #333 !important; /* Seçili Tab Koyu Gri */
+            color: #fff !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }}
 
-        /* Ana Kutu - KAPKARA VE OPAK */
-        div[data-testid="column"]:nth-of-type(2) {{
-            background: #000000; /* TAM SİYAH */
-            padding: 50px;
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.2); /* İnce Gümüş Çerçeve */
-            box-shadow: 0 0 80px rgba(0,0,0, 0.9); /* ÇOK GÜÇLÜ GÖLGE */
-            margin-top: 8vh;
-            position: relative;
-            z-index: 100;
-        }}
-
-        /* Inputlar - Modern */
+        /* Inputlar (Form Alanları) */
         .stTextInput input, .stSelectbox div[data-baseweb="select"] {{
-            background-color: #111111 !important; /* Koyu gri */
-            border: 1px solid #333333 !important;
+            background-color: #0a0a0a !important;
+            border: 1px solid #333 !important;
             color: white !important;
-            height: 50px !important;
-            border-radius: 12px !important;
+            height: 48px !important;
+            border-radius: 8px !important;
             padding-left: 15px !important;
-            transition: all 0.3s;
         }}
         .stTextInput input:focus {{
-            border-color: #ffffff !important; /* Focus olunca BEYAZ */
-            background-color: #000000 !important;
+            border-color: #ffffff !important; /* Focus olunca BEYAZ yanar */
+            background-color: #000 !important;
         }}
-        
-        /* PREMIUM BUTON: BEYAZ ZEMİN, SİYAH YAZI */
+
+        /* BUTON TASARIMI (EN ÖNEMLİ KISIM) */
+        /* Beyaz Buton - Siyah Yazı -> En Premium Kombinasyon */
         .stButton button {{
             background-color: #ffffff !important;
             color: #000000 !important;
@@ -144,63 +141,65 @@ def inject_css(bg_url):
             border: none !important;
             height: 55px !important;
             font-size: 15px !important;
-            border-radius: 12px !important;
-            letter-spacing: 0.5px;
+            border-radius: 8px !important;
             transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
         }}
         .stButton button:hover {{
-            background-color: #e2e8f0 !important; /* Hafif grileşme */
-            transform: scale(1.01);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); /* Beyaz parlama */
+            background-color: #e2e8f0 !important;
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3); /* Parlama artar */
         }}
-        
-        /* Yazılar */
-        h2 {{ font-family: 'Helvetica Neue', sans-serif; font-weight: 700; letter-spacing: -1px; }}
-        a {{ color: #94a3b8 !important; text-decoration: none; font-size: 13px; transition: 0.3s; }}
+
+        /* Yazı Stilleri */
+        h2 {{ color: white !important; font-family: 'Helvetica', sans-serif; letter-spacing: -1px; }}
+        p {{ color: #94a3b8 !important; }}
+        a {{ color: #64748b !important; text-decoration: none; font-size: 13px; }}
         a:hover {{ color: white !important; }}
-        .stCheckbox span {{ color: #94a3b8 !important; }}
+        .stCheckbox span {{ color: #64748b !important; font-size: 13px; }}
 
     </style>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 4. VALIDATION
+# 4. SAAS ANALİZ & VALİDASYON
 # ==============================================================================
-def validate_registration(email, phone):
+def validate_application(email, phone, company):
+    if not company or len(company) < 3:
+        return False, "Firma ünvanı geçerli değil."
     if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-        return False, "Geçersiz e-posta adresi."
+        return False, "Kurumsal e-posta formatı hatalı."
     if len(phone) < 10 or not phone.isdigit():
-        return False, "Telefon numarası geçersiz."
+        return False, "Telefon numarası eksik veya hatalı."
     return True, ""
 
 # ==============================================================================
-# 5. RENDER
+# 5. RENDER SAYFASI
 # ==============================================================================
 def render_login_page():
     bg, messages = get_assets()
     inject_css(bg)
     
-    # Grid: Sol(1.4) - Orta(1.2) - Sağ(0.4)
-    # Orta kolon, giriş kutusunun olduğu yer.
-    col1, col2, col3 = st.columns([1.4, 1.2, 0.4])
+    # GRID SİSTEMİ: Ortadaki kutuyu biraz daha büyüttüm (1.3)
+    # [Sol Boşluk] - [Kutu] - [Sağ Boşluk]
+    col1, col2, col3 = st.columns([1.3, 1.3, 0.4])
     
-    # --- SAĞ TARAF: PREMIUM LOGIN BOX ---
     with col2:
-        st.markdown("<h2 style='text-align:center; color:white; margin-bottom:5px;'>ARTIS PANEL</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align:center; color:#64748b; margin-bottom:30px; font-size:14px;'>Global Operasyon Yönetim Sistemi</p>", unsafe_allow_html=True)
+        # BAŞLIK
+        st.markdown("<h2 style='text-align:center; margin-bottom:5px;'>ARTIS PANEL</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align:center; margin-bottom:25px; font-size:13px;'>Global Operasyon & İhracat Yönetim Sistemi</p>", unsafe_allow_html=True)
 
-        # SEKMELER (Minimalist)
-        tab_login, tab_register = st.tabs(["GİRİŞ YAP", "BAŞVURU YAP"])
+        # SEKMELER
+        tab_login, tab_apply = st.tabs(["GİRİŞ YAP", "BAŞVURU YAP"])
         
-        # --- TAB 1: GİRİŞ ---
+        # --- 1. GİRİŞ FORMU ---
         with tab_login:
-            st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
             with st.form("login_form"):
                 user = st.text_input("Kullanıcı Adı", placeholder="admin")
-                st.markdown("<div style='height:5px'></div>", unsafe_allow_html=True)
                 pw = st.text_input("Şifre", type="password", placeholder="••••••••")
                 
-                st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
+                st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
                 
                 c1, c2 = st.columns([1, 1])
                 with c1:
@@ -212,45 +211,60 @@ def render_login_page():
                 
                 if st.form_submit_button("GÜVENLİ GİRİŞ", type="primary", use_container_width=True):
                     if user == "admin" and pw == "admin":
-                        with st.spinner("Kimlik doğrulanıyor..."):
+                        with st.spinner("Yetkilendirme sağlanıyor..."):
                             time.sleep(1)
                         st.session_state.logged_in = True
                         st.rerun()
                     else:
-                        st.error("Bilgiler hatalı.")
+                        st.error("Giriş bilgileri doğrulanamadı.")
 
-        # --- TAB 2: KAYIT (BAŞVURU) ---
-        with tab_register:
+        # --- 2. BAŞVURU FORMU (SAAS ANALİZİ) ---
+        with tab_apply:
             st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-            st.markdown("<p style='color:#64748b; font-size:12px; margin-bottom:15px;'>Amerika pazarı için üretici başvurusu.</p>", unsafe_allow_html=True)
+            st.markdown("<p style='color:#64748b; font-size:12px; text-align:center; margin-bottom:15px;'>Amerika pazarı için üretici ön değerlendirme formu.</p>", unsafe_allow_html=True)
             
-            with st.form("register_form"):
-                company = st.text_input("Firma Ünvanı", placeholder="Şirket Adı A.Ş.")
-                sector = st.selectbox("Sektör", ["Tekstil", "Gıda", "Otomotiv", "Mobilya", "Kozmetik", "Diğer"])
+            with st.form("apply_form"):
+                # Firma Kimliği
+                company = st.text_input("Firma Ünvanı", placeholder="Örn: Yılmaz Tekstil A.Ş.")
                 
-                rc1, rc2 = st.columns(2)
-                with rc1:
-                    email = st.text_input("Kurumsal E-Posta", placeholder="info@...")
-                with rc2:
-                    phone = st.text_input("Telefon", placeholder="5XX...")
+                c_sec, c_exp = st.columns(2)
+                with c_sec:
+                    sector = st.selectbox("Sektörünüz", ["Tekstil & Giyim", "Mobilya", "Gıda", "Otomotiv", "Kozmetik", "Endüstriyel", "Diğer"])
+                with c_exp:
+                    # Kritik Soru: Müşteriyi segmentlere ayırır
+                    status = st.selectbox("İhracat Durumu", ["Henüz Başlamadım", "Yeni Başladım (Az Hacim)", "Profesyonel İhracatçıyım"])
+
+                # Hacim ve Hedef (Lead Scoring için)
+                c_vol, c_target = st.columns(2)
+                with c_vol:
+                    volume = st.selectbox("Aylık Tahmini Gönderi", ["0 - 50 Adet", "50 - 500 Adet", "500 - 5000 Adet", "5000+ Adet"])
+                with c_target:
+                    target = st.selectbox("Hedef Pazar", ["Sadece ABD", "ABD + Kanada", "Avrupa", "Global"])
+
+                st.markdown("---") # Ayırıcı çizgi
                 
-                st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+                # İletişim
+                c_email, c_phone = st.columns(2)
+                with c_email:
+                    email = st.text_input("Kurumsal E-Posta", placeholder="info@firma.com")
+                with c_phone:
+                    phone = st.text_input("Yetkili Telefon", placeholder="05XX...")
+
+                st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
                 
-                if st.form_submit_button("HEMEN BAŞVUR", type="primary", use_container_width=True):
-                    valid, msg = validate_registration(email, phone)
-                    if not company:
-                        st.warning("Firma adı zorunludur.")
-                    elif not valid:
+                if st.form_submit_button("BAŞVURUYU GÖNDER", type="primary", use_container_width=True):
+                    valid, msg = validate_application(email, phone, company)
+                    
+                    if not valid:
                         st.error(msg)
                     else:
-                        st.success("Başvurunuz alındı. Sizinle iletişime geçeceğiz.")
-                        time.sleep(2)
+                        st.success("Başvurunuz başarıyla alındı! İhracat uzmanlarımız 24 saat içinde sizinle iletişime geçecektir.")
+                        time.sleep(3)
 
-    # --- SOL ÜST: YAZILAR ---
+    # --- SOL ÜST YAZILAR ---
     html_code = ""
     for msg in messages:
         html_code += f'<div class="typewriter-line">{msg}</div>'
-    
     st.markdown(f'<div class="terminal-container">{html_code}</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
