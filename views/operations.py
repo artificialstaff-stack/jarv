@@ -33,9 +33,6 @@ def inject_operations_css():
             transition: all 0.2s;
         }
         .task-card:hover { transform: translateX(4px); background-color: rgba(255, 255, 255, 0.04); }
-        .prio-High { border-left-color: #EF4444 !important; }
-        .prio-Medium { border-left-color: #F59E0B !important; }
-        .prio-Low { border-left-color: #3B82F6 !important; }
         .task-title { font-weight: 500; font-size: 15px; color: #E4E4E7; }
         .task-meta { font-size: 11px; color: #A1A1AA; display: flex; gap: 10px; margin-top: 4px; }
         .task-tag { background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 4px; font-weight: 600; }
@@ -57,17 +54,20 @@ def inject_operations_css():
         .icon-pdf { background: rgba(239, 68, 68, 0.15); color: #F87171; }
         .icon-xls { background: rgba(16, 185, 129, 0.15); color: #34D399; }
         .icon-img { background: rgba(59, 130, 246, 0.15); color: #60A5FA; }
-        .doc-tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.05); color: #A1A1AA; }
-
-        /* --- LOJİSTİK WIZARD (FORMS) --- */
-        .wizard-container { display: flex; justify-content: space-between; margin-bottom: 30px; position: relative; max-width: 500px; margin-left: auto; margin-right: auto; }
-        .wizard-line { position: absolute; top: 15px; left: 0; right: 0; height: 2px; background: #27272A; z-index: 0; }
-        .step-item { z-index: 1; background: #000000; padding: 0 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .step-circle { width: 30px; height: 30px; border-radius: 50%; background: #18181B; border: 2px solid #3F3F46; color: #71717A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
-        .step-active .step-circle { border-color: #3B82F6; background: rgba(59, 130, 246, 0.1); color: #3B82F6; }
         
-        /* Özet Kartı */
-        .summary-card { background: #18181B; border: 1px solid #27272A; border-radius: 12px; padding: 20px; }
+        /* --- PRO FORM STİLLERİ --- */
+        .form-section-title {
+            color: #C5A059;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+            padding-bottom: 5px;
+        }
+        .summary-card { background: #18181B; border: 1px solid #27272A; border-radius: 12px; padding: 20px; position: sticky; top: 20px; }
         .summary-total { font-size: 28px; font-weight: 800; color: #FFF; letter-spacing: -1px; }
     </style>
     """, unsafe_allow_html=True)
@@ -76,18 +76,15 @@ def inject_operations_css():
 # 🧠 2. VERİ YÖNETİMİ (STATE)
 # ==============================================================================
 def init_state():
-    # Görevler
     if "todos" not in st.session_state:
         st.session_state.todos = [
             {"id": 1, "task": "Vergileri öde", "tag": "Finans", "prio": "High", "done": False, "date": "2026-01-15"},
             {"id": 2, "task": "Washington stok sayımı", "tag": "Operasyon", "prio": "Medium", "done": False, "date": "2026-01-20"},
         ]
-    # Dosyalar (Mock)
     if "documents" not in st.session_state:
         st.session_state.documents = [
             {"name": "2026_Ocak_Gümrük_Beyan.pdf", "type": "pdf", "size": "2.4 MB", "date": "14 Jan", "category": "Gümrük"},
             {"name": "Stok_Listesi_v2.xlsx", "type": "xls", "size": "850 KB", "date": "12 Jan", "category": "Lojistik"},
-            {"name": "Hasar_Raporu_001.jpg", "type": "img", "size": "4.2 MB", "date": "08 Jan", "category": "Saha"},
         ]
 
 # --- Yardımcı Fonksiyonlar ---
@@ -102,37 +99,19 @@ def toggle_task(idx):
     st.session_state.todos[idx]['done'] = not st.session_state.todos[idx]['done']
 
 # ==============================================================================
-# 🧩 3. ALT BİLEŞENLER (RENDERERS)
+# 🧩 3. ALT BİLEŞENLER
 # ==============================================================================
-
 def render_summary_header():
-    """Sayfanın en üstündeki özet bant"""
     total_tasks = len(st.session_state.todos)
     pending_tasks = sum(1 for t in st.session_state.todos if not t['done'])
-    doc_count = len(st.session_state.documents)
-    
     c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.markdown(f"""<div class='metric-card-small'><div class='metric-label'>Bekleyen İş</div><div class='metric-value' style='color:#F59E0B'>{pending_tasks}</div></div>""", unsafe_allow_html=True)
-    with c2:
-        st.markdown(f"""<div class='metric-card-small'><div class='metric-label'>Tamamlanan</div><div class='metric-value' style='color:#10B981'>{total_tasks - pending_tasks}</div></div>""", unsafe_allow_html=True)
-    with c3:
-        st.markdown(f"""<div class='metric-card-small'><div class='metric-label'>Aktif Sevkiyat</div><div class='metric-value'>2</div></div>""", unsafe_allow_html=True)
-    with c4:
-        st.markdown(f"""<div class='metric-card-small'><div class='metric-label'>Arşiv Dosyası</div><div class='metric-value'>{doc_count}</div></div>""", unsafe_allow_html=True)
-
-def render_wizard_html(step):
-    steps = [{"n":1,"t":"Kargo"},{"n":2,"t":"Lojistik"},{"n":3,"t":"Onay"}]
-    html = ['<div class="wizard-container"><div class="wizard-line"></div>']
-    for s in steps:
-        active = "step-active" if s["n"] <= step else ""
-        icon = "✓" if s["n"] < step else str(s["n"])
-        html.append(f'<div class="step-item {active}"><div class="step-circle">{icon}</div><div style="font-size:10px; color:#666">{s["t"]}</div></div>')
-    html.append('</div>')
-    return "".join(html)
+    with c1: st.markdown(f"""<div class='metric-card-small'><div class='metric-label'>Bekleyen İş</div><div class='metric-value' style='color:#F59E0B'>{pending_tasks}</div></div>""", unsafe_allow_html=True)
+    with c2: st.markdown(f"""<div class='metric-card-small'><div class='metric-label'>Tamamlanan</div><div class='metric-value' style='color:#10B981'>{total_tasks - pending_tasks}</div></div>""", unsafe_allow_html=True)
+    with c3: st.markdown(f"""<div class='metric-card-small'><div class='metric-label'>Aktif Sevkiyat</div><div class='metric-value'>2</div></div>""", unsafe_allow_html=True)
+    with c4: st.markdown(f"""<div class='metric-card-small'><div class='metric-label'>Arşiv</div><div class='metric-value'>{len(st.session_state.documents)}</div></div>""", unsafe_allow_html=True)
 
 # ==============================================================================
-# 🚀 4. ANA EKRAN VE SEKMELER
+# 🚀 4. ANA EKRAN
 # ==============================================================================
 def render_operations():
     inject_operations_css()
@@ -141,140 +120,146 @@ def render_operations():
     st.title("🛠️ Operasyon Merkezi")
     st.caption("Üretim, sevkiyat ve görevlerinizi tek bir yerden yönetin.")
     
-    # 1. ÖZET BANT
     render_summary_header()
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 2. ANA SEKMELER
-    tab_logistics, tab_tasks, tab_docs = st.tabs(["🚢 Yeni Sevkiyat & Talep", "✅ Görev Listesi", "📂 Dijital Arşiv"])
+    tab_logistics, tab_tasks, tab_docs = st.tabs(["🚢 Yeni İhracat Talebi (ABD)", "✅ Görev Listesi", "📂 Dijital Arşiv"])
 
-    # --- SEKME 1: LOJİSTİK (FORMS) ---
+    # --- SEKME 1: PROFESYONEL İHRACAT FORMU ---
     with tab_logistics:
-        st.markdown(render_wizard_html(1), unsafe_allow_html=True)
-        col_form, col_info = st.columns([2, 1])
+        col_form, col_summary = st.columns([2, 1], gap="large")
         
         with col_form:
-            with st.form("shipment_form"):
-                st.subheader("📦 Sevkiyat Emri Oluştur")
+            with st.form("export_form"):
+                st.markdown("### 🇹🇷 ➔ 🇺🇸 ABD İhracat & Lojistik Formu")
+                st.caption("Lütfen gümrükleme ve lojistik işlemleri için tüm alanları eksiksiz doldurun.")
+                
+                # 1. ÜRÜN VE GÜMRÜK DETAYLARI
+                st.markdown('<div class="form-section-title">1. ÜRÜN & GÜMRÜK DETAYLARI</div>', unsafe_allow_html=True)
                 c1, c2 = st.columns(2)
-                product = c1.selectbox("Ürün Tipi", ["Tekstil", "Gıda", "Mobilya", "Yedek Parça"])
-                boxes = c2.number_input("Koli Adedi", 1, 1000, 50)
+                product_name = c1.text_input("Ürün Tanımı (İngilizce)", placeholder="Örn: 100% Cotton Towels")
+                hs_code = c2.text_input("GTİP Kodu (HS Code)", placeholder="Örn: 6302.60.00.00.00", help="Gümrük Tarife İstatistik Pozisyonu (12 Hane)")
                 
                 c3, c4 = st.columns(2)
-                origin = c3.selectbox("Çıkış Deposu", ["İstanbul", "Bursa", "İzmir"])
-                service = c4.radio("Hizmet", ["Ekonomik (Gemi)", "Ekspres (Uçak)"], horizontal=True)
-                
-                note = st.text_area("Notlar", height=80, placeholder="Özel paketleme isteği vb.")
-                
-                if st.form_submit_button("🚀 Talebi Gönder", type="primary", use_container_width=True):
-                    with st.status("İşleniyor...", expanded=True):
-                        time.sleep(1)
-                        st.write("✅ Stok kontrol edildi.")
-                        time.sleep(0.5)
-                        st.write("✅ Lojistik planlamaya iletildi.")
-                    st.success(f"Talep alındı! Referans: TR-{random.randint(1000,9999)}")
+                material_origin = c3.selectbox("Menşei", ["Türkiye (TR)", "Diğer"])
+                incoterms = c4.selectbox("Teslim Şekli (Incoterms)", ["EXW - İşyerinde Teslim", "FOB - Gemi Güvertesinde", "CIF - Mal Bedeli, Sigorta, Navlun", "DDP - Gümrük Vergileri Ödenmiş"], index=3)
 
-        with col_info:
-            price = boxes * (12 if "Gemi" in service else 45)
+                # 2. PAKETLEME VE HACİM
+                st.markdown('<div class="form-section-title">2. PAKETLEME & HACİM (PL)</div>', unsafe_allow_html=True)
+                cc1, cc2 = st.columns(2)
+                total_cartons = cc1.number_input("Toplam Koli Adedi", min_value=1, value=50)
+                total_weight = cc2.number_input("Toplam Brüt Ağırlık (kg)", min_value=1.0, value=500.0)
+                
+                st.caption("Koli Ebatları (cm) - Hacimsel ağırlık hesabı için gereklidir.")
+                d1, d2, d3 = st.columns(3)
+                dim_l = d1.number_input("Boy (L)", value=60)
+                dim_w = d2.number_input("En (W)", value=40)
+                dim_h = d3.number_input("Yükseklik (H)", value=40)
+
+                # 3. ALICI VE SEVKİYAT BİLGİLERİ
+                st.markdown('<div class="form-section-title">3. SEVKİYAT & ALICI (CONSIGNEE)</div>', unsafe_allow_html=True)
+                s1, s2 = st.columns(2)
+                ship_method = s1.radio("Taşıma Modu", ["Deniz Yolu (LCL - Parsiyel)", "Deniz Yolu (FCL - Full Konteyner)", "Hava Kargo (Express)"], index=0)
+                pickup_loc = s2.selectbox("Yükleme Adresi", ["İstanbul (Depo)", "İzmir (Fabrika)", "Bursa (Fabrika)", "Gaziantep (Fabrika)"])
+                
+                consignee = st.text_area("Alıcı (Consignee) Adres & Vergi No (EIN)", placeholder="Örn: Amazon FBA Warehouse TEB3\n123 Logistics Way, NJ 08000\nTax ID: XX-XXXXXXX", height=80)
+                
+                # 4. DOKÜMAN YÜKLEME
+                st.markdown('<div class="form-section-title">4. ZORUNLU BELGELER</div>', unsafe_allow_html=True)
+                doc1 = st.file_uploader("Çeki Listesi (Packing List)", type=["pdf", "xlsx"], key="pl_up")
+                doc2 = st.file_uploader("Ticari Fatura (Commercial Invoice)", type=["pdf", "xlsx"], key="ci_up")
+
+                st.markdown("---")
+                submitted = st.form_submit_button("🚀 Teklif Al ve Operasyonu Başlat", type="primary", use_container_width=True)
+
+        with col_summary:
+            # Hacimsel Ağırlık Hesabı (L x W x H / 5000) * Koli Adedi
+            volumetric_weight = (dim_l * dim_w * dim_h / 5000) * total_cartons
+            chargeable_weight = max(total_weight, volumetric_weight)
+            cbm = (dim_l * dim_w * dim_h * total_cartons) / 1000000
+            
+            # Tahmini Fiyat (Mock)
+            rate = 4.5 if "Hava" in ship_method else 0.8 # $/kg
+            est_cost = chargeable_weight * rate
+            
             st.markdown(f"""
             <div class="summary-card">
-                <div style="font-size:12px; color:#888;">TAHMİNİ MALİYET</div>
-                <div class="summary-total">${price:,}</div>
-                <div style="margin-top:15px; font-size:14px; color:#AAA;">
-                    <div>📦 {boxes} Koli</div>
-                    <div>📍 {origin} Çıkışlı</div>
-                    <div>🚀 {service}</div>
+                <div style="font-size:12px; color:#888;">TAHMİNİ NAVLUN BEDELİ</div>
+                <div class="summary-total">${est_cost:,.2f}</div>
+                <div style="margin-top:15px; font-size:13px; color:#AAA; line-height: 1.6;">
+                    <div style="display:flex; justify-content:space-between;"><span>📦 Koli:</span> <span style="color:#FFF">{total_cartons} Adet</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>⚖️ Hacim:</span> <span style="color:#FFF">{cbm:.2f} CBM</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>📏 Hacimsel Kg:</span> <span style="color:#FFF">{volumetric_weight:.1f} kg</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>💰 Ücretlendirilen:</span> <span style="color:#C5A059; font-weight:bold;">{chargeable_weight:.1f} kg</span></div>
+                    <hr style="border-color:#333;">
+                    <div style="color:#3B82F6;">ℹ️ {incoterms.split('-')[0]} seçildi. Gümrük vergileri hariçtir.</div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            st.info("💡 100 koli üzeri gönderimlerde %10 indirim uygulanır.")
+            
+            st.info("""
+            **Gerekli Belgeler:**
+            * Commercial Invoice
+            * Packing List
+            * Gerekiyorsa Menşe Şahadetnamesi (ATR/EUR1 ABD için geçerli değildir)
+            """)
+
+        if submitted:
+            if not product_name or not hs_code:
+                st.error("Lütfen Ürün Tanımı ve GTİP Kodunu giriniz.")
+            else:
+                with st.status("Operasyon Başlatılıyor...", expanded=True):
+                    st.write("📦 Hacimsel ağırlık kontrol ediliyor...")
+                    time.sleep(0.8)
+                    st.write(f"🌍 {incoterms} kurallarına göre rota oluşturuluyor...")
+                    time.sleep(0.8)
+                    st.write("📄 Gümrük müşavirine bildirim gönderildi.")
+                    time.sleep(0.5)
+                st.success(f"Talebiniz Alındı! Operasyon Kodu: **US-EXP-{random.randint(10000,99999)}**")
+                st.balloons()
 
     # --- SEKME 2: GÖREVLER (TODO) ---
     with tab_tasks:
         c_add, c_list = st.columns([1, 2])
-        
         with c_add:
             st.markdown("##### ⚡ Hızlı Görev Ekle")
             with st.form("add_task"):
-                t_name = st.text_input("Görev Adı", placeholder="Örn: Faturayı kes")
-                t_tag = st.selectbox("Etiket", ["Genel", "Finans", "Lojistik", "Üretim"])
+                t_name = st.text_input("Görev Adı")
+                t_tag = st.selectbox("Etiket", ["Genel", "Lojistik", "Üretim", "Gümrük"])
                 t_prio = st.select_slider("Öncelik", ["Low", "Medium", "High"], value="Medium")
                 if st.form_submit_button("Ekle", use_container_width=True):
                     if t_name:
                         add_task(t_name, t_tag, t_prio)
                         st.rerun()
-
         with c_list:
             st.markdown("##### 📋 Yapılacaklar")
-            # Aktif Görevler
-            active_tasks = [t for t in st.session_state.todos if not t['done']]
-            if not active_tasks:
-                st.success("Tüm görevler tamamlandı! 🎉")
-            
             for i, task in enumerate(st.session_state.todos):
                 if not task['done']:
                     idx = st.session_state.todos.index(task)
                     prio_color = "#EF4444" if task['prio']=="High" else "#F59E0B" if task['prio']=="Medium" else "#3B82F6"
-                    
                     c_chk, c_txt, c_del = st.columns([0.5, 4, 0.5])
-                    if c_chk.button("⬜", key=f"chk_{task['id']}"):
-                        toggle_task(idx)
-                        st.rerun()
-                    
-                    c_txt.markdown(f"""
-                        <div class="task-card" style="border-left-color: {prio_color}; margin:0;">
-                            <div>
-                                <div class="task-title">{task['task']}</div>
-                                <div class="task-meta">
-                                    <span class="task-tag">{task['tag']}</span> • {task['date']}
-                                </div>
-                            </div>
-                        </div>
-                    """, unsafe_allow_html=True)
-                    
-                    if c_del.button("🗑️", key=f"del_{task['id']}"):
-                        delete_task(idx)
-                        st.rerun()
+                    if c_chk.button("⬜", key=f"chk_{task['id']}"): toggle_task(idx); st.rerun()
+                    c_txt.markdown(f"""<div class="task-card" style="border-left-color: {prio_color}; margin:0;"><div><div class="task-title">{task['task']}</div><div class="task-meta"><span class="task-tag">{task['tag']}</span> • {task['date']}</div></div></div>""", unsafe_allow_html=True)
+                    if c_del.button("🗑️", key=f"del_{task['id']}"): delete_task(idx); st.rerun()
 
-            # Tamamlananları Göster/Gizle
-            with st.expander("Tamamlanan Görevler"):
-                done_tasks = [t for t in st.session_state.todos if t['done']]
-                for t in done_tasks:
-                    st.markdown(f"~~{t['task']}~~ <span style='font-size:10px; color:green'>Tamamlandı</span>", unsafe_allow_html=True)
-
-    # --- SEKME 3: DOKÜMANLAR (DOCS) ---
+    # --- SEKME 3: DOKÜMANLAR ---
     with tab_docs:
         c_filter, c_upload = st.columns([2, 1])
+        with c_filter: search = st.text_input("🔍 Dosya Ara")
+        with c_upload: st.file_uploader("Yükle", label_visibility="collapsed")
         
-        with c_filter:
-            search = st.text_input("🔍 Dosya Ara", placeholder="Dosya adı...")
-        
-        with c_upload:
-            uploaded = st.file_uploader("Yükle", label_visibility="collapsed")
-            if uploaded: st.toast("Dosya yüklendi!", icon="cloud")
-
         st.markdown("##### 📄 Son Dosyalar")
-        
         docs = st.session_state.documents
-        if search:
-            docs = [d for d in docs if search.lower() in d['name'].lower()]
-            
+        if search: docs = [d for d in docs if search.lower() in d['name'].lower()]
+        
         for idx, doc in enumerate(docs):
             icon_cls = "icon-pdf" if "pdf" in doc['type'] else "icon-xls" if "xls" in doc['type'] else "icon-img"
-            icon_html = "📄" # Basitlik için
-            
             c1, c2, c3 = st.columns([0.5, 3, 1])
-            with c1:
-                st.markdown(f"<div class='file-icon-box {icon_cls}'><i class='bx bx-file'></i></div>", unsafe_allow_html=True)
-            with c2:
-                st.markdown(f"**{doc['name']}**")
-                st.caption(f"{doc['size']} • {doc['date']} • {doc['category']}")
-            with c3:
-                st.button("⬇️ İndir", key=f"dl_{idx}", use_container_width=True)
-            
+            with c1: st.markdown(f"<div class='file-icon-box {icon_cls}'><i class='bx bx-file'></i></div>", unsafe_allow_html=True)
+            with c2: st.markdown(f"**{doc['name']}**"); st.caption(f"{doc['size']} • {doc['date']} • {doc['category']}")
+            with c3: st.button("⬇️ İndir", key=f"dl_{idx}", use_container_width=True)
             st.markdown("<hr style='margin:5px 0; border-color:rgba(255,255,255,0.05)'>", unsafe_allow_html=True)
 
-# Test için (sadece bu dosya çalıştırılırsa)
 if __name__ == "__main__":
     st.set_page_config(layout="wide", page_title="Operations Hub")
     render_operations()
