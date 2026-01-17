@@ -33,6 +33,9 @@ def inject_operations_css():
             transition: all 0.2s;
         }
         .task-card:hover { transform: translateX(4px); background-color: rgba(255, 255, 255, 0.04); }
+        .prio-High { border-left-color: #EF4444 !important; }
+        .prio-Medium { border-left-color: #F59E0B !important; }
+        .prio-Low { border-left-color: #3B82F6 !important; }
         .task-title { font-weight: 500; font-size: 15px; color: #E4E4E7; }
         .task-meta { font-size: 11px; color: #A1A1AA; display: flex; gap: 10px; margin-top: 4px; }
         .task-tag { background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 4px; font-weight: 600; }
@@ -97,6 +100,24 @@ def delete_task(idx):
 
 def toggle_task(idx):
     st.session_state.todos[idx]['done'] = not st.session_state.todos[idx]['done']
+
+def save_uploaded_file(uploaded_file, category="Genel"):
+    """Dosyayı hafızaya kaydeder ve Arşiv sekmesinde gösterir."""
+    if uploaded_file is not None:
+        file_type = "pdf" if "pdf" in uploaded_file.type else "xls" if "sheet" in uploaded_file.type or "excel" in uploaded_file.type else "img"
+        file_size = f"{uploaded_file.size / 1024:.1f} KB"
+        
+        new_doc = {
+            "name": uploaded_file.name,
+            "type": file_type,
+            "size": file_size,
+            "date": datetime.now().strftime("%d %b"),
+            "category": category
+        }
+        # Listeye en başa ekle
+        st.session_state.documents.insert(0, new_doc)
+        return True
+    return False
 
 # ==============================================================================
 # 🧩 3. ALT BİLEŞENLER
@@ -166,6 +187,7 @@ def render_operations():
                 
                 # 4. DOKÜMAN YÜKLEME
                 st.markdown('<div class="form-section-title">4. ZORUNLU BELGELER</div>', unsafe_allow_html=True)
+                st.info("Buraya yüklenen belgeler otomatik olarak **Dijital Arşiv** sekmesine kaydedilir.")
                 doc1 = st.file_uploader("Çeki Listesi (Packing List)", type=["pdf", "xlsx"], key="pl_up")
                 doc2 = st.file_uploader("Ticari Fatura (Commercial Invoice)", type=["pdf", "xlsx"], key="ci_up")
 
@@ -208,14 +230,29 @@ def render_operations():
             if not product_name or not hs_code:
                 st.error("Lütfen Ürün Tanımı ve GTİP Kodunu giriniz.")
             else:
+                # --- DOSYALARI KAYDETME İŞLEMİ (BURASI YENİ) ---
+                files_saved = 0
+                if doc1:
+                    save_uploaded_file(doc1, category="Lojistik")
+                    files_saved += 1
+                if doc2:
+                    save_uploaded_file(doc2, category="Finans")
+                    files_saved += 1
+                
                 with st.status("Operasyon Başlatılıyor...", expanded=True):
                     st.write("📦 Hacimsel ağırlık kontrol ediliyor...")
-                    time.sleep(0.8)
+                    time.sleep(0.5)
+                    if files_saved > 0:
+                        st.write(f"📂 {files_saved} adet belge Dijital Arşiv'e kaydedildi.")
+                        time.sleep(0.5)
                     st.write(f"🌍 {incoterms} kurallarına göre rota oluşturuluyor...")
-                    time.sleep(0.8)
+                    time.sleep(0.5)
                     st.write("📄 Gümrük müşavirine bildirim gönderildi.")
                     time.sleep(0.5)
+                
                 st.success(f"Talebiniz Alındı! Operasyon Kodu: **US-EXP-{random.randint(10000,99999)}**")
+                if files_saved > 0:
+                    st.toast(f"{files_saved} dosya arşivlendi.", icon="wq")
                 st.balloons()
 
     # --- SEKME 2: GÖREVLER (TODO) ---
@@ -246,7 +283,14 @@ def render_operations():
     with tab_docs:
         c_filter, c_upload = st.columns([2, 1])
         with c_filter: search = st.text_input("🔍 Dosya Ara")
-        with c_upload: st.file_uploader("Yükle", label_visibility="collapsed")
+        with c_upload: 
+            # DİREKT YÜKLEME İÇİN
+            uploaded_doc = st.file_uploader("Hızlı Yükle", label_visibility="collapsed")
+            if uploaded_doc:
+                if save_uploaded_file(uploaded_doc, category="Genel"):
+                    st.toast("Dosya arşivlendi!", icon="✅")
+                    # Sayfayı yenilemek yerine listeyi anlık güncellemek için sleep koyup rerun yapabiliriz
+                    # ama Streamlit zaten rerun yaptığı için gerek yok.
         
         st.markdown("##### 📄 Son Dosyalar")
         docs = st.session_state.documents
