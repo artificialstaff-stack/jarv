@@ -17,11 +17,11 @@ st.set_page_config(
 # 3. MODÜLLERİ YÜKLE
 try:
     import styles, login, dashboard
-    # Operasyonel Araçlar
-    import logistics, inventory, plan, documents, todo, forms
+    # Operasyonel Araçlar (YENİ: Birleştirilmiş Modül)
+    import operations, logistics, inventory, plan
     # Yeni 9 Global Hizmet
     import website, llc, seller, social, ads, automation, leadgen
-    # [YENİ] Admin Modülü (CORTEX AI)
+    # Admin Modülü (CORTEX AI)
     import admin
 except ImportError as e:
     st.error(f"⚠️ Kritik Modül Eksik: {e}. Lütfen 'views' klasöründeki tüm dosyaları oluşturduğundan emin ol.")
@@ -32,12 +32,10 @@ styles.load_css()
 # Session State Başlatma
 if "logged_in" not in st.session_state: st.session_state.logged_in = False
 
-# [GÜNCELLEME] Kullanıcı verisi Login.py'den gelecek.
 if "user_data" not in st.session_state: 
     st.session_state.user_data = {} 
 
-# --- [YENİ] GLOBAL KULLANICI VERİTABANI (CORTEX AI YÖNETİMİ İÇİN) ---
-# AI'ın kullanıcıları banlayıp/açabilmesi için veritabanının burada tanımlı olması gerek.
+# CORTEX AI İçin Global Veritabanı
 if "users_db" not in st.session_state:
     st.session_state.users_db = [
         {"id": 101, "name": "Ahmet Yılmaz", "role": "editor", "status": "Active", "mrr": 1200},
@@ -103,13 +101,11 @@ def render_sidebar():
             index=None 
         )
 
-        # --- GRUP 3: ARAÇLAR ---
+        # --- GRUP 3: ARAÇLAR (GÜNCELLENDİ) ---
         st.markdown('<div class="menu-label" style="font-size:10px; color:#666; letter-spacing:1px; margin-top:20px; margin-bottom:5px;">ARAÇLAR</div>', unsafe_allow_html=True)
         
         tools_map = {
-            "Dokümanlar": "📂 Dijital Arşiv",
-            "Yapılacaklar": "✅ Görevler",
-            "Formlar": "📝 Formlar",
+            "Operasyonlar": "🛠️ Operasyon Merkezi", # Tek çatı altında toplandı
             "Planlar": "💎 Stratejik Planlar"
         }
         
@@ -123,10 +119,9 @@ def render_sidebar():
             index=None
         )
 
-        # --- [EKLENDİ] CORTEX YÖNETİM (SADECE ADMIN GÖRÜR) ---
+        # --- CORTEX YÖNETİM (SADECE ADMIN) ---
         if user_role == 'admin':
             st.markdown("---")
-            # Buton ismini güncelledik
             if st.button("🧠 CORTEX (Super AI)", use_container_width=True):
                 st.session_state.current_page = "Admin"
                 st.rerun()
@@ -147,7 +142,7 @@ def main():
         
         try:
             if page == "Dashboard": dashboard.render_dashboard()
-            # [EKLENDİ] Admin/Cortex Yönlendirmesi
+            # Admin/Cortex Yönlendirmesi
             elif page == "Admin": admin.render()
             
             # Servisler
@@ -161,16 +156,14 @@ def main():
             elif page == "Automation": automation.render()
             elif page == "LeadGen": leadgen.render()
             
-            # Araçlar
-            elif page == "Dokümanlar": documents.render_documents()
-            elif page == "Yapılacaklar": todo.render_todo()
-            elif page == "Formlar": forms.render_forms()
+            # Araçlar (GÜNCELLENDİ)
+            elif page == "Operasyonlar": operations.render_operations() # YENİ MODÜL
             elif page == "Planlar": plan.render_plans()
             else:
                 dashboard.render_dashboard() 
         except Exception as e:
             st.error(f"Sayfa Yükleme Hatası: {e}")
-            st.info("Lütfen ilgili 'views' dosyasının (örn: admin.py) oluşturulduğundan emin olun.")
+            st.info("Lütfen ilgili 'views' dosyasının (örn: operations.py) oluşturulduğundan emin olun.")
 
 if __name__ == "__main__":
     main()
