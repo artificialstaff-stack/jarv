@@ -195,7 +195,7 @@ def render_operations():
                 submitted = st.form_submit_button("🚀 Teklif Al ve Operasyonu Başlat", type="primary", use_container_width=True)
 
         with col_summary:
-            # Hacimsel Ağırlık Hesabı (L x W x H / 5000) * Koli Adedi
+            # Hacimsel Ağırlık Hesabı
             volumetric_weight = (dim_l * dim_w * dim_h / 5000) * total_cartons
             chargeable_weight = max(total_weight, volumetric_weight)
             cbm = (dim_l * dim_w * dim_h * total_cartons) / 1000000
@@ -214,23 +214,18 @@ def render_operations():
                     <div style="display:flex; justify-content:space-between;"><span>📏 Hacimsel Kg:</span> <span style="color:#FFF">{volumetric_weight:.1f} kg</span></div>
                     <div style="display:flex; justify-content:space-between;"><span>💰 Ücretlendirilen:</span> <span style="color:#C5A059; font-weight:bold;">{chargeable_weight:.1f} kg</span></div>
                     <hr style="border-color:#333;">
-                    <div style="color:#3B82F6;">ℹ️ {incoterms.split('-')[0]} seçildi. Gümrük vergileri hariçtir.</div>
+                    <div style="color:#3B82F6;">ℹ️ {incoterms.split('-')[0]} seçildi.</div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
             
-            st.info("""
-            **Gerekli Belgeler:**
-            * Commercial Invoice
-            * Packing List
-            * Gerekiyorsa Menşe Şahadetnamesi (ATR/EUR1 ABD için geçerli değildir)
-            """)
+            st.info("Commercial Invoice ve Packing List zorunludur.")
 
         if submitted:
             if not product_name or not hs_code:
                 st.error("Lütfen Ürün Tanımı ve GTİP Kodunu giriniz.")
             else:
-                # --- DOSYALARI KAYDETME İŞLEMİ (BURASI YENİ) ---
+                # --- DOSYALARI KAYDETME İŞLEMİ (DÜZELTİLDİ) ---
                 files_saved = 0
                 if doc1:
                     save_uploaded_file(doc1, category="Lojistik")
@@ -251,8 +246,10 @@ def render_operations():
                     time.sleep(0.5)
                 
                 st.success(f"Talebiniz Alındı! Operasyon Kodu: **US-EXP-{random.randint(10000,99999)}**")
+                
+                # HATA VEREN KISIM DÜZELTİLDİ: "wq" yerine geçerli emoji
                 if files_saved > 0:
-                    st.toast(f"{files_saved} dosya arşivlendi.", icon="wq")
+                    st.toast(f"{files_saved} dosya arşivlendi.", icon="📂")
                 st.balloons()
 
     # --- SEKME 2: GÖREVLER (TODO) ---
@@ -288,9 +285,8 @@ def render_operations():
             uploaded_doc = st.file_uploader("Hızlı Yükle", label_visibility="collapsed")
             if uploaded_doc:
                 if save_uploaded_file(uploaded_doc, category="Genel"):
+                    # HATA VEREN KISIM DÜZELTİLDİ: "cloud" yerine emoji
                     st.toast("Dosya arşivlendi!", icon="✅")
-                    # Sayfayı yenilemek yerine listeyi anlık güncellemek için sleep koyup rerun yapabiliriz
-                    # ama Streamlit zaten rerun yaptığı için gerek yok.
         
         st.markdown("##### 📄 Son Dosyalar")
         docs = st.session_state.documents
