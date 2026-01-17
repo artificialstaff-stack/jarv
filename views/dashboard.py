@@ -1,12 +1,11 @@
 import streamlit as st
-import brain
+import brain  # logic/brain.py dosyasını kullanır
 import time
-import pandas as pd # Tablo göstermek için gerekli
+import pandas as pd 
 from datetime import datetime
-from typing import Dict, Any
 
 # ==============================================================================
-# 🎨 DASHBOARD STİLİ (Aynı Kalıyor)
+# 🎨 DASHBOARD STİLİ
 # ==============================================================================
 def inject_dashboard_css():
     st.markdown("""
@@ -122,7 +121,7 @@ def render_dashboard():
             
             st.rerun()
 
-    # Asistan Cevabı
+    # Asistan Cevabı (Streamlit akışında input sonrası render edilir)
     if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
         with chat_cont:
             with st.chat_message("assistant"):
