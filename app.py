@@ -24,7 +24,7 @@ try:
     # Admin
     import admin
 except ImportError as e:
-    st.error(f"⚠️ Kritik Modül Eksik: {e}")
+    st.error(f"⚠️ Kritik Modül Eksik: {e}. Lütfen 'views' klasörünü kontrol edin.")
 
 # 4. GLOBAL CSS VE STATE
 styles.load_css()
@@ -33,16 +33,31 @@ if "logged_in" not in st.session_state: st.session_state.logged_in = False
 if "user_data" not in st.session_state: st.session_state.user_data = {} 
 if "current_page" not in st.session_state: st.session_state.current_page = "Dashboard"
 
-# CORTEX AI İçin Global Veritabanı
+# CORTEX AI Global Veritabanı
 if "users_db" not in st.session_state:
     st.session_state.users_db = [
         {"id": 101, "name": "Ahmet Yılmaz", "role": "editor", "status": "Active", "mrr": 1200},
         {"id": 104, "name": "John Doe", "role": "admin", "status": "Active", "mrr": 5000},
     ]
 
-# --- NAVİGASYON FONKSİYONU ---
+# --- NAVİGASYON MANTIĞI (DÜZELTİLDİ) ---
 def update_page(key):
+    """
+    Bir menü grubuna tıklandığında diğerlerini sıfırlar.
+    Bu, menüler arası geçişte takılmayı önler.
+    """
     st.session_state.current_page = st.session_state[key]
+    
+    # Mutual Exclusivity (Biri seçilince diğerlerini temizle)
+    if key == "nav_main":
+        st.session_state["nav_services"] = None
+        st.session_state["nav_tools"] = None
+    elif key == "nav_services":
+        st.session_state["nav_main"] = None
+        st.session_state["nav_tools"] = None
+    elif key == "nav_tools":
+        st.session_state["nav_main"] = None
+        st.session_state["nav_services"] = None
 
 # 5. STRATEJİK SOL MENÜ
 def render_sidebar():
@@ -50,7 +65,6 @@ def render_sidebar():
         user_brand = st.session_state.user_data.get('brand', 'ARTIS AI')
         user_role = st.session_state.user_data.get('role', 'user')
         
-        # Marka Kimliği
         st.markdown(f"""
             <div style="padding: 15px; background: rgba(197, 160, 89, 0.03); border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(197, 160, 89, 0.1);">
                 <div style="font-weight: 800; font-size: 18px; color: #FFF; letter-spacing: -0.5px;">⚡ {user_brand}</div>
@@ -58,13 +72,12 @@ def render_sidebar():
             </div>
         """, unsafe_allow_html=True)
 
-        # Mevcut sayfayı al
         curr = st.session_state.current_page
 
         # --- GRUP 1: ANA KOMUTA ---
         st.markdown('<div class="menu-label" style="font-size:10px; color:#666; margin-bottom:5px;">ANA KOMUTA</div>', unsafe_allow_html=True)
         
-        # Seçili index mantığı
+        # Eğer sayfa Dashboard ise index 0, değilse None (Seçimi kaldır)
         idx_main = 0 if curr == "Dashboard" else None
         
         st.radio(
@@ -92,7 +105,6 @@ def render_sidebar():
             "LeadGen": "🚀 AI Lead Gen"
         }
         
-        # Servisler listesinde mi?
         svc_keys = list(services_map.keys())
         idx_svc = svc_keys.index(curr) if curr in svc_keys else None
         
@@ -127,7 +139,7 @@ def render_sidebar():
             index=idx_tool
         )
 
-        # --- ADMIN ---
+        # --- CORTEX (ADMIN) ---
         if user_role == 'admin':
             st.markdown("---")
             if st.button("🧠 CORTEX (Super AI)", use_container_width=True):
@@ -145,10 +157,7 @@ def main():
     if not st.session_state.logged_in:
         login.render_login_page()
     else:
-        # Önce render sidebar, çünkü state güncellenebilir
         render_sidebar()
-        
-        # Sonra sayfayı göster
         page = st.session_state.current_page
         
         try:
@@ -172,7 +181,7 @@ def main():
             else:
                 dashboard.render_dashboard() 
         except Exception as e:
-            st.error(f"Sayfa Yükleme Hatası ({page}): {e}")
+            st.error(f"Sayfa Yükleme Hatası: {e}")
 
 if __name__ == "__main__":
     main()
