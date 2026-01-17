@@ -3,7 +3,17 @@ import time
 import random
 
 # ==============================================================================
-# 🗄️ 1. KULLANICI VERİTABANI (MEVCUT YAPI KORUNDU)
+# ⚙️ SAYFA AYARLARI (EN BAŞTA OLMALI)
+# "layout='wide'" ekranı tam genişlikte kullanmamızı sağlar.
+# ==============================================================================
+st.set_page_config(
+    page_title="ARTIS - Giriş",
+    layout="wide",  # BU ÇOK ÖNEMLİ: Ekranı geniş moda alır
+    initial_sidebar_state="collapsed"
+)
+
+# ==============================================================================
+# 🗄️ 1. KULLANICI VERİTABANI (MEVCUT VERİLERİN)
 # ==============================================================================
 USERS = {
     "demo": {
@@ -33,126 +43,138 @@ USERS = {
 }
 
 # ==============================================================================
-# 🎨 2. GTA STYLE ASSETS & CSS (YENİ TASARIM)
+# 🎨 2. GTA TARZI GÖRSELLER VE SÖZLER
 # ==============================================================================
-def get_gta_assets():
-    """Rastgele görsel ve ipucu seçer"""
+def get_random_content():
     images = [
-        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop", # Network
-        "https://images.unsplash.com/photo-1607799275518-d58665d096c2?q=80&w=2070&auto=format&fit=crop", # Server Room
         "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop", # Cyberpunk
-        "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2070&auto=format&fit=crop"  # Team/Work
+        "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop", # Chip
+        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop", # Network
+        "https://images.unsplash.com/photo-1607799275518-d58665d096c2?q=80&w=2070&auto=format&fit=crop"  # Server
     ]
     tips = [
         "ARTIS v2.4: Operasyonel verimliliği %40 artırır.",
         "İPUCU: Admin paneline erişmek için yetkili hesap kullanın.",
-        "SİSTEM: Verileriniz 256-bit SSL ile şifrelenmektedir.",
+        "GÜVENLİK: Verileriniz 256-bit SSL ile şifrelenmektedir.",
         "ARTIS AI: İş süreçlerinizi optimize etmek için arka planda çalışır.",
-        "BİLİYOR MUYDUNUZ? Raporları 'Panel' sekmesinden PDF olarak alabilirsiniz."
+        "HATIRLATMA: Şifrenizi kimseyle paylaşmayın."
     ]
     return random.choice(images), random.choice(tips)
 
-def inject_login_css(selected_image):
+# ==============================================================================
+# 🎨 3. CSS (TASARIM MOTORU)
+# ==============================================================================
+def inject_css(bg_image):
     st.markdown(f"""
     <style>
-        /* Standart Streamlit Boşluklarını Sıfırla */
+        /* 1. Streamlit'in varsayılan boşluklarını YOK ET */
         .block-container {{
-            padding: 0 !important;
-            max-width: 100%;
-        }}
-        [data-testid="stAppViewContainer"] {{
-            background-color: #0e1117;
+            padding-top: 0rem !important;
+            padding-bottom: 0rem !important;
+            padding-left: 0rem !important;
+            padding-right: 0rem !important;
+            max-width: 100% !important;
         }}
         
-        /* SOL TARAFTAKİ GÖRSEL ALANI (GTA STYLE) */
-        .gta-visual {{
+        /* Sidebar ve Header'ı gizle */
+        [data-testid="stSidebar"] {{ display: none; }}
+        header {{ display: none !important; }}
+        footer {{ display: none !important; }}
+        
+        /* Ana Arka Plan Rengi */
+        [data-testid="stAppViewContainer"] {{
+            background-color: #050505;
+        }}
+
+        /* --- SOL TARAFTAKİ RESİM ALANI --- */
+        .split-left {{
             height: 100vh;
-            background-image: url('{selected_image}');
+            width: 100%;
+            background-image: url('{bg_image}');
             background-size: cover;
             background-position: center;
+            position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
+            justify-content: flex-end; /* Yazıyı alta yasla */
             padding: 60px;
-            position: relative;
         }}
         
-        /* Görsel Üzeri Karartma (Yazı Okunurluğu İçin) */
-        .gta-visual::before {{
+        /* Resmin üzerine siyah perde (yazı okunsun diye) */
+        .split-left::before {{
             content: "";
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.1));
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.1) 60%);
             z-index: 1;
         }}
-        
-        /* İçerik Animasyonu */
+
+        /* --- SOL TARAFTAKİ YAZILAR --- */
         .gta-content {{
             position: relative;
             z-index: 2;
-            color: white;
             animation: slideUp 1.2s ease-out;
         }}
         
-        .gta-title {{
-            font-size: 60px;
+        .gta-logo {{
+            font-size: 64px;
             font-weight: 900;
-            letter-spacing: -2px;
+            color: white;
             line-height: 1;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             text-transform: uppercase;
+            letter-spacing: -2px;
         }}
         
-        .gta-tip-box {{
-            border-left: 4px solid #FF4B4B; /* Streamlit kırmızısı veya marka rengin */
-            padding-left: 20px;
-            margin-bottom: 40px;
-        }}
-        
-        .gta-tip-text {{
+        .gta-tip {{
             font-size: 18px;
-            font-weight: 300;
-            color: #e0e0e0;
-            font-family: 'Courier New', monospace; /* Terminal havası */
+            color: #d1d5db;
+            border-left: 5px solid #FF4B4B; /* Kırmızı çizgi */
+            padding-left: 15px;
+            font-family: monospace;
+            margin-top: 20px;
         }}
 
-        @keyframes slideUp {{
-            from {{ opacity: 0; transform: translateY(40px); }}
-            to {{ opacity: 1; transform: translateY(0); }}
-        }}
-
-        /* SAĞ TARAF (LOGIN FORM) */
-        .login-container {{
+        /* --- SAĞ TARAFTAKİ FORM ALANI --- */
+        .login-wrapper {{
             display: flex;
             flex-direction: column;
             justify-content: center;
-            height: 100vh;
-            padding: 10% 15%;
-            background-color: #0e1117;
+            align-items: center;
+            height: 90vh; /* Formu dikey ortala */
+            padding: 40px;
         }}
         
-        /* Input Alanları Makyajı */
-        .stTextInput input {{
-            background-color: #1a1c24 !important;
-            border: 1px solid #2d2f36 !important;
-            color: white !important;
-            border-radius: 8px;
-            padding: 15px;
+        .form-title {{
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
         }}
+        
+        /* Input stilleri */
+        .stTextInput input {{
+            background-color: #18181b !important;
+            border: 1px solid #27272a !important;
+            color: white !important;
+            padding: 12px !important;
+        }}
+        
         .stTextInput input:focus {{
             border-color: #FF4B4B !important;
-            box-shadow: 0 0 0 1px #FF4B4B !important;
         }}
-        
-        /* Footer Gizle */
-        footer {{display: none !important;}}
-        header {{display: none !important;}}
+
+        /* Animasyon Keyframe */
+        @keyframes slideUp {{
+            from {{ opacity: 0; transform: translateY(30px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
         
     </style>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🔐 3. DOĞRULAMA (MEVCUT YAPI KORUNDU)
+# 🔐 4. DOĞRULAMA MANTIĞI
 # ==============================================================================
 def verify_user(username, password):
     if username in USERS and USERS[username]["pass"] == password:
@@ -160,79 +182,82 @@ def verify_user(username, password):
     return None
 
 # ==============================================================================
-# 🚀 4. RENDER FONKSİYONU (YENİ LAYOUT)
+# 🚀 5. EKRAN RENDER (ANA FONKSİYON)
 # ==============================================================================
 def render_login_page():
-    # Rastgele veri çek
-    bg_image, tip_text = get_gta_assets()
+    # 1. Rastgele içerik seç
+    bg_image, tip_text = get_random_content()
     
-    # CSS'i yükle
-    inject_login_css(bg_image)
+    # 2. CSS'i sayfaya enjekte et
+    inject_css(bg_image)
     
-    # EKRANI İKİYE BÖL: [SOL: Görsel %60] - [SAĞ: Form %40]
-    col_visual, col_form = st.columns([1.6, 1])
+    # 3. EKRANI BÖL (Sol: 1.5 birim, Sağ: 1 birim)
+    col1, col2 = st.columns([1.7, 1])
     
-    # --- SOL KOLON (GTA GÖRSEL & BİLGİ) ---
-    with col_visual:
+    # --- SOL KOLON (GTA GÖRSELİ) ---
+    with col1:
+        # Streamlit görseli yerine HTML div kullanıyoruz ki tam otursun
         st.markdown(f"""
-        <div class="gta-visual">
+        <div class="split-left">
             <div class="gta-content">
-                <div class="gta-title">ARTIS<br>SYSTEMS</div>
-                <div class="gta-tip-box">
-                    <div class="gta-tip-text">{tip_text}</div>
-                </div>
+                <div class="gta-logo">ARTIS<br>SYSTEMS</div>
+                <div class="gta-tip">{tip_text}</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-    # --- SAĞ KOLON (GİRİŞ FORMU) ---
-    with col_form:
-        # Dikey ortalama için container
-        st.markdown('<div class="login-container">', unsafe_allow_html=True)
+    # --- SAĞ KOLON (LOGIN FORM) ---
+    with col2:
+        st.markdown('<div class="login-wrapper">', unsafe_allow_html=True)
         
-        # Logo veya İkon
-        st.markdown("## 👋 Tekrar Hoş Geldiniz")
-        st.markdown("<p style='color: #666; margin-bottom: 30px;'>Hesabınıza erişmek için bilgilerinizi girin.</p>", unsafe_allow_html=True)
+        st.markdown('<div class="form-title">Giriş Yap</div>', unsafe_allow_html=True)
+        st.markdown('<p style="color:#a1a1aa; margin-bottom:30px;">Hesabınıza erişmek için bilgilerinizi girin.</p>', unsafe_allow_html=True)
 
-        # Form Başlat
         with st.form("login_form"):
-            username = st.text_input("Kullanıcı Adı", placeholder="admin", key="login_user")
-            password = st.text_input("Şifre", type="password", placeholder="••••••", key="login_pass")
+            username = st.text_input("Kullanıcı Adı", placeholder="admin", label_visibility="collapsed")
+            st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True) # Ara boşluk
+            password = st.text_input("Şifre", type="password", placeholder="••••••", label_visibility="collapsed")
             
-            st.markdown("<div style='height: 20px'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True) # Ara boşluk
             
-            submit_btn = st.form_submit_button("GİRİŞ YAP", use_container_width=True, type="primary")
-        
-        # Form Logic (Eski kodunuzdaki mantıkla aynı)
+            submit_btn = st.form_submit_button("SİSTEME GİR", type="primary", use_container_width=True)
+
         if submit_btn:
-            with st.spinner("Sistem başlatılıyor..."):
-                time.sleep(0.8) # Efekt için bekleme
+            with st.spinner("Bağlantı kuruluyor..."):
+                time.sleep(1) # Gerilim efekti :)
                 user = verify_user(username, password)
                 
                 if user:
+                    st.success("Giriş onaylandı.")
                     st.session_state.logged_in = True
                     st.session_state.user_data = user
-                    
-                    if user['role'] == 'admin':
-                        st.toast(f"Yönetici Erişimi: {user['name']}", icon="🛡️")
-                    else:
-                        st.toast(f"Hoş geldin, {user['name']}!", icon="🚀")
-                    
                     time.sleep(0.5)
                     st.rerun()
                 else:
-                    st.error("Hatalı kullanıcı adı veya şifre.")
+                    st.error("Kimlik doğrulama başarısız.")
+        
+        # Demo bilgileri
+        with st.expander("Geliştirici Giriş Bilgileri"):
+             st.code("Admin: admin / admin\nUser : demo / 1234", language="text")
 
-        # Alt Bilgi (Footer benzeri)
         st.markdown("""
-            <div style="margin-top: 40px; text-align: center; color: #444; font-size: 12px;">
-            ARTIS Global Operations Engine v2.4.1<br>
-            Secure Connection
+            <div style="margin-top: 50px; font-size: 11px; color: #444; text-align: center;">
+            ARTIS Global Operations v2.4.1<br>
+            Secure Server Connection
             </div>
         """, unsafe_allow_html=True)
-        
-        # Demo Bilgisi (Geliştirici için - İstersen kaldırabilirsin)
-        with st.expander("🔑 Demo Hesapları", expanded=False):
-            st.code("Admin: admin / admin\nUser : demo  / 1234", language="text")
 
-        st.markdown('</div>', unsafe_allow_html=True) # Container kapat
+        st.markdown('</div>', unsafe_allow_html=True) # Wrapper close
+
+# Eğer bu dosya doğrudan çalıştırılırsa testi gör
+if __name__ == "__main__":
+    if "logged_in" not in st.session_state:
+        st.session_state.logged_in = False
+
+    if not st.session_state.logged_in:
+        render_login_page()
+    else:
+        st.write(f"Giriş Yapıldı! Hoşgeldin {st.session_state.user_data['name']}")
+        if st.button("Çıkış Yap"):
+            st.session_state.logged_in = False
+            st.rerun()
