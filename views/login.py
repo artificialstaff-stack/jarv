@@ -3,7 +3,7 @@ import time
 import random
 
 # ==============================================================================
-# ⚙️ SAYFA YAPILANDIRMASI (EN BAŞTA)
+# ⚙️ 1. SAYFA AYARLARI (ZORUNLU - EN BAŞTA)
 # ==============================================================================
 st.set_page_config(
     page_title="ARTIS - Giriş",
@@ -12,248 +12,229 @@ st.set_page_config(
 )
 
 # ==============================================================================
-# 🗄️ KULLANICI VERİLERİ (MEVCUT YAPI)
-# ==============================================================================
-USERS = {
-    "demo": {"pass": "1234", "name": "Ahmet Yılmaz", "role": "user"},
-    "admin": {"pass": "admin", "name": "Sistem Yöneticisi", "role": "admin"}
-}
-
-# ==============================================================================
-# 🎨 GTA TARZI İÇERİK HAVUZU
-# ==============================================================================
-def get_gta_content():
-    # Arka plan görselleri (Yüksek Kalite)
-    images = [
-        "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop", # Chip/Tech
-        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop", # Network/Globe
-        "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop"  # Cyberpunk
-    ]
-    
-    # Animasyonlu Yazılar (Başlık + Alt Açıklama)
-    stories = [
-        {"title": "GLOBAL OPERATIONS", "desc": "Dünya genelindeki tüm veri akışı tek bir merkezden yönetiliyor."},
-        {"title": "YAPAY ZEKA ENTEGRASYONU", "desc": "ARTIS AI motoru, verimliliği %40 artırmak için devrede."},
-        {"title": "MAKSİMUM GÜVENLİK", "desc": "Uçtan uca şifreleme ile verileriniz siber tehditlere karşı koruma altında."}
-    ]
-    
-    return random.choice(images), random.choice(stories)
-
-# ==============================================================================
-# 🖌️ CSS VE TASARIM MOTORU
+# 🖌️ 2. CSS - AGRESİF STİL (SCROLL ENGELLEME)
 # ==============================================================================
 def inject_css(bg_image):
     st.markdown(f"""
     <style>
-        /* 1. TÜM BOŞLUKLARI VE KAYDIRMAYI YOK ET */
-        .stApp {{ overflow: hidden !important; }}
+        /* A. SAYFAYI KİLİTLE (SCROLL YOK) */
+        .stApp {{
+            overflow: hidden !important;
+            height: 100vh !important;
+        }}
         
-        header, footer, [data-testid="stSidebar"] {{ display: none !important; }}
-        
+        /* B. STREAMLIT BOŞLUKLARINI SIFIRLA */
         .block-container {{
             padding: 0 !important;
             margin: 0 !important;
             max-width: 100% !important;
+            height: 100vh !important;
         }}
         
-        /* 2. SOL TARAF (Görsel ve Animasyon) */
+        /* Header, Footer, Sidebar GİZLE */
+        header, footer, [data-testid="stSidebar"] {{ display: none !important; }}
+        
+        /* C. İKİ KOLONU YANYANA YAPIŞTIR (GAP SİL) */
+        [data-testid="column"] {{
+            padding: 0 !important;
+        }}
+        
+        [data-testid="stHorizontalBlock"] {{
+            gap: 0 !important;
+        }}
+
+        /* --- SOL PANEL (RESİM) --- */
         .left-panel {{
             height: 100vh;
             width: 100%;
             background-image: url('{bg_image}');
             background-size: cover;
             background-position: center;
-            position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
-            padding: 80px;
+            justify-content: flex-end; /* Yazıyı alta it */
+            padding: 60px;
+            position: relative;
         }}
         
+        /* Karartma Perdesi */
         .left-panel::before {{
             content: "";
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 100%);
             z-index: 1;
         }}
         
-        .content-box {{
+        /* Yazı Alanı */
+        .hero-text {{
             position: relative;
             z-index: 2;
-            max-width: 80%;
-            animation: slideIn 1s ease-out;
+            color: white;
+            margin-bottom: 40px; /* Alttan biraz yukarıda kalsın */
         }}
         
-        .big-title {{
-            font-size: 5rem;
-            font-weight: 900;
-            line-height: 0.9;
-            color: #ffffff;
-            margin-bottom: 20px;
+        .hero-title {{
+            font-size: 3.5rem; /* Yazıyı biraz küçülttüm sığsın diye */
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 15px;
             text-transform: uppercase;
-            letter-spacing: -2px;
-            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }}
         
-        .sub-desc {{
-            font-size: 1.2rem;
-            color: #d1d5db;
-            border-left: 4px solid #3b82f6; /* Mavi vurgu */
-            padding-left: 20px;
-            background: linear-gradient(90deg, rgba(0,0,0,0.5), transparent);
+        .hero-subtitle {{
+            font-size: 1.1rem;
+            color: #ccc;
+            border-left: 4px solid #ff4b4b;
+            padding-left: 15px;
         }}
 
-        @keyframes slideIn {{
-            from {{ opacity: 0; transform: translateX(-50px); }}
-            to {{ opacity: 1; transform: translateX(0); }}
-        }}
-
-        /* 3. SAĞ TARAF (Login Formu) */
-        .right-panel {{
+        /* --- SAĞ PANEL (FORM) --- */
+        .right-panel-wrapper {{
             height: 100vh;
-            background-color: #09090b; /* Çok koyu gri/siyah */
+            background-color: #050505; /* Simsiyah arka plan */
             display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
+            align-items: center; /* Dikey Ortala */
+            justify-content: center; /* Yatay Ortala */
         }}
         
-        /* Glassmorphism Giriş Kartı */
-        .login-card {{
-            width: 380px; /* Daha kompakt genişlik */
-            padding: 40px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.03);
+        /* Login Kartı */
+        .login-box {{
+            width: 360px; /* Daha kompakt */
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
         }}
         
-        .card-header {{
-            font-size: 24px;
-            font-weight: 700;
+        .box-header {{
+            font-size: 22px;
+            font-weight: bold;
             color: white;
             margin-bottom: 5px;
-            text-align: center;
         }}
         
-        .card-sub {{
-            font-size: 13px;
-            color: #a1a1aa;
-            text-align: center;
-            margin-bottom: 30px;
+        .box-sub {{
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 25px;
         }}
-
-        /* Input alanlarını özelleştir */
+        
+        /* Inputları Güzelleştir */
         .stTextInput input {{
-            background-color: #18181b !important;
-            border: 1px solid #27272a !important;
-            color: white !important;
-            border-radius: 8px !important;
-            padding: 10px 15px !important;
+            background-color: #121212 !important;
+            border: 1px solid #333 !important;
+            color: #fff !important;
+            padding: 10px !important;
             font-size: 14px !important;
+            border-radius: 8px !important;
         }}
         
         .stTextInput input:focus {{
-            border-color: #3b82f6 !important;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+            border-color: #ff4b4b !important;
         }}
         
-        /* Checkbox Stili */
-        .stCheckbox label span {{
-            color: #a1a1aa !important;
-            font-size: 13px !important;
+        /* Link Stili (Şifremi Unuttum) */
+        .forgot-link {{
+            text-align: right;
+            font-size: 12px;
+            margin-top: 10px;
+        }}
+        .forgot-link a {{
+            color: #666;
+            text-decoration: none;
+            transition: 0.3s;
+        }}
+        .forgot-link a:hover {{
+            color: #fff;
         }}
 
     </style>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 🔐 GİRİŞ MANTIĞI
+# 🎲 3. İÇERİK HAVUZU (GTA STYLE)
 # ==============================================================================
-def render_login_page():
-    bg_image, story = get_gta_content()
-    inject_css(bg_image)
+def get_content():
+    images = [
+        "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop", # Teknoloji
+        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop", # Dünya
+    ]
+    texts = [
+        {"t": "GLOBAL<br>OPERATIONS", "s": "Tüm operasyon süreçleriniz tek ekranda."},
+        {"t": "MAKSİMUM<br>GÜVENLİK", "s": "Uçtan uca şifreleme ile verileriniz güvende."},
+        {"t": "ARTIS<br>INTELLIGENCE", "s": "Yapay zeka destekli iş akış yönetimi."}
+    ]
+    return random.choice(images), random.choice(texts)
+
+# ==============================================================================
+# 🚀 4. ANA UYGULAMA
+# ==============================================================================
+def main():
+    bg, txt = get_content()
+    inject_css(bg)
     
-    # Ekranı Böl: Sol (%65) - Sağ (%35)
-    col1, col2 = st.columns([1.8, 1])
+    # EKRANI BÖL (SOL %60 - SAĞ %40)
+    col1, col2 = st.columns([1.5, 1])
     
-    # --- SOL KOLON (Görsel Hikaye) ---
+    # --- SOL TARAFI DOLDUR ---
     with col1:
         st.markdown(f"""
         <div class="left-panel">
-            <div class="content-box">
-                <div class="big-title">{story['title']}</div>
-                <div class="sub-desc">{story['desc']}</div>
+            <div class="hero-text">
+                <div class="hero-title">{txt['t']}</div>
+                <div class="hero-subtitle">{txt['s']}</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-    # --- SAĞ KOLON (Giriş Formu) ---
+    # --- SAĞ TARAFI DOLDUR ---
     with col2:
-        # Formu dikeyde ortalamak için bir wrapper
-        st.markdown('<div class="right-panel">', unsafe_allow_html=True)
+        # Wrapper div ile formu tam ortalıyoruz
+        st.markdown('<div class="right-panel-wrapper">', unsafe_allow_html=True)
         
-        # Giriş Kartı Başlangıcı
+        # Giriş Kutusunu Başlat
         st.markdown(f"""
-        <div class="login-card">
-            <div class="card-header">Hoş Geldiniz</div>
-            <div class="card-sub">ARTIS Operasyon Paneline erişin</div>
+        <div class="login-box">
+            <div class="box-header">Giriş Yap</div>
+            <div class="box-sub">Panel erişimi için kimliğinizi doğrulayın</div>
         """, unsafe_allow_html=True)
-
+        
         # Form
-        with st.form("login_form", border=False):
-            username = st.text_input("Kullanıcı Adı", placeholder="örn: admin", label_visibility="collapsed")
-            st.write("") # Küçük boşluk
-            password = st.text_input("Şifre", type="password", placeholder="••••••••", label_visibility="collapsed")
+        with st.form("login"):
+            kullanici = st.text_input("Kullanıcı Adı", placeholder="admin", label_visibility="collapsed")
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True) # İnce boşluk
+            sifre = st.text_input("Şifre", type="password", placeholder="••••••", label_visibility="collapsed")
             
-            # Form İçi Layout: Beni Hatırla ve Buton
-            c1, c2 = st.columns([1,1])
-            with c1:
-                remember = st.checkbox("Beni Hatırla")
+            st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
             
-            st.write("")
-            submit = st.form_submit_button("Giriş Yap", type="primary", use_container_width=True)
+            # Hatırla ve Buton
+            c_chk, c_btn = st.columns([1, 1.5])
+            with c_chk:
+                st.checkbox("Hatırla", value=True)
+            with c_btn:
+                btn = st.form_submit_button("GİRİŞ", type="primary", use_container_width=True)
 
-        # Şifremi Unuttum (Buton görünümünde link)
-        if st.button("Şifremi Unuttum?", type="tertiary", use_container_width=True):
-             st.toast("Lütfen sistem yöneticisi ile iletişime geçin: it@artis.com", icon="🔒")
-        
-        # HTML Kart Kapanışı
-        st.markdown('</div>', unsafe_allow_html=True) # login-card end
-        
-        # Alt Bilgi
+        # Şifremi Unuttum Linki
         st.markdown("""
-            <div style="margin-top: 20px; font-size: 11px; color: #52525b;">
-            © 2026 ARTIS Inc. v2.4.1
+            <div class="forgot-link">
+                <a href="#">Şifremi Unuttum?</a>
             </div>
-            </div> 
-        """, unsafe_allow_html=True) # right-panel end
+        </div> </div> """, unsafe_allow_html=True)
 
-        # İşlem Mantığı
-        if submit:
-            user = USERS.get(username)
-            if user and user["pass"] == password:
-                with st.spinner("Kimlik doğrulanıyor..."):
-                    time.sleep(0.8)
-                st.success(f"Giriş Başarılı! Hoşgeldin {user['name']}")
-                st.session_state.logged_in = True
-                st.session_state.user_data = user
+        # İşlem
+        if btn:
+            # Login Mantığı (Mock)
+            with st.spinner(""):
                 time.sleep(0.5)
-                st.rerun()
+            if kullanici == "admin" and sifre == "admin":
+                st.success("Giriş Başarılı!")
+                time.sleep(0.5)
+                # st.switch_page("dashboard.py") # Sayfa yönlendirme
             else:
-                st.error("Kullanıcı adı veya şifre hatalı.")
+                st.error("Hatalı bilgi.")
 
-# Çalıştır
 if __name__ == "__main__":
-    if "logged_in" not in st.session_state:
-        st.session_state.logged_in = False
-        
-    if not st.session_state.logged_in:
-        render_login_page()
-    else:
-        st.write("İçerdesiniz!")
-        if st.button("Çıkış"):
-            st.session_state.logged_in = False
-            st.rerun()
+    main()
